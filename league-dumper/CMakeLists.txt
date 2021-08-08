@@ -31,3 +31,10 @@ add_executable(league-dumper
 	utils.h
 	work_queue.h
 )
+ADD_DEFINITIONS(-DUNICODE)
+ADD_DEFINITIONS(-D_UNICODE)
+
+target_link_libraries(league-dumper
+	Shlwapi.lib
+	Kernel32.lib
+)
