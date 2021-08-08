@@ -38,6 +38,6 @@ target_link_libraries(league-dumper
 	Shlwapi.lib
 	Kernel32.lib
 )
-add_library(league-decryptor
+add_library(league-decryptor SHARED
 	dllmain.cpp
 )
