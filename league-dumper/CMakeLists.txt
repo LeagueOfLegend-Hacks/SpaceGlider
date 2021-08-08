@@ -1,0 +1,33 @@
+add_executable(league-dumper
+	close_watcher.cpp
+	close_watcher.h
+	dirent.h
+	dump_process.cpp
+	dump_process.h
+	DynArray.h
+	export_list.cpp
+	export_list.h
+	hash.cpp
+	hash.h
+	module_list.cpp
+	module_list.h
+	pd.cpp
+	pe_exports.cpp
+	pe_exports.h
+	pe_hash_database.cpp
+	pe_hash_database.h
+	pe_header.cpp
+	pe_header.h
+	pe_imports.cpp
+	pe_imports.h
+	simple.cpp
+	simple.h
+	stdafx.cpp
+	stdafx.h
+	stream_wrapper.h
+	targetver.h
+	terminate_monitor_hook.cpp
+	terminate_monitor_hook.h
+	utils.h
+	work_queue.h
+)
