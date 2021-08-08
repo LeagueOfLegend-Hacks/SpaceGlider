@@ -1,1 +1,1 @@
-# SpaceGlider
+# SpaceGlider - league-dumper
