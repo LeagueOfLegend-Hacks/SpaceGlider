@@ -1,1 +1,0 @@
-# SpaceGlider - internal
