@@ -22,12 +22,14 @@ namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
+	typedef int(__thiscall* orgGetPing)(void* NetClient);
 }
 
 namespace Functions {
 	FuncTypes::Prototype_Reset Original_Reset;
 	FuncTypes::Prototype_Present Original_Present;
 	FuncTypes::fnOnProcessSpell OnProcessSpell;
+	FuncTypes::orgGetPing GetPing;
 	WNDPROC Original_WndProc;
 }
 
@@ -36,6 +38,10 @@ HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
 PVOID NewOnProcessSpell;
+
+int GetPing() {
+	return Functions::GetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
+}
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion)
 {
@@ -52,6 +58,7 @@ HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CO
 	ImGui::NewFrame();
 
 	console.Render();
+	ImGui::Text("Ping: %i", GetPing());
 
 	ImGui::EndFrame();
 	ImGui::Render();
@@ -126,6 +133,8 @@ DWORD WINAPI MainThread(LPVOID param) {
 #endif
 	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
+
+	Functions::GetPing = (FuncTypes::orgGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
 
 	ApplyHooks();
 
