@@ -222,7 +222,7 @@ int main_scanner() {
 	string x = "x";
 
 	string processName = L + e + a + g + u + e + space + o + f + space + L + e + g + e + n + d + s + dot + e + x + e;
-	string payloadPath = GetExePath() + "\\" + "testapp.dll";
+	string payloadPath = GetExePath() + "\\" + "SpaceGlider.dll";
 
 	cls();
 	std::cout << "\tProcess Name: " << processName << endl;
