@@ -1,5 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
-#include "../../libraries/Offsets/Offsets.h"
+#include "Offsets.h"
+#include "Decrypt.h"
 #include "Utils.h"
 #include <windows.h>
 #include <imgui.h>
@@ -23,7 +24,7 @@ HWND GetHwndProc()
 	do
 	{
 		char title[256];
-		if ((GetWindowText(g_hWindow, title, 256) > 0) && (IsWindowVisible(g_hWindow)))
+		if ((GetWindowTextA(g_hWindow, title, 256) > 0) && (IsWindowVisible(g_hWindow)))
 		{
 			DWORD procId;
 			GetWindowThreadProcessId(g_hWindow, &procId);
@@ -42,7 +43,7 @@ static DWORD FindDevice(DWORD Len)
 {
 	DWORD dwObjBase = 0;
 
-	dwObjBase = (DWORD)LoadLibrary("d3d9.dll");
+	dwObjBase = (DWORD)LoadLibraryA("d3d9.dll");
 	while (dwObjBase++ < dwObjBase + Len)
 	{
 		if ((*(WORD*)(dwObjBase + 0x00)) == 0x06C7
@@ -135,12 +136,14 @@ DWORD WINAPI MainThread(LPVOID param) {
 
 	Sleep(5000);
 
+	LeagueDecrypt rito_nuke;
+	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
+	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
+
 	ApplyHooks();
 
 	while (!(GetAsyncKeyState(VK_END) & 1))
 		Sleep(1);
-
-
 
 	RemoveHooks();
 
