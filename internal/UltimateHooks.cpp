@@ -32,6 +32,39 @@ LONG __stdcall LeoHandler(EXCEPTION_POINTERS* pExceptionInfo)
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 
+bool UltimateHooks::deinit()
+{
+	DWORD old;
+	if (VEH_Handle)
+	{
+		if (RemoveVectoredExceptionHandler(VEH_Handle))
+		{
+
+			for (HookEntries hs : hookEntries)
+			{
+				for (HookDetails hd : hs.hookDetails)
+				{
+					auto addr = (PVOID)hd.addressToHook;
+					auto size = static_cast<SIZE_T>(static_cast<int>(1));
+
+					if (NT_SUCCESS(
+						makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x170, 0xC2, 0x14,
+							0x00)(GetCurrentProcess(), &addr, &size, hs.addressToHookOldProtect, &old)))
+					{
+					}
+					else
+					{
+					}
+				}
+			}
+			hookEntries.clear();
+			return true;
+		}
+	}
+
+	return false;
+}
+
 DWORD UltimateHooks::RestoreRtlAddVectoredExceptionHandler() {
 	HMODULE ntdll = GetModuleHandleA("ntdll.dll");
 

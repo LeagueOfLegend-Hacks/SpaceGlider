@@ -167,7 +167,8 @@ void RemoveHooks() {
 	DetourDetach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
 	DetourTransactionCommit();
 #ifndef _DEBUG
-	// need to unhook onprocessspell.
+	if (GetSystemDEPPolicy())
+		ulthook.deinit(); // this completely gets rid of all of our DEP hooks in one go.
 #endif
 }
 

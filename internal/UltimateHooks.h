@@ -27,6 +27,7 @@ LONG WINAPI LeoHandler(EXCEPTION_POINTERS* pExceptionInfo);
 
 class UltimateHooks {
 public:
+	bool deinit();
 	DWORD RestoreRtlAddVectoredExceptionHandler();
 	DWORD RestoreZwQueryInformationProcess();
 	DWORD UltimateHooks::VirtualAllocateRegion(PVOID& NewFunction, DWORD OrigAddress, size_t size);
