@@ -129,7 +129,7 @@ def main():
         ["DrawCircle", FindFuncCall("E8 ? ? ? ? 83 C4 1C 80 7F 35 00")],
         ["IsTargetable", FindFunctionByPatternStartEA("56 8B F1 E8 ? ? ? ? 84 C0 74 2E")],
         ["IsAlive", FindFuncCall("E8 ? ? ? ? 84 C0 74 2E 8D 8E ? ? ? ?")],
-        ["IsHero", FindFuncCall("E8 ? ? ? ? 83 C4 04 88 44 24 54")],
+        ["IsHero", FindFuncCall("E8 ? ? ? ? 83 C4 04 84 C0 74 12")],
         ["IsMissile", FindFuncCall("E8 ? ? ? ? 83 C4 04 84 C0 74 60")],
         ["IsMinion", FindFuncCall("E8 ? ? ? ? 83 C4 04 80 7F 2A 06")],
         ["IsTurret", FindFuncCall("E8 ? ? ? ? 83 C4 04 84 C0 75 38")],
@@ -141,7 +141,7 @@ def main():
         ["IsAI", FindFuncCall("E8 ? ? ? ? 8B 6C 24 50 83 C4 04")],
         ["IsAITurret", FindFuncCall("E8 ? ? ? ? 83 C4 04 84 C0 74 5F")],
         ["CompareObjectTypeFlags", FindFuncCall("E8 ? ? ? ? 84 C0 74 79 56")],
-        ["onProcessSpell", FindFuncCall("E8 ? ? ? ? 85 C0 5B")],
+        ["onProcessSpell", FindFuncCall("E8 ?? ?? ?? ?? 8B CE E8 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? ?? D8")],
         ["OnCreateObject", FindFuncCall("E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0 74 ?? 32 C9 EB")],
         ["OnDeleteObject", FindFuncCall("E8 ?? ?? ?? ?? 57 E8 ?? ?? ?? ?? 83 ?? ?? 5F 5E C3")],
         ["OnNewPath", FindFunctionByPatternStartEA("83 EC 18 56 8B 74 24 20 8B CE 57")],
@@ -168,12 +168,6 @@ def main():
         ["Index", idc.get_operand_value(FindFunctionAddr("GetID", -0x14, 1)+0x11, 1)],
         ["TeamID", idc.get_operand_value(FindFunctionAddr("GetTeamID", -0x14, 1)+0x11, 1)],
         ["Position", FindOffsetPattern("8D 86 ? ? ? ? 8B 74 24 08", 1)],
-        ["ObjNetworkID", 0xCC],# No Pattern.
-        ["ObjPos", 0x1d8],# No Pattern.
-        ["ObjSpawnCount", 0x218],# No Pattern.
-        ["ObjMissileSpellCast", 0x250],# No Pattern.
-        ["ObjVisibility", 0x270],# No Pattern.
-        ["ObjSrcIndex", 0x290],# No Pattern.
         ["mPAR", FindOffset("mMaxPAR",-0xC,1)-0x10],
         ["mMaxPAR", FindOffset("mMaxPAR",-0xC,1)],
         ["mPAREnabled", FindOffset("mPAREnabled",-0xC,1)],
@@ -204,23 +198,6 @@ def main():
         ["ActionState", FindOffset("mActionState",-0xC,1)],
         ["ActionState2", FindOffset("mActionState2",-0xC,1)],
         ["ObjAbilityHaste", FindOffset("mObjAbilityHaste",-0xC,1)],
-        ["ObjMagicPen", 0x11C0],# No Pattern.
-        ["ObjMagicPenMulti", 0x11C8],# No Pattern.
-        ["ObjLethality", 0x11DC],# No Pattern.
-        ["ObjBonusAtk", 0x121C],# No Pattern.
-        ["ObjAbilityPower", 0x122C],# No Pattern.
-        ["ObjAdditionalApMulti", 0x1230],# No Pattern.
-        ["ObjAtkSpeedMulti", 0x12A0],# No Pattern.
-        ["ObjBaseAtk", 0x12A4],# No Pattern.
-        ["ObjCritMulti", 0x12B4],# No Pattern.
-        ["ObjCrit", 0x12C8],# No Pattern.
-        ["ObjArmor", 0x12CC],# No Pattern.
-        ["ObjBonusArmor", 0x12D0],# No Pattern.
-        ["ObjMagicRes", 0x12D4],# No Pattern.
-        ["ObjBonusMagicRes", 0x12D8],# No Pattern.
-        ["ObjHealthRegen", 0x12DC],# No Pattern.
-        ["ObjMoveSpeed", 0x12E4],# No Pattern.
-        ["ObjAtkRange", 0x12EC],# No Pattern.
         ["PercentCooldownMod", GetCharacterIntermediate()],
         ["AbilityHasteMod", GetCharacterIntermediate()+FindOffset("mAbilityHasteMod",0x5,1)],
         ["PercentCooldownCapMod", GetCharacterIntermediate()+FindOffset("mPercentCooldownCapMod",0x5,1)],
