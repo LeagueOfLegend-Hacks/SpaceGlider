@@ -15,6 +15,12 @@ typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST
 typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+namespace Functions {
+	Prototype_Reset Original_Reset;
+	Prototype_Present Original_Present;
+	WNDPROC Original_WndProc;
+}
+
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
 
@@ -40,7 +46,7 @@ HWND GetHwndProc()
 	} while (g_hWindow);
 	return NULL;
 }
-static DWORD FindDevice(DWORD Len)
+DWORD FindDevice(DWORD Len)
 {
 	DWORD dwObjBase = 0;
 
@@ -56,17 +62,11 @@ static DWORD FindDevice(DWORD Len)
 	}
 	return(dwObjBase);
 }
-static DWORD GetDeviceAddress(int VTableIndex)
+DWORD GetDeviceAddress(int VTableIndex)
 {
 	PDWORD VTable;
 	*(DWORD*)&VTable = *(DWORD*)FindDevice(0x128000);
 	return VTable[VTableIndex];
-}
-
-namespace Functions {
-	Prototype_Reset Original_Reset;
-	Prototype_Present Original_Present;
-	WNDPROC originalWindowProcedure;
 }
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion)
@@ -107,7 +107,7 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
 
-	return CallWindowProcA(Functions::originalWindowProcedure, hWnd, msg, wParam, lParam);
+	return CallWindowProcA(Functions::Original_WndProc, hWnd, msg, wParam, lParam);
 }
 
 void ApplyHooks() {
@@ -119,11 +119,11 @@ void ApplyHooks() {
 	DetourAttach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourAttach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
 	DetourTransactionCommit();
-	Functions::originalWindowProcedure = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
+	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 }
 
 void RemoveHooks() {
-	SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)Functions::originalWindowProcedure);
+	SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)Functions::Original_WndProc);
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourDetach(&(PVOID&)Functions::Original_Present, Hooked_Present);
