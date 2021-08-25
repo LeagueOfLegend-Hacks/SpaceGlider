@@ -40,6 +40,7 @@ template <typename T>
 makesyscall<T>::makesyscall(byte sysindex1, byte sysindex2, byte sysindex3, byte sysindex4, LPCSTR lpFuncName,
 	DWORD offsetToFunc, byte retCode, byte ret1, byte ret2)
 {
+	//PBYTE pFuncAddr = (PBYTE)GetProcAddress(GetModuleHandleA("ntdll.dll"), lpFuncName);
 
 	CreateShellSysCall(sysindex1, sysindex2, sysindex3, sysindex4, lpFuncName, offsetToFunc, retCode, ret1, ret2);
 }
@@ -124,6 +125,5 @@ void makesyscall<T>::CreateShellSysCall(byte sysindex1, byte sysindex2, byte sys
 	*(byte*)(m_pShellCode + 12) = retCode;
 	*(byte*)(m_pShellCode + 13) = ret1;
 	*(byte*)(m_pShellCode + 14) = ret2;
-
 #endif
 }

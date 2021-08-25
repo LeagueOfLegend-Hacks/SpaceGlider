@@ -2,6 +2,8 @@
 #include "Offsets.h"
 #include "Decrypt.h"
 #include "Utils.h"
+#include "Menu.h"
+#include "UltimateHooks.h"
 #include <windows.h>
 #include <imgui.h>
 #include <imgui_impl_dx9.h>
@@ -11,18 +13,27 @@
 #include <d3d9.h>
 #pragma comment(lib, "d3d9.lib")
 
+struct SpellInfo {
+
+};
+
 typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
 
 namespace Functions {
 	Prototype_Reset Original_Reset;
 	Prototype_Present Original_Present;
 	WNDPROC Original_WndProc;
+	fnOnProcessSpell OnProcessSpell;
 }
 
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
+Menu console;
+UltimateHooks ulthook;
+PVOID NewOnProcessSpell;
 
 HWND GetHwndProc()
 {
@@ -83,7 +94,7 @@ HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CO
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::Text("");
+	console.Render();
 
 	ImGui::EndFrame();
 	ImGui::Render();
@@ -109,8 +120,19 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	return CallWindowProcA(Functions::Original_WndProc, hWnd, msg, wParam, lParam);
 }
+int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo) {
+	if (spellBook == nullptr || CastInfo == nullptr)
+		return Functions::OnProcessSpell(spellBook, CastInfo);
+	console.Print("OnProcessSpell Was Called.");
+	return Functions::OnProcessSpell(spellBook, CastInfo);
+}
 
 void ApplyHooks() {
+	console.Print("Fixing VEH");
+	ulthook.RestoreRtlAddVectoredExceptionHandler();
+	console.Print("Fixing QueryInformationProcess");
+	ulthook.RestoreZwQueryInformationProcess();
+	console.Print("Applying Hooks");
 	Functions::Original_Present = (Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (Prototype_Reset)GetDeviceAddress(16);
 	DetourRestoreAfterWith();
@@ -120,6 +142,22 @@ void ApplyHooks() {
 	DetourAttach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
 	DetourTransactionCommit();
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
+#ifndef _DEBUG
+	if (rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
+
+		console.Print("OnProcessSpell was decrypted so, we're going to hook it now");
+		DWORD NewOnprocessSpellAddr = ulthook.VirtualAllocateRegion(NewOnProcessSpell, DEFINE_RVA(Offsets::Functions::OnProcessSpell), 0x60);
+		ulthook.CopyRegion((DWORD)NewOnProcessSpell, DEFINE_RVA(Offsets::Functions::OnProcessSpell), 0x60);
+		ulthook.FixFuncRellocation(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DEFINE_RVA(Offsets::Functions::OnProcessSpell) + 0x60), (DWORD)NewOnProcessSpell, 0x60);
+		Functions::OnProcessSpell = (fnOnProcessSpell)(NewOnprocessSpellAddr);
+		bool isOnProcessSpellHooked = ulthook.addHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, 1);
+		if (!isOnProcessSpellHooked)
+			console.Print("OnProcessSpell failed to hook Hooked.");
+		else
+			console.Print("OnProcessSpell Hooked.");
+	}
+
+#endif
 }
 
 void RemoveHooks() {
@@ -129,6 +167,9 @@ void RemoveHooks() {
 	DetourDetach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourDetach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
 	DetourTransactionCommit();
+#ifndef _DEBUG
+	// need to unhook onprocessspell.
+#endif
 }
 
 DWORD WINAPI MainThread(LPVOID param) {
