@@ -1,4 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
+#include "../../libraries/Offsets/Offsets.h"
+#include "Utils.h"
 #include <windows.h>
 #include <imgui.h>
 #include <imgui_impl_dx9.h>
@@ -11,6 +13,8 @@
 typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+HMODULE g_module;
 
 HWND GetHwndProc()
 {
@@ -32,6 +36,7 @@ HWND GetHwndProc()
 
 		g_hWindow = GetNextWindow(g_hWindow, GW_HWNDNEXT);
 	} while (g_hWindow);
+	return NULL;
 }
 static DWORD FindDevice(DWORD Len)
 {
@@ -115,16 +120,41 @@ void ApplyHooks() {
 	Functions::originalWindowProcedure = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 }
 
+void RemoveHooks() {
+	SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)Functions::originalWindowProcedure);
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourDetach(&(PVOID&)Functions::Original_Present, Hooked_Present);
+	DetourDetach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
+	DetourTransactionCommit();
+}
+
 DWORD WINAPI MainThread(LPVOID param) {
-	Sleep(5000);
-	ApplyHooks();
-	while (true)
+	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
+
+	Sleep(5000);
+
+	ApplyHooks();
+
+	while (!(GetAsyncKeyState(VK_END) & 1))
+		Sleep(1);
+
+
+
+	RemoveHooks();
+
+	ImGui_ImplDX9_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
+	FreeLibraryAndExitThread(g_module, 0);
 	return 1;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule,DWORD  ul_reason_for_call,LPVOID lpReserved)
 {
+	g_module = hModule;
 	DisableThreadLibraryCalls(hModule);
 	switch (ul_reason_for_call)
 	{
