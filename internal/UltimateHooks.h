@@ -3,6 +3,8 @@
 #include <vector>
 #include <VersionHelpers.h>
 
+#define VP_Offset 0x170
+
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
 struct HookDetails {
