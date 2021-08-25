@@ -15,6 +15,7 @@ typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST
 typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+LeagueDecrypt rito_nuke;
 HMODULE g_module;
 
 HWND GetHwndProc()
@@ -131,12 +132,12 @@ void RemoveHooks() {
 }
 
 DWORD WINAPI MainThread(LPVOID param) {
+#ifndef _DEBUG
 	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
 
 	Sleep(5000);
-
-	LeagueDecrypt rito_nuke;
+#endif
 	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
 
