@@ -85,12 +85,8 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 }
 
 void ApplyHooks() {
-	if (!GetSystemDEPPolicy())
-		console.Print("Something went wrong. This platform is not available for you. ERROR: 0xD0E0F0");	// means DEP is set to AlwaysOff, user needs to set it to ether opt in or AlwaysOn
-	else {
-		if (!SetProcessDEPPolicy(PROCESS_DEP_ENABLE))
-			console.Print("Something went wrong. This platform is not available for you. ERROR: 0xD0E0F0");	// IDK why this could happen, but it did... so uhmmmm idk...
-	}
+	if (GetSystemDEPPolicy())
+		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
 	ulthook.RestoreRtlAddVectoredExceptionHandler();
 	ulthook.RestoreZwQueryInformationProcess();
 	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
@@ -104,9 +100,7 @@ void ApplyHooks() {
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 #ifndef _DEBUG
 	if (GetSystemDEPPolicy() && rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
-		bool OnProcessSpellHooked = ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
-		if (!OnProcessSpellHooked)
-			console.Print("OnProcessSpell failed to hook Hooked.");
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
 	}
 #endif
 }
