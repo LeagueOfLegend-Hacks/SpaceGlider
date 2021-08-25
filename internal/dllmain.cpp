@@ -144,7 +144,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	FreeLibraryAndExitThread(g_module, 0);
+	FreeLibrary(g_module);
 	return 1;
 }
 BOOL APIENTRY DllMain(HMODULE hModule,DWORD  ul_reason_for_call,LPVOID lpReserved)
