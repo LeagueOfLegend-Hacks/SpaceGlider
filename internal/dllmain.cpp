@@ -146,15 +146,9 @@ void ApplyHooks() {
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 #ifndef _DEBUG
 	if (GetSystemDEPPolicy() && rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
-		DWORD NewOnprocessSpellAddr = ulthook.VirtualAllocateRegion(NewOnProcessSpell, DEFINE_RVA(Offsets::Functions::OnProcessSpell), 0x60);
-		ulthook.CopyRegion((DWORD)NewOnProcessSpell, DEFINE_RVA(Offsets::Functions::OnProcessSpell), 0x60);
-		ulthook.FixFuncRellocation(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DEFINE_RVA(Offsets::Functions::OnProcessSpell) + 0x60), (DWORD)NewOnProcessSpell, 0x60);
-		Functions::OnProcessSpell = (fnOnProcessSpell)(NewOnprocessSpellAddr);
-		bool isOnProcessSpellHooked = ulthook.addHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, 1);
-		if (!isOnProcessSpellHooked)
+		bool OnProcessSpellHooked = ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
+		if (!OnProcessSpellHooked)
 			console.Print("OnProcessSpell failed to hook Hooked.");
-	} else {
-		console.Print("OnProcessSpell failed to hook Hooked.");
 	}
 #endif
 }
