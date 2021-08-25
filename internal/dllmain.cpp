@@ -15,7 +15,12 @@
 struct SpellInfo {
 
 };
+struct Vector3 {
 
+};
+struct GameObject {
+
+};
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace FuncTypes {
@@ -23,12 +28,14 @@ namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
 	typedef int(__thiscall* orgGetPing)(void* NetClient);
+	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
 }
 
 namespace Functions {
 	FuncTypes::Prototype_Reset Original_Reset;
 	FuncTypes::Prototype_Present Original_Present;
 	FuncTypes::fnOnProcessSpell OnProcessSpell;
+	FuncTypes::fnOnNewPath OnNewPath;
 	FuncTypes::orgGetPing GetPing;
 	WNDPROC Original_WndProc;
 }
@@ -37,7 +44,7 @@ LeagueDecrypt rito_nuke;
 HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
-PVOID NewOnProcessSpell;
+PVOID NewOnProcessSpell, NewOnNewPath;
 
 int GetPing() {
 	return Functions::GetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
@@ -87,10 +94,15 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo) {
 	if (spellBook == nullptr || CastInfo == nullptr)
 		return Functions::OnProcessSpell(spellBook, CastInfo);
-	console.Print("OnProcessSpell Was Called.");
+	console.Print("OnProcessSpell was called.");
 	return Functions::OnProcessSpell(spellBook, CastInfo);
 }
-
+int hk_OnNewPath(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7) {
+	if (obj == nullptr)
+		return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
+	console.Print("OnNewPath was called.");
+	return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
+}
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
@@ -108,6 +120,7 @@ void ApplyHooks() {
 #ifndef _DEBUG
 	if (GetSystemDEPPolicy() && rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
 		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnNewPath), (DWORD)hk_OnNewPath, Functions::OnNewPath, 0x28F, NewOnNewPath, 2);
 	}
 #endif
 }
