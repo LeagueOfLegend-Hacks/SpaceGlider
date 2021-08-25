@@ -16,16 +16,19 @@ struct SpellInfo {
 
 };
 
-typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
-typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
+
+namespace FuncTypes {
+	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
+	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
+	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
+}
 
 namespace Functions {
-	Prototype_Reset Original_Reset;
-	Prototype_Present Original_Present;
+	FuncTypes::Prototype_Reset Original_Reset;
+	FuncTypes::Prototype_Present Original_Present;
+	FuncTypes::fnOnProcessSpell OnProcessSpell;
 	WNDPROC Original_WndProc;
-	fnOnProcessSpell OnProcessSpell;
 }
 
 LeagueDecrypt rito_nuke;
@@ -33,51 +36,6 @@ HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
 PVOID NewOnProcessSpell;
-
-HWND GetHwndProc()
-{
-	HWND g_hWindow = GetTopWindow(NULL);
-	DWORD currentPID = GetCurrentProcessId();
-	do
-	{
-		char title[256];
-		if ((GetWindowTextA(g_hWindow, title, 256) > 0) && (IsWindowVisible(g_hWindow)))
-		{
-			DWORD procId;
-			GetWindowThreadProcessId(g_hWindow, &procId);
-
-			if (procId == currentPID)
-			{
-				return g_hWindow;
-			}
-		}
-
-		g_hWindow = GetNextWindow(g_hWindow, GW_HWNDNEXT);
-	} while (g_hWindow);
-	return NULL;
-}
-DWORD FindDevice(DWORD Len)
-{
-	DWORD dwObjBase = 0;
-
-	dwObjBase = (DWORD)LoadLibraryA("d3d9.dll");
-	while (dwObjBase++ < dwObjBase + Len)
-	{
-		if ((*(WORD*)(dwObjBase + 0x00)) == 0x06C7
-			&& (*(WORD*)(dwObjBase + 0x06)) == 0x8689
-			&& (*(WORD*)(dwObjBase + 0x0C)) == 0x8689
-			) {
-			dwObjBase += 2; break;
-		}
-	}
-	return(dwObjBase);
-}
-DWORD GetDeviceAddress(int VTableIndex)
-{
-	PDWORD VTable;
-	*(DWORD*)&VTable = *(DWORD*)FindDevice(0x128000);
-	return VTable[VTableIndex];
-}
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion)
 {
@@ -135,8 +93,8 @@ void ApplyHooks() {
 	}
 	ulthook.RestoreRtlAddVectoredExceptionHandler();
 	ulthook.RestoreZwQueryInformationProcess();
-	Functions::Original_Present = (Prototype_Present)GetDeviceAddress(17);
-	Functions::Original_Reset = (Prototype_Reset)GetDeviceAddress(16);
+	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
+	Functions::Original_Reset = (FuncTypes::Prototype_Reset)GetDeviceAddress(16);
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -152,7 +110,6 @@ void ApplyHooks() {
 	}
 #endif
 }
-
 void RemoveHooks() {
 	SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)Functions::Original_WndProc);
 	DetourTransactionBegin();
@@ -190,7 +147,6 @@ DWORD WINAPI MainThread(LPVOID param) {
 	FreeLibraryAndExitThread(g_module, 0);
 	return 1;
 }
-
 BOOL APIENTRY DllMain(HMODULE hModule,DWORD  ul_reason_for_call,LPVOID lpReserved)
 {
 	g_module = hModule;
