@@ -1,6 +1,6 @@
-#include "Menu.h"
+#include "Console.h"
 
-void Menu::Render() {
+void Console::Render() {
 	ImGui::Begin("Console", &ShowConsole, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 	ImGui::BeginChild("console#scroll", ImVec2(490, 225), true);
 	for (auto i : consoleEvents) {
@@ -10,16 +10,16 @@ void Menu::Render() {
 	ImGui::End();
 }
 
-void Menu::Show()
+void Console::Show()
 {
 	ShowConsole = true;
 }
 
-void Menu::Hide() {
+void Console::Hide() {
 	ShowConsole = false;
 }
 
-void Menu::Print(const char* fmt, ...) {
+void Console::Print(const char* fmt, ...) {
 	char buffer[512];
 	ZeroMemory(buffer, 511);
 	va_list argList;

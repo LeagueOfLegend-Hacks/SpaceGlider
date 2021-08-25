@@ -4,7 +4,7 @@
 #include <string>
 #include <Windows.h>
 
-class Menu {
+class Console {
 public:
 	void Render();
 	void Show();

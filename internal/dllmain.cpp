@@ -2,7 +2,7 @@
 #include "Offsets.h"
 #include "Decrypt.h"
 #include "Utils.h"
-#include "Menu.h"
+#include "Console.h"
 #include "UltimateHooks.h"
 #include <windows.h>
 #include <imgui.h>
@@ -31,7 +31,7 @@ namespace Functions {
 
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
-Menu console;
+Console console;
 UltimateHooks ulthook;
 PVOID NewOnProcessSpell;
 

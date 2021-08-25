@@ -24,8 +24,8 @@ SET(core_sources
 	Decrypt.cpp 
 	Decrypt.h 
 	Offsets.h
-	Menu.cpp
-	Menu.h
+	Console.cpp
+	Console.h
 	UltimateHooks.cpp
 	UltimateHooks.h
 )
