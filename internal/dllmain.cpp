@@ -9,7 +9,6 @@
 #include <imgui_impl_dx9.h>
 #include <imgui_impl_win32.h>
 #include <detours.h>
-
 #include <d3d9.h>
 #pragma comment(lib, "d3d9.lib")
 
@@ -128,11 +127,14 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 }
 
 void ApplyHooks() {
-	console.Print("Fixing VEH");
+	if (!GetSystemDEPPolicy())
+		console.Print("Something went wrong. This platform is not available for you. ERROR: 0xD0E0F0");	// means DEP is set to AlwaysOff, user needs to set it to ether opt in or AlwaysOn
+	else {
+		if (!SetProcessDEPPolicy(PROCESS_DEP_ENABLE))
+			console.Print("Something went wrong. This platform is not available for you. ERROR: 0xD0E0F0");	// IDK why this could happen, but it did... so uhmmmm idk...
+	}
 	ulthook.RestoreRtlAddVectoredExceptionHandler();
-	console.Print("Fixing QueryInformationProcess");
 	ulthook.RestoreZwQueryInformationProcess();
-	console.Print("Applying Hooks");
 	Functions::Original_Present = (Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (Prototype_Reset)GetDeviceAddress(16);
 	DetourRestoreAfterWith();
@@ -143,9 +145,7 @@ void ApplyHooks() {
 	DetourTransactionCommit();
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 #ifndef _DEBUG
-	if (rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
-
-		console.Print("OnProcessSpell was decrypted so, we're going to hook it now");
+	if (GetSystemDEPPolicy() && rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
 		DWORD NewOnprocessSpellAddr = ulthook.VirtualAllocateRegion(NewOnProcessSpell, DEFINE_RVA(Offsets::Functions::OnProcessSpell), 0x60);
 		ulthook.CopyRegion((DWORD)NewOnProcessSpell, DEFINE_RVA(Offsets::Functions::OnProcessSpell), 0x60);
 		ulthook.FixFuncRellocation(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DEFINE_RVA(Offsets::Functions::OnProcessSpell) + 0x60), (DWORD)NewOnProcessSpell, 0x60);
@@ -153,10 +153,9 @@ void ApplyHooks() {
 		bool isOnProcessSpellHooked = ulthook.addHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, 1);
 		if (!isOnProcessSpellHooked)
 			console.Print("OnProcessSpell failed to hook Hooked.");
-		else
-			console.Print("OnProcessSpell Hooked.");
+	} else {
+		console.Print("OnProcessSpell failed to hook Hooked.");
 	}
-
 #endif
 }
 

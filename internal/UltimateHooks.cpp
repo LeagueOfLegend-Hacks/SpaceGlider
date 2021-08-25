@@ -2,6 +2,7 @@
 #include "../DirectSysCalls/makesyscall.h"
 #include <Zydis/Zydis.h>
 
+
 std::vector<HookEntries> hookEntries;
 
 LONG __stdcall LeoHandler(EXCEPTION_POINTERS* pExceptionInfo)
@@ -45,20 +46,37 @@ DWORD UltimateHooks::RestoreRtlAddVectoredExceptionHandler() {
 
 	auto addr = (PVOID)RtlAddVectoredExceptionHandlerAddr;
 	auto size = static_cast<SIZE_T>(5);
+	if (IsWindowsVersionOrGreater(6, 3, 0)) {
+		if (NT_SUCCESS(
+			makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x180, 0xC2, 0x14, 0x00)(
+				GetCurrentProcess(), &addr, &size, PAGE_EXECUTE_READWRITE, &oldProt)))
+		{
+			int i = 0;
+			for (BYTE _byte : RtlAVE) {
+				*(BYTE*)(RtlAddVectoredExceptionHandlerAddr + i) = _byte;
+				i++;
+			}
 
-	if (NT_SUCCESS(
-		makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x170, 0xC2, 0x14, 0x00)(
-			GetCurrentProcess(), &addr, &size, PAGE_EXECUTE_READWRITE, &oldProt)))
-	{
-		int i = 0;
-		for (BYTE _byte : RtlAVE) {
-			*(BYTE*)(RtlAddVectoredExceptionHandlerAddr + i) = _byte;
-			i++;
+			NT_SUCCESS(
+				makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x180, 0xC2, 0x14, 0x00)(
+					GetCurrentProcess(), &addr, &size, oldProt, &oldProt));
 		}
-
-		NT_SUCCESS(
+	}
+	else {
+		if (NT_SUCCESS(
 			makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x170, 0xC2, 0x14, 0x00)(
-				GetCurrentProcess(), &addr, &size, oldProt, &oldProt));
+				GetCurrentProcess(), &addr, &size, PAGE_EXECUTE_READWRITE, &oldProt)))
+		{
+			int i = 0;
+			for (BYTE _byte : RtlAVE) {
+				*(BYTE*)(RtlAddVectoredExceptionHandlerAddr + i) = _byte;
+				i++;
+			}
+
+			NT_SUCCESS(
+				makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x170, 0xC2, 0x14, 0x00)(
+					GetCurrentProcess(), &addr, &size, oldProt, &oldProt));
+		}
 	}
 
 	return RtlAddVectoredExceptionHandlerAddr;
@@ -316,14 +334,25 @@ bool UltimateHooks::Hook(DWORD original_fun, DWORD hooked_fun, size_t offset)
 	{
 		auto addr = (PVOID)original_fun;
 		auto size = static_cast<SIZE_T>(static_cast<int>(1));
-
-		if (NT_SUCCESS(
-			makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x170, 0xC2, 0x14, 0x00)(
-				GetCurrentProcess(), &addr, &size, PAGE_READONLY, &hs.addressToHookOldProtect)))
-		{
-			hookEntries.push_back(hs);
-			return true;
+		if (IsWindowsVersionOrGreater(6, 3, 0)) {
+			if (NT_SUCCESS(
+				makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x180, 0xC2, 0x14, 0x00)(
+					GetCurrentProcess(), &addr, &size, PAGE_READONLY, &hs.addressToHookOldProtect)))
+			{
+				hookEntries.push_back(hs);
+				return true;
+			}
 		}
+		else {
+			if (NT_SUCCESS(
+				makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", 0x170, 0xC2, 0x14, 0x00)(
+					GetCurrentProcess(), &addr, &size, PAGE_READONLY, &hs.addressToHookOldProtect)))
+			{
+				hookEntries.push_back(hs);
+				return true;
+			}
+		}
+
 	}
 
 	return false;

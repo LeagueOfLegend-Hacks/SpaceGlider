@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <vector>
-
+#include <VersionHelpers.h>
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
