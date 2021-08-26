@@ -1,27 +1,36 @@
 #define WIN32_LEAN_AND_MEAN
 #include "Offsets.h"
 #include "Decrypt.h"
-#include "Utils.h"
 #include "Console.h"
 #include "UltimateHooks.h"
+#include "ImRender.h"
 #include <windows.h>
-#include <imgui.h>
-#include <imgui_impl_dx9.h>
-#include <imgui_impl_win32.h>
 #include <detours.h>
 #include <d3d9.h>
-#pragma comment(lib, "d3d9.lib")
+#include <ctime>
+#include <string>
 
 struct SpellInfo {
 
 };
 struct Vector3 {
-
+public:
+	float x;
+	float y;
+	float z;
+};
+struct Vector2 {
+	float x;
+	float y;
 };
 struct GameObject {
-
+public:
+	union {
+		DEFINE_MEMBER_0(DWORD* VTable)
+		DEFINE_MEMBER_N(byte IsOnScreen, 0x1A8) // !(IsOnScreen % 2)
+		DEFINE_MEMBER_N(ImRender::ImVec3 Position, 0x220)
+	};
 };
-extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
@@ -29,6 +38,24 @@ namespace FuncTypes {
 	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
 	typedef int(__thiscall* orgGetPing)(void* NetClient);
 	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
+	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
+	typedef float(__cdecl* fnGetAttackCastDelay)(GameObject* pObj);
+	typedef float(__cdecl* fnGetAttackDelay)(GameObject* pObj);
+	typedef void(__cdecl* fnDrawCircle)(Vector3* position, float range, int* color, int a4, float a5, int a6, float alpha);
+	typedef void(__thiscall* fnPrintChat)(DWORD ChatClient, const char* Message, int Color);
+	typedef bool(__cdecl* WorldToScreen)(Vector3* vectorIn, Vector2* vectorOut);
+	typedef bool(__cdecl* fnIsHero)(GameObject* pObj);
+	typedef bool(__cdecl* fnIsMissile)(GameObject* pObj);
+	typedef bool(__cdecl* fnIsMinion)(GameObject* pObj);
+	typedef bool(__cdecl* fnIsTurret)(GameObject* pObj);
+	typedef bool(__cdecl* fnIsInhibitor)(GameObject* pObj);
+	typedef bool(__cdecl* fnIsTroyEnt)(GameObject* pObj);
+	typedef bool(__cdecl* fnIsNexus)(GameObject* pObj);
+	typedef float(__cdecl* fnGetAttackCastDelay)(GameObject* pObj);
+	typedef float(__cdecl* fnGetAttackDelay)(GameObject* pObj);
+	typedef bool(__thiscall* fnIsAlive)(GameObject* pObj);
+	typedef bool(__thiscall* fnIsTargetable)(GameObject* pObj);
+	typedef bool(__thiscall* fnGetPing)(GameObject* pObj);
 }
 
 namespace Functions {
@@ -37,6 +64,7 @@ namespace Functions {
 	FuncTypes::fnOnProcessSpell OnProcessSpell;
 	FuncTypes::fnOnNewPath OnNewPath;
 	FuncTypes::orgGetPing GetPing;
+	FuncTypes::WorldToScreen WorldToScreen;
 	WNDPROC Original_WndProc;
 }
 
@@ -44,6 +72,7 @@ LeagueDecrypt rito_nuke;
 HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
+ImRender render;
 PVOID NewOnProcessSpell, NewOnNewPath;
 
 int GetPing() {
@@ -52,25 +81,17 @@ int GetPing() {
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion)
 {
-	static bool init = true;
-	if (init) {
-		init = false;
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO();
-		ImGui_ImplWin32_Init(GetHwndProc());
-		ImGui_ImplDX9_Init(Device);
-	}
-	ImGui_ImplDX9_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+	render.Init(Device);
+	render.begin_draw();
 
 	console.Render();
-	ImGui::Text("Ping: %i", GetPing());
 
-	ImGui::EndFrame();
-	ImGui::Render();
+	render.draw_text(ImVec2(5,5), "Space Glider", false, ImColor(255, 0, 0, 255));
+	auto pLocal = (GameObject*)*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer);
+	  
+	render.draw_circle(pLocal->Position, 600, ImColor(255, 0, 0, 255));
 
-	ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+	render.end_draw();
 	return Functions::Original_Present(Device, pSrcRect, pDestRect, hDestWindow, pDirtyRegion);
 }
 HRESULT WINAPI Hooked_Reset(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -100,6 +121,12 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 int hk_OnNewPath(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7) {
 	if (obj == nullptr)
 		return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
+
+	if (obj->IsOnScreen % 2)
+		console.Print("offscreen");
+	else
+		console.Print("onscreen");
+
 	console.Print("OnNewPath was called.");
 	return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
 }
@@ -148,6 +175,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
 
 	Functions::GetPing = (FuncTypes::orgGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
+	Functions::WorldToScreen = (FuncTypes::WorldToScreen)(DEFINE_RVA(0x971F30));
 
 	ApplyHooks();
 
@@ -156,11 +184,10 @@ DWORD WINAPI MainThread(LPVOID param) {
 
 	RemoveHooks();
 
-	ImGui_ImplDX9_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
+	render.Free();
 
 	FreeLibrary(g_module);
+	_endthreadex(0);
 	return 1;
 }
 BOOL APIENTRY DllMain(HMODULE hModule,DWORD  ul_reason_for_call,LPVOID lpReserved)

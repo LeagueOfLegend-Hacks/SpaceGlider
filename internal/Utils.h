@@ -1,46 +1,12 @@
 #pragma once
+#include <Windows.h>
 #define DEFINE_RVA(address) ((DWORD)GetModuleHandleA(NULL) + (DWORD)address)
-HWND GetHwndProc()
-{
-	HWND g_hWindow = GetTopWindow(NULL);
-	DWORD currentPID = GetCurrentProcessId();
-	do
-	{
-		char title[256];
-		if ((GetWindowTextA(g_hWindow, title, 256) > 0) && (IsWindowVisible(g_hWindow)))
-		{
-			DWORD procId;
-			GetWindowThreadProcessId(g_hWindow, &procId);
+#define STR_MERGE_IMPL(x, y)                x##y
+#define STR_MERGE(x,y)                        STR_MERGE_IMPL(x,y)
+#define MAKE_PAD(size)                        BYTE STR_MERGE(pad_, __COUNTER__) [ size ]
+#define DEFINE_MEMBER_0(x)                    x;
+#define DEFINE_MEMBER_N(x,offset)            struct { MAKE_PAD((DWORD)offset); x; };
 
-			if (procId == currentPID)
-			{
-				return g_hWindow;
-			}
-		}
-
-		g_hWindow = GetNextWindow(g_hWindow, GW_HWNDNEXT);
-	} while (g_hWindow);
-	return NULL;
-}
-DWORD FindDevice(DWORD Len)
-{
-	DWORD dwObjBase = 0;
-
-	dwObjBase = (DWORD)LoadLibraryA("d3d9.dll");
-	while (dwObjBase++ < dwObjBase + Len)
-	{
-		if ((*(WORD*)(dwObjBase + 0x00)) == 0x06C7
-			&& (*(WORD*)(dwObjBase + 0x06)) == 0x8689
-			&& (*(WORD*)(dwObjBase + 0x0C)) == 0x8689
-			) {
-			dwObjBase += 2; break;
-		}
-	}
-	return(dwObjBase);
-}
-DWORD GetDeviceAddress(int VTableIndex)
-{
-	PDWORD VTable;
-	*(DWORD*)&VTable = *(DWORD*)FindDevice(0x128000);
-	return VTable[VTableIndex];
-}
+HWND GetHwndProc();
+DWORD FindDevice(DWORD Len);
+DWORD GetDeviceAddress(int VTableIndex);

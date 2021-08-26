@@ -20,6 +20,7 @@ set(zydis_source
 )
 SET(core_sources
 	dllmain.cpp 
+	Utils.cpp
 	Utils.h 
 	Decrypt.cpp 
 	Decrypt.h 
@@ -28,6 +29,10 @@ SET(core_sources
 	Console.h
 	UltimateHooks.cpp
 	UltimateHooks.h
+	ImRender.cpp
+	ImRender.h
+	OrbWalker.cpp
+	OrbWalker.h
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib)

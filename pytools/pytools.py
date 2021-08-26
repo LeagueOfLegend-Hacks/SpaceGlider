@@ -153,7 +153,7 @@ def main():
         ["ZoomClass", idc.get_operand_value(FindFunctionByPatternStartEA("A1 ? ? ? ? 89 47 60")+0xE8, 1)],
         ["ViewMatrix", idc.get_operand_value(FindFunctionByPatternStartEA("B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E9 ? ? ? ? CC CC CC CC CC CC CC CC CC CC CC CC B9 ? ? ? ? B8 ? ? ? ?"), 1)],
         ["NetClient", idc.get_operand_value(FindFunctionByPatternStartEA("A1 ? ? ? ? C3 CC CC CC CC CC CC CC CC CC CC 83 EC 58"), 1)],
-        ["UnderMouseObject", idc.get_operand_value(FindFunctionFirstXRef("standalone_postgame_SequenceText_%u")+0xA, 1)],
+        ["UnderMouseObject", idc.get_operand_value(FindFunctionFirstXRef("standalone_postgame_SequenceText_%u")+0xA, 1)],   #8B 35 ? ? ? ? 8B 44 24 10
         ["Minimap", idc.get_operand_value(FindFunctionByPatternStartEA("A3 ? ? ? ? 89 35 ? ? ? ? 85 DB")+0x2B, 0)],
         ["MinimapObject", idc.get_operand_value(FindFunctionByPatternStartEA("83 3D ? ? ? ? ? 0F 84 ? ? ? ? 53 8B 5C 24 08"), 0)],
         ["HudInstance", idc.get_operand_value(FindFunctionByPatternStartEA("8B 0D ? ? ? ? FF 77 20")+0x15A, 1)],
@@ -168,6 +168,7 @@ def main():
         ["Index", idc.get_operand_value(FindFunctionAddr("GetID", -0x14, 1)+0x11, 1)],
         ["TeamID", idc.get_operand_value(FindFunctionAddr("GetTeamID", -0x14, 1)+0x11, 1)],
         ["Position", FindOffsetPattern("8D 86 ? ? ? ? 8B 74 24 08", 1)],
+        ["SpellBook", FindOffset("mReplicatedSpellCanCastBitsLower1",0x11,1)],
         ["mPAR", FindOffset("mMaxPAR",-0xC,1)-0x10],
         ["mMaxPAR", FindOffset("mMaxPAR",-0xC,1)],
         ["mPAREnabled", FindOffset("mPAREnabled",-0xC,1)],
@@ -178,13 +179,11 @@ def main():
         ["LargePipBitField", FindOffset("LargePipBitField",-0xC,1)],
         ["MediumPipBitField", FindOffset("MediumPipBitField",-0xC,1)],
         ["mSARState", FindOffset("mSARState",-0xC,1)],
-        ["ObjInvulnerable", 0x3D0],# No Pattern.
         ["mLifetime", FindOffset("mLifetime",-0xC,1)],
         ["mLifetimeTicks", FindOffset("mLifetimeTicks",-0xC,1)],
         ["PhysicalDamagePercentageModifier", FindOffset("PhysicalDamagePercentageModifier",-0xC,1)],
         ["mIsTargetable", FindOffset("mIsTargetable",-0xC,1)],
         ["mIsTargetableToTeamFlags", FindOffset("mIsTargetableToTeamFlags",-0xC,1)],
-        ["ObjRecallState", 0xD8C],# No Pattern.
         ["HP", FindOffset("mMaxHP",0x5,1)-0x10],
         ["MaxHP", FindOffset("mMaxHP",-0x5,1)],
         ["HPMaxPenalty", FindOffset("mHPMaxPenalty",-0xC,1)],
@@ -197,7 +196,6 @@ def main():
         ["StopShieldFade", FindOffset("mStopShieldFade",-0xC,1)],
         ["ActionState", FindOffset("mActionState",-0xC,1)],
         ["ActionState2", FindOffset("mActionState2",-0xC,1)],
-        ["ObjAbilityHaste", FindOffset("mObjAbilityHaste",-0xC,1)],
         ["PercentCooldownMod", GetCharacterIntermediate()],
         ["AbilityHasteMod", GetCharacterIntermediate()+FindOffset("mAbilityHasteMod",0x5,1)],
         ["PercentCooldownCapMod", GetCharacterIntermediate()+FindOffset("mPercentCooldownCapMod",0x5,1)],
