@@ -299,7 +299,6 @@ struct Vector
 		return out < 0 ? out * -1 : out;
 	}
 };
-ImRender::ImVec3 MousePos;
 float LastAttackCommandT = 0;
 float LastMoveCommandT = 0;
 void MoveCursorTo(float x, float y) {
@@ -333,31 +332,32 @@ bool CanMove(float extraWindup)
 	return ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista" || float(GetTickCount64()) + 30 * 0.5f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000.f + (GetPing() * 1.5f) + extraWindup;
 }
 void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
-	ImRender::ImVec3 previousPos = MousePos;
-	if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr && target->IsAlive() && target->IsTargetable) {
-		BlockInput(true);
-		ImRender::ImVec3 TargetPos_W2S;
-		if (Functions::WorldToScreen(&target->Position, &TargetPos_W2S)) {
-			MoveCursorTo(TargetPos_W2S.x, TargetPos_W2S.y);
-			Sleep(50);
-			if (ObjectManager::GetObjectUnderMouse()->Index != target->Index) {
-				PressRightClick();
+	ImRender::ImVec3 previousPos;
+	if (Functions::WorldToScreen(&GetMouseWorldPosition(), &previousPos)) {
+		if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr && target->IsAlive() && target->IsTargetable) {
+			BlockInput(true);
+			ImRender::ImVec3 TargetPos_W2S;
+			if (Functions::WorldToScreen(&target->Position, &TargetPos_W2S)) {
+				MoveCursorTo(TargetPos_W2S.x, TargetPos_W2S.y);
 				Sleep(50);
+				if (ObjectManager::GetObjectUnderMouse()->Index != target->Index) {
+					PressRightClick();
+					Sleep(50);
+				}
+				MoveCursorTo(previousPos.x, previousPos.y);
+				LastAttackCommandT = float(GetTickCount64()) + rand() % 30 + GetPing();
 			}
-			MoveCursorTo(previousPos.x, previousPos.y);
-			LastAttackCommandT = float(GetTickCount64()) + rand() % 30 + GetPing();
+			BlockInput(false);
 		}
-		BlockInput(false);
-	}
-	else if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
-	{
-		PressRightClick();
-		LastMoveCommandT = GetTickCount64() + rand() % 30 + GetPing();
+		else if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
+		{
+			PressRightClick();
+			LastMoveCommandT = GetTickCount64() + rand() % 30 + GetPing();
+		}
 	}
 }
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
-	Functions::WorldToScreen(&GetMouseWorldPosition(), &MousePos);
 	render.Init(Device);
 	render.begin_draw();
 
