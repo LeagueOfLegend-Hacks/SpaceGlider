@@ -9,16 +9,37 @@
 #include <d3d9.h>
 #include <ctime>
 #include <string>
+#include <unordered_map>
 
-struct SpellInfo {
-
+class SpellInfo {
+public:
+	union {
+		DEFINE_MEMBER_0(DWORD* base)
+		DEFINE_MEMBER_N(int Slot, 0x4)
+		DEFINE_MEMBER_N(float StartTime, 0x8)
+		DEFINE_MEMBER_N(int SpellIndex, 0xC)
+		DEFINE_MEMBER_N(unsigned int Level, 0x58)
+		DEFINE_MEMBER_N(unsigned short SourceId, 0x64)
+		DEFINE_MEMBER_N(unsigned int SourceNetworkID, 0x6C)
+		DEFINE_MEMBER_N(ImRender::ImVec3 StartPosition, 0x7C)
+		DEFINE_MEMBER_N(ImRender::ImVec3 EndPosition, 0x88)
+		DEFINE_MEMBER_N(ImRender::ImVec3 CastPos, 0x94);
+		DEFINE_MEMBER_N(bool HasTarget, 0xB4)
+		DEFINE_MEMBER_N(unsigned short TargetId, 0xB8)
+		DEFINE_MEMBER_N(float winduptime, 0x4B8)
+		DEFINE_MEMBER_N(float CoolDown, 0x4CC)
+		DEFINE_MEMBER_N(float ManaCost, 0x4E0)
+		DEFINE_MEMBER_N(float EndTime, 0x7D0)
+	};
 };
+std::unordered_map<int, struct SpellInfo> ActiveSpellMap;
 struct GameObject {
 public:
 	union {
 		DEFINE_MEMBER_0(DWORD* VTable)
 		DEFINE_MEMBER_N(int Index, 0x20)
 		DEFINE_MEMBER_N(int Team, 0x4c)
+		DEFINE_MEMBER_N(unsigned int NetworkID, 0xCC)
 		DEFINE_MEMBER_N(byte IsOnScreen, 0x1A8)
 		DEFINE_MEMBER_N(ImRender::ImVec3 Position, 0x1D8)
 		DEFINE_MEMBER_N(bool IsTargetable, 0xD00)
@@ -92,12 +113,15 @@ public:
 		return std::string(this->ChampionName);
 	}
 };
+std::unordered_map<int, struct GameObject*> ActiveMissiles;
 
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
-	typedef BOOL(_stdcall* Prototype_GetCursorPos)(LPPOINT);
 	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
+	typedef int(__thiscall* fnOnFinishCast)(SpellInfo* ptr, GameObject* obj);
+	typedef int(__thiscall* fnCreateObject)(GameObject* obj, unsigned int NetworkID);
+	typedef int(__thiscall* fnDeleteObject)(void* thisPtr, GameObject* pObject);
 	typedef int(__thiscall* orgGetPing)(void* NetClient);
 	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
 	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
@@ -120,11 +144,13 @@ public:
 namespace Functions {
 	FuncTypes::Prototype_Reset Original_Reset;
 	FuncTypes::Prototype_Present Original_Present;
-	FuncTypes::Prototype_GetCursorPos Original_GetCursorPos;
 	FuncTypes::fnOnProcessSpell OnProcessSpell;
 	FuncTypes::fnOnNewPath OnNewPath;
+	FuncTypes::fnCreateObject OnCreateObject;
+	FuncTypes::fnDeleteObject OnDeleteObject;
 	FuncTypes::orgGetPing GetPing;
 	FuncTypes::WorldToScreen WorldToScreen;
+	FuncTypes::fnOnFinishCast OnFinishCast;
 	WNDPROC Original_WndProc;
 }
 
@@ -133,7 +159,7 @@ HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
 ImRender render;
-PVOID NewOnProcessSpell, NewOnNewPath;
+PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject, NewOnFinishCast;
 clock_t lastMove;
 clock_t lastAttack;
 
@@ -167,6 +193,7 @@ private:
 		size_t size;
 		size_t max_size;
 	};
+
 public:
 	static GameObject* GetFirstObject()
 	{
@@ -178,17 +205,26 @@ public:
 		typedef GameObject* (__thiscall* fnGetNext)(void*, GameObject*);
 		return ((fnGetNext)(DEFINE_RVA(Offsets::Functions::GetNextObject)))(*(void**)(DEFINE_RVA(Offsets::Data::ObjectManager)), object);
 	}
-	static std::vector<GameObject*> GetAllObjects() {
-		std::vector<GameObject*> out;
+	static std::unordered_map<unsigned int, GameObject*> GetAllObjects() {
+		std::unordered_map<unsigned int, GameObject*> out;
 		GameObject* Obj = ObjectManager::GetFirstObject();
 		while (Obj) {
-			out.push_back(Obj);
-			Obj = ObjectManager::GetNextObject(Obj);
+			out.insert({Obj->NetworkID, Obj});
+			Obj = GetNextObject(Obj);
 		}
 		return out;
 	}
-	static std::vector<GameObject*> GetAllHeros() {
-		std::vector<GameObject*> heroes;
+	static GameObject* FindObjectByIndex(std::list<GameObject*> heroList, short casterIndex)
+	{
+		for (GameObject* a : heroList)
+		{
+			if (casterIndex == a->Index)
+				return a;
+		}
+		return nullptr;
+	}
+	static std::list<GameObject*> GetAllHeros() {
+		std::list<GameObject*> heroes;
 		auto hero_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_AIHero_));
 		for (size_t i = 0; i < hero_list->size; i++)
 		{
@@ -199,9 +235,6 @@ public:
 	}
 	static GameObject* GetLocalPlayer() {
 		return (GameObject*)*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer);
-	}
-	static GameObject* GetObjectUnderMouse() {
-		return (GameObject*)*(DWORD*)DEFINE_RVA(0x180f208);
 	}
 };
 
@@ -340,10 +373,8 @@ void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
 			if (Functions::WorldToScreen(&target->Position, &TargetPos_W2S)) {
 				MoveCursorTo(TargetPos_W2S.x, TargetPos_W2S.y);
 				Sleep(50);
-				if (ObjectManager::GetObjectUnderMouse()->Index != target->Index) {
-					PressRightClick();
-					Sleep(50);
-				}
+				PressRightClick();
+				Sleep(50);
 				MoveCursorTo(previousPos.x, previousPos.y);
 				LastAttackCommandT = float(GetTickCount64()) + rand() % 30 + GetPing();
 			}
@@ -364,8 +395,27 @@ HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CO
 	console.Render();
 
 	render.draw_text(ImVec2(5,5), "Space Glider", false, ImColor(255, 0, 0, 255));
-	auto hero_list = ObjectManager::GetAllHeros();
-	for (auto hero : hero_list) {
+	auto herolist = ObjectManager::GetAllHeros();
+	std::vector<int> Deletable;
+	for (auto it = ActiveSpellMap.begin(); it != ActiveSpellMap.end(); it++) {
+		if (it->second.StartTime > *(float*)(DEFINE_RVA(Offsets::Data::GameTime))) {
+			ImRender::ImVec3 StartPos_W2S, EndPos_W2S;
+			Functions::WorldToScreen(&it->second.StartPosition, &StartPos_W2S);
+			Functions::WorldToScreen(&it->second.EndPosition, &EndPos_W2S);
+			render.draw_line(StartPos_W2S, EndPos_W2S, ImColor(0.0f, 1.0f, 0.0f, 0.4f), 5.0);
+		}
+		else {
+			Deletable.push_back(it->first);
+		}
+	}
+
+	if (!Deletable.empty()) {
+		for (auto dlt : Deletable)
+			ActiveSpellMap.erase(dlt);
+		Deletable.clear();
+	}
+
+	for (auto hero : herolist) {
 		if (hero->IsAlive()) {
 			if (hero->IsAllyTo(ObjectManager::GetLocalPlayer()))
 				render.draw_circle(hero->Position, hero->AttackRange + hero->GetBoundingRadius(), ImColor(0, 255, 0, 255));
@@ -396,22 +446,34 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo) {
 	if (spellBook == nullptr || CastInfo == nullptr)
 		return Functions::OnProcessSpell(spellBook, CastInfo);
-	console.Print("OnProcessSpell was called.");
+	ActiveSpellMap.insert(std::pair<int, struct SpellInfo>(CastInfo->SpellIndex, *CastInfo));
 	return Functions::OnProcessSpell(spellBook, CastInfo);
+}
+int __fastcall hk_OnFinishCast(SpellInfo* castInfo, void* edx, GameObject* object) {
+	if (!object || !castInfo)
+		return Functions::OnFinishCast(castInfo, object);
+	return Functions::OnFinishCast(castInfo, object);
 }
 int hk_OnNewPath(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7) {
 	if (obj == nullptr)
 		return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
 
-	if (obj->IsOnScreen % 2)
-		console.Print("offscreen");
-	else
-		console.Print("onscreen");
-
-	console.Print("OnNewPath was called.");
 	return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
 }
-
+int __fastcall hk_OnCreateObject(GameObject* obj, void* edx, unsigned int netId) {
+	if (obj == nullptr)
+		return Functions::OnCreateObject(obj, netId);
+	if (obj->IsMissile())
+		ActiveMissiles.insert({ obj->Index, obj });
+	return Functions::OnCreateObject(obj, netId);
+}
+int __fastcall hk_OnDeleteObject(void* thisPtr, void* edx, GameObject* obj) {
+	if (obj == nullptr || thisPtr == nullptr)
+		return Functions::OnDeleteObject(thisPtr, obj);
+	if (obj->IsMissile())
+		ActiveMissiles.erase(obj->Index);
+	return Functions::OnDeleteObject(thisPtr, obj);
+}
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
@@ -419,7 +481,6 @@ void ApplyHooks() {
 	ulthook.RestoreZwQueryInformationProcess();
 	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (FuncTypes::Prototype_Reset)GetDeviceAddress(16);
-	Functions::Original_GetCursorPos = (FuncTypes::Prototype_GetCursorPos)GetCursorPos;
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -429,8 +490,11 @@ void ApplyHooks() {
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 #ifndef _DEBUG
 	if (GetSystemDEPPolicy() && rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnNewPath), (DWORD)hk_OnNewPath, Functions::OnNewPath, 0x28F, NewOnNewPath, 2);
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnNewPath), (DWORD)hk_OnNewPath, Functions::OnNewPath, 0x28F, NewOnNewPath, 2);
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnCreateObject), (DWORD) hk_OnCreateObject, Functions::OnCreateObject, 0xAE, NewOnCreateObject, 3);
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnDeleteObject), (DWORD) hk_OnDeleteObject, Functions::OnDeleteObject, 0x151, NewOnDeleteObject, 4);
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnFinishCast), (DWORD)hk_OnFinishCast, Functions::OnFinishCast, 0x2A2, NewOnFinishCast, 5);
 	}
 #endif
 }

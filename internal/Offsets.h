@@ -18,6 +18,9 @@ namespace Offsets {
 		IsTurret = 0x1a6ec0,
 		GetAttackDelay = 0x276090,
 		GetAttackCastDelay = 0x275f90,
+		OnCreateObject = 0x27E1E0,	//0xAE
+		OnDeleteObject = 0x276BF0,	//0x151
+		OnFinishCast = 0x4EAB00
 	};
 	enum class Data {
 		NetClient = 0x30E223C,
