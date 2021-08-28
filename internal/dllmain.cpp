@@ -634,8 +634,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 
 	render.Free();
 
-	FreeLibrary(g_module);
-	_endthreadex(0);
+	FreeLibraryAndExitThread(g_module, 0);
 	return 1;
 }
 BOOL APIENTRY DllMain(HMODULE hModule,DWORD  ul_reason_for_call,LPVOID lpReserved)
@@ -645,9 +644,12 @@ BOOL APIENTRY DllMain(HMODULE hModule,DWORD  ul_reason_for_call,LPVOID lpReserve
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
-		_beginthreadex(nullptr, 0, (_beginthreadex_proc_type)MainThread, hModule, 0, nullptr);
+		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)MainThread, hModule, 0, nullptr);
+		break;
 	case DLL_THREAD_ATTACH:
+		break;
 	case DLL_THREAD_DETACH:
+		break;
 	case DLL_PROCESS_DETACH:
 		break;
 	}
