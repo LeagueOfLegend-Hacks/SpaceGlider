@@ -10,7 +10,6 @@
 #include <ctime>
 #include <string>
 #include <unordered_map>
-//#include <algorithm>
 #include <functional>    
 
 struct Vector
@@ -305,7 +304,6 @@ namespace FuncTypes {
 	typedef bool(__cdecl* fnIsTroyEnt)(GameObject* pObj);
 	typedef bool(__thiscall* fnGetPing)(GameObject* pObj);
 }
-
 namespace Functions {
 	FuncTypes::Prototype_Reset Original_Reset;
 	FuncTypes::Prototype_Present Original_Present;
@@ -318,7 +316,6 @@ namespace Functions {
 	FuncTypes::fnOnFinishCast OnFinishCast;
 	WNDPROC Original_WndProc;
 }
-
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
 Console console;
@@ -327,7 +324,6 @@ ImRender render;
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject, NewOnFinishCast;
 clock_t lastMove;
 clock_t lastAttack;
-
 ImRender::ImVec3 GetMouseWorldPosition()
 {
 	DWORD MousePtr = DEFINE_RVA(Offsets::Data::HudInstance);
@@ -344,11 +340,9 @@ ImRender::ImVec3 GetMouseWorldPosition()
 
 	return temp;
 }
-
 int GetPing() {
 	return Functions::GetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
 }
-
 class ObjectManager {
 private:
 	template<typename T>
@@ -569,7 +563,6 @@ int __fastcall hk_OnDeleteObject(void* thisPtr, void* edx, GameObject* obj) {
 		return Functions::OnDeleteObject(thisPtr, obj);
 	return Functions::OnDeleteObject(thisPtr, obj);
 }
-
 auto Original_GetCursorPos = &GetCursorPos;
 BOOL WINAPI hGetCursorPos(LPPOINT lpPoint)
 {
@@ -618,8 +611,6 @@ void RemoveHooks() {
 		ulthook.deinit(); // this completely gets rid of all of our DEP hooks in one go.
 #endif
 }
-
-
 DWORD WINAPI MainThread(LPVOID param) {
 #ifndef _DEBUG
 	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
