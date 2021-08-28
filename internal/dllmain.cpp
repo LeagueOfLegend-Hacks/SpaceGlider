@@ -13,7 +13,6 @@
 //#include <algorithm>
 #include <functional>    
 
-typedef std::function<void()> callback;
 struct Vector
 {
 	float X, Y, Z;
@@ -108,6 +107,7 @@ struct Vector
 		return out < 0 ? out * -1 : out;
 	}
 };
+typedef std::function<void()> callback;
 struct action
 {
 	callback func;
@@ -204,18 +204,22 @@ struct GameObject {
 public:
 	union {
 		DEFINE_MEMBER_0(DWORD* VTable)
-			DEFINE_MEMBER_N(unsigned short Index, 0x20)
-			DEFINE_MEMBER_N(int Team, 0x4c)
-			DEFINE_MEMBER_N(unsigned int NetworkID, 0xCC)
-			DEFINE_MEMBER_N(byte IsOnScreen, 0x1A8)
-			DEFINE_MEMBER_N(ImRender::ImVec3 Position, 0x1d8)
-			DEFINE_MEMBER_N(Vector ServerPosition, 0x1d8)
-			DEFINE_MEMBER_N(bool IsTargetable, 0xD00)
-			DEFINE_MEMBER_N(bool IsVisible, 0x23C)
-			DEFINE_MEMBER_N(float Health, 0xD98);
+		DEFINE_MEMBER_N(unsigned short Index, 0x20)
+		DEFINE_MEMBER_N(int Team, 0x4c)
+		DEFINE_MEMBER_N(unsigned int NetworkID, 0xCC)
+		DEFINE_MEMBER_N(byte IsOnScreen, 0x1A8)
+		DEFINE_MEMBER_N(ImRender::ImVec3 Position, 0x1d8)
+		DEFINE_MEMBER_N(Vector ServerPosition, 0x1d8)
+		DEFINE_MEMBER_N(bool IsTargetable, 0xD00)
+		DEFINE_MEMBER_N(bool IsVisible, 0x23C)
+		DEFINE_MEMBER_N(float Health, 0xD98);
 		DEFINE_MEMBER_N(float MaxHealth, 0xDA8)
-			DEFINE_MEMBER_N(float AttackRange, 0x12EC)
-			DEFINE_MEMBER_N(char* ChampionName, 0x2BB4);
+		DEFINE_MEMBER_N(float Armor, 0x1890)
+		DEFINE_MEMBER_N(float BonusArmor, 0x18a0)
+		DEFINE_MEMBER_N(float AttackRange, 0x12EC)
+		DEFINE_MEMBER_N(float BaseAttackDamage, 0x17f0)
+		DEFINE_MEMBER_N(float BonusAttackDamage, 0x121C)
+		DEFINE_MEMBER_N(char* ChampionName, 0x2BB4);
 	};
 	float GameObject::GetBoundingRadius() {
 		return reinterpret_cast<float(__thiscall*)(GameObject*)>(this->VTable[35])(this);
@@ -279,6 +283,10 @@ public:
 	}
 	std::string GetChampionName() {
 		return std::string(this->ChampionName);
+	}
+	float CalcDamage(GameObject* Target) {
+		auto Damage = Target->BaseAttackDamage + Target->BonusAttackDamage;
+		return Damage - (Target->Armor + Target->BonusArmor);
 	}
 };
 namespace FuncTypes {
@@ -426,7 +434,6 @@ action ac([&] {
 	PressRightClick();
 	Sleep(50);
 	MLP.enabled = false;
-	LastAttackCommandT = float(GetTickCount64()) + (GetPing()*2);
 	}, 50);
 bool CanAttack() {
 	return float(GetTickCount64()) + 50 / 2.f + 25.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
@@ -437,39 +444,29 @@ bool CanMove(float extraWindup) {
 	return GetTickCount64() >= LastAttackCommandT + static_cast<int>(ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000) + GetPing();
 }
 enum TargetType {
-	ClosestToMouse,
-	LowestHealth
+	LowestHealth,
 };
-GameObject* CurrentTarget = nullptr;
-void tryFindTarget(TargetType targetting_type) {
-	GameObject* pLocal = ObjectManager::GetLocalPlayer();
-	if (!pLocal)
-		return;
-	if (CurrentTarget != nullptr)
-		return;
-	std::vector<GameObject*> vecPossibleTargets;
-	auto pObject = ObjectManager::GetFirstObject();
-	while (pObject ) {
-		if (pObject != nullptr && pObject->IsEnemyTo(pLocal)) {
-			if (pObject->IsHero() || pObject->IsMinion() || pObject->IsTurret()) {
-				if (!pObject->IsAlive())
-					continue;
-				if (pObject->Health <= 0.f)
-					continue;
-				Vector vec1(pLocal->Position.x, pLocal->Position.y, pLocal->Position.z);
-				Vector vec2(pObject->Position.x, pObject->Position.y, pObject->Position.z);
-				if (pLocal->AttackRange+pLocal->GetBoundingRadius() > vec1.DistTo(vec2))
-					vecPossibleTargets.push_back(pObject);
+GameObject* tryFindTarget(TargetType targetting_type) {
+	auto pLocal = ObjectManager::GetLocalPlayer();
+	std::list<GameObject*> Objects = ObjectManager::GetAllObjects();
+	GameObject* CurTarget = nullptr;
+	for (auto pObject : Objects) {
+		if (pObject != nullptr) {
+			if (pObject->ServerPosition.DistTo(pLocal->ServerPosition) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
+				if (pLocal->IsEnemyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
+					switch (targetting_type) {
+					case TargetType::LowestHealth:
+						if (CurTarget == nullptr)
+							CurTarget = pObject;
+						if (CurTarget != nullptr && CurTarget->Health > pObject->Health)
+							CurTarget = pObject;
+						break;
+					}
+				}
 			}
 		}
-		pObject = ObjectManager::GetNextObject(pObject);
 	}
-	if (!vecPossibleTargets.empty()) {
-		CurrentTarget = vecPossibleTargets.front();
-		return;
-	}
-	else
-		return;
+	return CurTarget;
 }
 void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
 	ImRender::ImVec3 previousPos;
@@ -483,7 +480,6 @@ void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
 						MLP.y = TargetPos_W2S.y;
 						MLP.enabled = true;
 						DelayedAction.add(ac);
-						LastAttackCommandT = float(GetTickCount64()) + (GetPing() * 2);
 					}
 				}
 			}
@@ -497,16 +493,7 @@ void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
 }
 void MainLoop() {
 	if (GetAsyncKeyState(VK_SPACE)) {
-		auto pLocal = ObjectManager::GetLocalPlayer();
-		auto Objects = ObjectManager::GetAllObjects();
-		for (auto pObject : Objects) {
-			render.draw_circle(pObject->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(255, 0, 0, 255));
-			if (pObject->ServerPosition.DistTo(pLocal->ServerPosition) <= pLocal->AttackRange + pLocal->GetBoundingRadius()) {
-				if (!pLocal->IsAllyTo(pObject))
-					CurrentTarget = pObject;
-			}
-		}
-		OrbWalk(CurrentTarget);
+		OrbWalk(tryFindTarget(TargetType::LowestHealth));
 	}
 }
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
@@ -517,11 +504,6 @@ HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CO
 	MainLoop();
 
 	render.draw_text(ImVec2(5,5), "Space Glider", false, ImColor(255, 0, 0, 255));
-
-	auto Objects = ObjectManager::GetAllObjects();
-	for (auto obj : Objects) {
-		render.draw_circle(obj->Position, 30, ImColor(255, 0, 0, 255));
-	}
 
 	auto herolist = ObjectManager::GetAllHeros();
 	for (auto hero : herolist) {
@@ -554,7 +536,7 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo) {
 	if (spellBook == nullptr || CastInfo == nullptr)
 		return Functions::OnProcessSpell(spellBook, CastInfo);
-	if (ObjectManager::GetLocalPlayer()->Index = CastInfo->source_id) {
+	if (ObjectManager::GetLocalPlayer()->Index == CastInfo->source_id) {
 		switch (CastInfo->Slot) {
 		case kSpellSlot::SpellSlot_Unknown:
 		case kSpellSlot::SpellSlot_BasicAttack1:
@@ -615,7 +597,7 @@ void ApplyHooks() {
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 #ifndef _DEBUG
 	if (GetSystemDEPPolicy() && rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
+		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
 		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnNewPath), (DWORD)hk_OnNewPath, Functions::OnNewPath, 0x28F, NewOnNewPath, 2);
 		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnCreateObject), (DWORD) hk_OnCreateObject, Functions::OnCreateObject, 0xAE, NewOnCreateObject, 3);
 		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnDeleteObject), (DWORD) hk_OnDeleteObject, Functions::OnDeleteObject, 0x151, NewOnDeleteObject, 4);
