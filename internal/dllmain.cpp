@@ -10,8 +10,96 @@
 #include <ctime>
 #include <string>
 #include <unordered_map>
-#include <functional>    
+#include <functional>
 
+struct Vector2 {
+	Vector2() {};
+	Vector2(float _x, float _y) {
+		x = _x;
+		y = _y;
+	}
+
+	float x;
+	float y;
+
+	inline bool operator == (const Vector2& A) const
+	{
+		return A.x == x && A.y == y;
+	}
+
+	inline Vector2 operator + (const Vector2& A) const
+	{
+		return Vector2(x + A.x, y + A.y);
+	}
+
+	inline Vector2 operator + (const float A) const
+	{
+		return Vector2(x + A, y + A);
+	}
+
+	inline Vector2 operator * (const float A) const
+	{
+		return Vector2(A * x, A * y);
+	}
+
+	inline Vector2 operator * (const Vector2& A) const
+	{
+		return Vector2(A.x * x, A.y * y);
+	}
+
+	inline Vector2 operator - (const float A) const
+	{
+		return Vector2(A * x, A * y);
+	}
+
+	inline Vector2 operator - (const Vector2& A) const
+	{
+		return Vector2(A.x - x, A.y - y);
+	}
+
+	inline Vector2 operator / (const float A) const
+	{
+		return Vector2(A / x, A / y);
+	}
+
+	inline Vector2 operator / (const Vector2& A) const
+	{
+		return Vector2(A.x / x, A.y / y);
+	}
+
+	float length() {
+		return sqrt(x * x + y * y);
+	}
+
+	float distance(const Vector2& o) {
+		return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2));
+	}
+
+	Vector2 vscale(const Vector2& s) {
+		return Vector2(x * s.x, y * s.y);
+	}
+
+	Vector2 scale(float s) {
+		return Vector2(x * s, y * s);
+	}
+
+	Vector2 normalize() {
+		float l = length();
+		return Vector2(x / l, y / l);
+	}
+
+	Vector2 add(const Vector2& o) {
+		return Vector2(x + o.x, y + o.y);
+	}
+
+	Vector2 sub(const Vector2& o) {
+		return Vector2(x - o.x, y - o.y);
+	}
+
+	Vector2 clone() {
+		return Vector2(x, y);
+	}
+};
 struct Vector
 {
 	float X, Y, Z;
@@ -26,7 +114,9 @@ struct Vector
 		Y = y;
 		Z = z;
 	}
-
+	ImVec2 Cast_To_ImGui() {
+		return ImVec2(X, Y);
+	}
 	Vector operator +(const Vector& A) const
 	{
 		return Vector(X + A.X, Y + A.Y, Z + A.Z);
@@ -106,6 +196,97 @@ struct Vector
 		return out < 0 ? out * -1 : out;
 	}
 };
+struct Vector4 {
+	Vector4() {};
+	Vector4(float _x, float _y, float _z, float _w) {
+		x = _x;
+		y = _y;
+		z = _z;
+		w = _w;
+	}
+
+	float x;
+	float y;
+	float z;
+	float w;
+
+	float length() {
+		return sqrt(x * x + y * y + z * z + w * w);
+	}
+
+	float distance(const Vector4& o) {
+		return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2) + pow(z - o.z, 2) + pow(w - o.w, 2));
+	}
+
+	Vector4 vscale(const Vector4& s) {
+		return Vector4(x * s.x, y * s.y, z * s.z, w * s.w);
+	}
+
+	Vector4 scale(float s) {
+		return Vector4(x * s, y * s, z * s, w * s);
+	}
+
+	Vector4 normalize() {
+		float l = length();
+		return Vector4(x / l, y / l, z / l, w / l);
+	}
+
+	Vector4 add(const Vector4& o) {
+		return Vector4(x + o.x, y + o.y, z + o.z, w + o.w);
+	}
+
+	Vector4 sub(const Vector4& o) {
+		return Vector4(x - o.x, y - o.y, z - o.z, w - o.w);
+	}
+
+	Vector4 clone() {
+		return Vector4(x, y, z, w);
+	}
+};
+class D3DRenderer {
+public:
+	int GetWidth() {
+		return *(int*)((DWORD)this + 0xC);
+	}
+	int GetHeight() {
+		return *(int*)((DWORD)this + 0x10);
+	}
+	float* GetViewMatrix() {
+		return (float*)((DWORD)this + 0x54);
+	}
+	float* GetProjectionMatrix() {
+		return (float*)((DWORD)this + 0x94);
+	}
+	void MultiplyMatrices(float* out, float* a, float* b) {
+		int size = 4 * 4;
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				float sum = 0.f;
+				for (int k = 0; k < 4; k++)
+					sum = sum + a[i * 4 + k] * b[k * 4 + j];
+				out[i * 4 + j] = sum;
+			}
+		}
+	}
+	Vector2 WorldToScreen(const Vector& pos) {
+		float viewProjMatrix[16];
+		MultiplyMatrices(viewProjMatrix, GetViewMatrix(), GetProjectionMatrix());
+		Vector2 screen = { (float)GetWidth(), (float)GetHeight() };
+		static Vector4 clipCoords;
+		clipCoords.x = pos.X * viewProjMatrix[0] + pos.Y * viewProjMatrix[4] + pos.Z * viewProjMatrix[8] + viewProjMatrix[12];
+		clipCoords.y = pos.X * viewProjMatrix[1] + pos.Y * viewProjMatrix[5] + pos.Z * viewProjMatrix[9] + viewProjMatrix[13];
+		clipCoords.z = pos.X * viewProjMatrix[2] + pos.Y * viewProjMatrix[6] + pos.Z * viewProjMatrix[10] + viewProjMatrix[14];
+		clipCoords.w = pos.X * viewProjMatrix[3] + pos.Y * viewProjMatrix[7] + pos.Z * viewProjMatrix[11] + viewProjMatrix[15];
+		if (clipCoords.w < 1.0f)
+			clipCoords.w = 1.f;
+		Vector M;
+		M.X = clipCoords.x / clipCoords.w;
+		M.Y = clipCoords.y / clipCoords.w;
+		M.Z = clipCoords.z / clipCoords.w;
+		return Vector2((screen.x / 2.f * M.X) + (M.X + screen.x / 2.f), -(screen.y / 2.f * M.Y) + (M.Y + screen.y / 2.f));
+	}
+}*riot_render;
+
 typedef std::function<void()> callback;
 struct action
 {
@@ -300,7 +481,7 @@ namespace FuncTypes {
 	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
 	typedef void(__cdecl* fnDrawCircle)(ImRender::ImVec3* position, float range, int* color, int a4, float a5, int a6, float alpha);
 	typedef void(__thiscall* fnPrintChat)(DWORD ChatClient, const char* Message, int Color);
-	typedef bool(__cdecl* WorldToScreen)(ImRender::ImVec3* vectorIn, ImRender::ImVec3* vectorOut);
+	typedef bool(__cdecl* WorldToScreen)(Vector* vectorIn, Vector* vectorOut);
 	typedef bool(__cdecl* fnIsTroyEnt)(GameObject* pObj);
 	typedef bool(__thiscall* fnGetPing)(GameObject* pObj);
 }
@@ -324,7 +505,7 @@ ImRender render;
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject, NewOnFinishCast;
 clock_t lastMove;
 clock_t lastAttack;
-ImRender::ImVec3 GetMouseWorldPosition()
+Vector GetMouseWorldPosition()
 {
 	DWORD MousePtr = DEFINE_RVA(Offsets::Data::HudInstance);
 	auto aux1 = *(DWORD*)MousePtr;
@@ -332,11 +513,11 @@ ImRender::ImVec3 GetMouseWorldPosition()
 	auto aux2 = *(DWORD*)aux1;
 	aux2 += 0x1C;
 
-	ImRender::ImVec3 temp;
+	Vector temp;
 
-	temp.x = *(float*)(aux2 + 0x0);
-	temp.y = *(float*)(aux2 + 0x4);
-	temp.z = *(float*)(aux2 + 0x8);
+	temp.X = *(float*)(aux2 + 0x0);
+	temp.Y = *(float*)(aux2 + 0x4);
+	temp.Z = *(float*)(aux2 + 0x8);
 
 	return temp;
 }
@@ -463,15 +644,15 @@ GameObject* tryFindTarget(TargetType targetting_type) {
 	return CurTarget;
 }
 void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
-	ImRender::ImVec3 previousPos;
+	Vector previousPos;
 	if (Functions::WorldToScreen(&GetMouseWorldPosition(), &previousPos)) {
 		if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
 			if (target->IsAlive()) {
 				if (!MLP.enabled) {
-					ImRender::ImVec3 TargetPos_W2S;
-					if (Functions::WorldToScreen(&target->Position, &TargetPos_W2S)) {
-						MLP.x = TargetPos_W2S.x;
-						MLP.y = TargetPos_W2S.y;
+					Vector TargetPos_W2S;
+					if (Functions::WorldToScreen(&target->ServerPosition, &TargetPos_W2S)) {
+						MLP.x = TargetPos_W2S.X;
+						MLP.y = TargetPos_W2S.Y;
 						MLP.enabled = true;
 						DelayedAction.add(ac);
 					}
@@ -501,6 +682,11 @@ HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CO
 
 	auto herolist = ObjectManager::GetAllHeros();
 	for (auto hero : herolist) {
+		Vector w2s_location;
+		Functions::WorldToScreen(&hero->ServerPosition, &w2s_location);
+		Vector2 w2s_location2 = riot_render->WorldToScreen(hero->ServerPosition);
+		std::string location = std::to_string(w2s_location2.x) + ", " + std::to_string(w2s_location2.y);
+		render.draw_text(ImVec2(w2s_location2.x, w2s_location2.y), location.c_str());
 		if (hero->IsAlive()) {
 			if (hero->IsAllyTo(ObjectManager::GetLocalPlayer()))
 				render.draw_circle(hero->Position, hero->AttackRange + hero->GetBoundingRadius(), ImColor(0, 255, 0, 255));
@@ -615,15 +801,14 @@ DWORD WINAPI MainThread(LPVOID param) {
 #ifndef _DEBUG
 	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
-
-	Sleep(5000);
+	Sleep(200);
 #endif
 	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
 
 	Functions::GetPing = (FuncTypes::orgGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
 	Functions::WorldToScreen = (FuncTypes::WorldToScreen)(DEFINE_RVA(0x971F30));
-
+	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(0x310257c);
 	ApplyHooks();
 
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
