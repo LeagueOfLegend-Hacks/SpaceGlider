@@ -502,6 +502,7 @@ HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
 ImRender render;
+INPUT input = { 0 };
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject, NewOnFinishCast;
 clock_t lastMove;
 clock_t lastAttack;
@@ -598,7 +599,6 @@ struct MouseLockedPos {
 float LastMoveCommandT = 0;
 void PressRightClick()
 {
-	INPUT input = { 0 };
 	input.type = INPUT_MOUSE;
 	input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
 	SendInput(1, &input, sizeof(INPUT));
@@ -607,16 +607,14 @@ void PressRightClick()
 }
 action ac([&] {
 	PressRightClick();
-	Sleep(50);
+	Sleep(25);
 	MLP.enabled = false;
-	}, 50);
+	}, 25);
 bool CanAttack() {
-	return float(GetTickCount64()) + 50 / 2.f + 25.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
+	return float(GetTickCount64()) + GetPing() / 2.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
 }
 bool CanMove(float extraWindup) {
-	if (ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista")
-		return true;
-	return GetTickCount64() >= LastAttackCommandT + static_cast<int>(ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000) + GetPing();
+	return GetTickCount64() >= LastAttackCommandT + static_cast<int>(ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000) + GetPing() || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
 }
 enum TargetType {
 	LowestHealth,
@@ -628,7 +626,7 @@ GameObject* tryFindTarget(TargetType targetting_type) {
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {
 			if (pObject->ServerPosition.DistTo(pLocal->ServerPosition) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
-				if (pLocal->IsEnemyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
+				if (!pLocal->IsAllyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
 					switch (targetting_type) {
 					case TargetType::LowestHealth:
 						if (CurTarget == nullptr)
@@ -644,19 +642,14 @@ GameObject* tryFindTarget(TargetType targetting_type) {
 	return CurTarget;
 }
 void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
-	Vector previousPos;
-	if (Functions::WorldToScreen(&GetMouseWorldPosition(), &previousPos)) {
-		if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
-			if (target->IsAlive()) {
-				if (!MLP.enabled) {
-					Vector TargetPos_W2S;
-					if (Functions::WorldToScreen(&target->ServerPosition, &TargetPos_W2S)) {
-						MLP.x = TargetPos_W2S.X;
-						MLP.y = TargetPos_W2S.Y;
-						MLP.enabled = true;
-						DelayedAction.add(ac);
-					}
-				}
+	if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
+		if (target->IsAlive()) {
+			if (!MLP.enabled) {
+				Vector2 TargetPos_W2S = riot_render->WorldToScreen(target->ServerPosition);
+				MLP.x = TargetPos_W2S.x;
+				MLP.y = TargetPos_W2S.y;
+				MLP.enabled = true;
+				DelayedAction.add(ac);
 			}
 		}
 	}
@@ -676,17 +669,10 @@ HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CO
 	render.begin_draw();
 
 	console.Render();
-	MainLoop();
 
 	render.draw_text(ImVec2(5,5), "Space Glider", false, ImColor(255, 0, 0, 255));
-
 	auto herolist = ObjectManager::GetAllHeros();
 	for (auto hero : herolist) {
-		Vector w2s_location;
-		Functions::WorldToScreen(&hero->ServerPosition, &w2s_location);
-		Vector2 w2s_location2 = riot_render->WorldToScreen(hero->ServerPosition);
-		std::string location = std::to_string(w2s_location2.x) + ", " + std::to_string(w2s_location2.y);
-		render.draw_text(ImVec2(w2s_location2.x, w2s_location2.y), location.c_str());
 		if (hero->IsAlive()) {
 			if (hero->IsAllyTo(ObjectManager::GetLocalPlayer()))
 				render.draw_circle(hero->Position, hero->AttackRange + hero->GetBoundingRadius(), ImColor(0, 255, 0, 255));
@@ -722,7 +708,7 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 		case kSpellSlot::SpellSlot_BasicAttack1:
 		case kSpellSlot::SpellSlot_BasicAttack2:
 		case kSpellSlot::SpellSlot_SpecialAttack:
-			LastAttackCommandT = float(GetTickCount64()) + GetPing();
+			LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
 			break;
 		}
 	}
@@ -736,7 +722,6 @@ int __fastcall hk_OnFinishCast(SpellInfo* castInfo, void* edx, GameObject* objec
 int hk_OnNewPath(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7) {
 	if (obj == nullptr)
 		return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
-
 	return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
 }
 int __fastcall hk_OnCreateObject(GameObject* obj, void* edx, unsigned int netId) {
@@ -813,6 +798,9 @@ DWORD WINAPI MainThread(LPVOID param) {
 
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
 		DelayedAction.update(GetTickCount64());
+		if (GetAsyncKeyState(VK_SPACE)) {
+			OrbWalk(tryFindTarget(TargetType::LowestHealth));
+		}
 	}
 
 	RemoveHooks();
