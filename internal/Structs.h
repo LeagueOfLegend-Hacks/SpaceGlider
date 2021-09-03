@@ -46,19 +46,79 @@ public:
 		DEFINE_MEMBER_N(float			BaseAttackDamage,										Offsets::GameObject::BaseAttackDamage)
 		DEFINE_MEMBER_N(float			BonusAttackDamage,										0x121C)
 		DEFINE_MEMBER_N(char*			ChampionName,											0x2BB4)
-		// all these are unused but we grab them from ida so, might as well put them in
-		DEFINE_MEMBER_N(BYTE			PAR,													Offsets::GameObject::mPAR)
-		DEFINE_MEMBER_N(BYTE			MaxPar,													Offsets::GameObject::mMaxPAR)
-		DEFINE_MEMBER_N(BYTE			ParEnabled,												Offsets::GameObject::mPAREnabled)
-		DEFINE_MEMBER_N(BYTE			ParState,												Offsets::GameObject::mPARState)
-		DEFINE_MEMBER_N(BYTE			SAR,													Offsets::GameObject::mSAR)
-		DEFINE_MEMBER_N(BYTE			MaxSAR,													Offsets::GameObject::mMaxSAR)
-		DEFINE_MEMBER_N(BYTE			SAREnabled,												Offsets::GameObject::mSAREnabled)
-		DEFINE_MEMBER_N(BYTE			LargePipBitField,										Offsets::GameObject::LargePipBitField)
-		DEFINE_MEMBER_N(BYTE			MediumPipBitField,										Offsets::GameObject::MediumPipBitField)
-		DEFINE_MEMBER_N(BYTE			SARState,												Offsets::GameObject::mSARState)
-		DEFINE_MEMBER_N(BYTE			LifeTime,												Offsets::GameObject::mLifetime)
-		DEFINE_MEMBER_N(BYTE			LifeTimeTicks,											Offsets::GameObject::mLifetimeTicks)
-		DEFINE_MEMBER_N(BYTE			PhysicalDamagePercentageModifier,						Offsets::GameObject::PhysicalDamagePercentageModifier)
 	};
+	float GameObject::GetBoundingRadius() {
+		return reinterpret_cast<float(__thiscall*)(GameObject*)>(this->VTable[35])(this);
+	}
+	bool IsAlive() {
+		typedef bool(__thiscall* fnIsAlive)(GameObject* pObj);
+		return ((fnIsAlive)(DEFINE_RVA(Offsets::Functions::IsAlive)))(this);
+	}
+	bool IsHero() {
+		typedef bool(__cdecl* fnIsHero)(GameObject* pObj);
+		return ((fnIsHero)(DEFINE_RVA(Offsets::Functions::IsHero)))(this);
+	}
+	bool IsMissile() {
+		typedef bool(__cdecl* fnIsMissile)(GameObject* pObj);
+		return ((fnIsMissile)(DEFINE_RVA(Offsets::Functions::IsMissile)))(this);
+	}
+	bool IsMinion() {
+		typedef bool(__cdecl* fnMinion)(GameObject* pObj);
+		return ((fnMinion)(DEFINE_RVA(Offsets::Functions::IsMinion)))(this);
+	}
+	bool IsInhibitor() {
+		typedef bool(__cdecl* fnIsInhibitor)(GameObject* pObj);
+		return ((fnIsInhibitor)(DEFINE_RVA(Offsets::Functions::IsInhib)))(this);
+	}
+	bool IsBaron() {
+		typedef bool(__cdecl* fnIsBaron)(GameObject* pObj);
+		return ((fnIsBaron)(DEFINE_RVA(Offsets::Functions::IsBaron)))(this);
+	}
+	bool IsNexus() {
+		typedef bool(__cdecl* fnIsNexus)(GameObject* pObj);
+		return ((fnIsNexus)(DEFINE_RVA(Offsets::Functions::IsNexus)))(this);
+	}
+	bool IsTurret() {
+		typedef bool(__cdecl* fnIsTurret)(GameObject* pObj);
+		return ((fnIsTurret)(DEFINE_RVA(Offsets::Functions::IsTurret)))(this);
+	}
+	float GetAttackDelay() {
+		typedef float(__cdecl* fnGetAttackDelay)(GameObject* pObj);
+		return ((fnGetAttackDelay)(DEFINE_RVA(Offsets::Functions::GetAttackDelay)))(this);
+	}
+	float GetAttackCastDelay() {
+		typedef float(__cdecl* fnGetAttackCastDelay)(GameObject* pObj);
+		return ((fnGetAttackCastDelay)(DEFINE_RVA(Offsets::Functions::GetAttackCastDelay)))(this);
+	}
+	bool IsAllyTo(GameObject* Obj) {
+		return Obj->Team == this->Team;
+	}
+	bool IsNeutral() {
+		return this->Team == 300;
+	}
+	bool IsEnemyTo(GameObject* Obj) {
+		if (this->IsNeutral() || Obj->IsNeutral())
+			return false;
+		return !IsAllyTo(Obj);
+	}
+	bool IsMonster() {
+		return this->IsNeutral() && this->MaxHealth > 6.0f;
+	}
+	bool IsVisibleOnScreen() {
+		return !(IsOnScreen % 2);
+	}
+	std::string GetChampionName() {
+		return std::string(this->ChampionName);
+	}
+	float CalcDamage(GameObject* Target) {
+		auto Damage = Target->BaseAttackDamage + Target->BonusAttackDamage;
+		return Damage - (Target->Armor + Target->BonusArmor);
+	}
+};
+template<typename T>
+struct SEntityList {
+	char pad[0x4];
+	T** entities;
+	size_t size;
+	size_t max_size;
 };

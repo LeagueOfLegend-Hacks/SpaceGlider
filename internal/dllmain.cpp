@@ -2,7 +2,7 @@
 #include "Offsets.h"
 #include "Decrypt.h"
 #include "Console.h"
-#include "Vector.h"
+#include "Structs.h"
 #include "UltimateHooks.h"
 #include "ImRender.h"
 #include <windows.h>
@@ -13,18 +13,6 @@
 #include <unordered_map>
 #include <functional>
 
-enum class GameObjectOrder
-{
-	None = 0,
-	HoldPosition,
-	MoveTo,
-	AttackUnit,
-	AutoAttackPet,
-	AutoAttack,
-	MovePet,
-	AttackTo,
-	Stop = 10,
-};
 class D3DRenderer {
 public:
 	int GetWidth() {
@@ -120,152 +108,15 @@ public:
 		}
 	}
 }DelayedAction;
-enum kSpellSlot
-{
-	SpellSlot_Unknown = -1,
-	SpellSlot_Q,
-	SpellSlot_W,
-	SpellSlot_E,
-	SpellSlot_R,
-	SpellSlot_Summoner1,
-	SpellSlot_Summoner2,
-	SpellSlot_Item1,
-	SpellSlot_Item2,
-	SpellSlot_Item3,
-	SpellSlot_Item4,
-	SpellSlot_Item5,
-	SpellSlot_Item6,
-	SpellSlot_Trinket,
-	SpellSlot_Recall,
-	SpellSlot_SpecialAttack = 45,
-	SpellSlot_BasicAttack1 = 64,
-	SpellSlot_BasicAttack2 = 65,
-};
-class SpellInfo {
-public:
-	union {
-		DEFINE_MEMBER_0(DWORD* base)
-		DEFINE_MEMBER_N(kSpellSlot Slot, 0x4)
-		DEFINE_MEMBER_N(float StartTime, 0x8)
-		DEFINE_MEMBER_N(int SpellIndex, 0xC)
-		DEFINE_MEMBER_N(unsigned int Level, 0x58)
-		DEFINE_MEMBER_N(unsigned short source_id, 0x64)
-		DEFINE_MEMBER_N(unsigned int SourceNetworkID, 0x6C)
-		DEFINE_MEMBER_N(ImRender::ImVec3 StartPosition, 0x7C)
-		DEFINE_MEMBER_N(ImRender::ImVec3 EndPosition, 0x88)
-		DEFINE_MEMBER_N(ImRender::ImVec3 CastPos, 0x94);
-		DEFINE_MEMBER_N(bool HasTarget, 0xB4)
-		DEFINE_MEMBER_N(unsigned short TargetId, 0xB8)
-		DEFINE_MEMBER_N(float winduptime, 0x4B8)
-		DEFINE_MEMBER_N(float CoolDown, 0x4CC)
-		DEFINE_MEMBER_N(float ManaCost, 0x4E0)
-		DEFINE_MEMBER_N(float EndTime, 0x7D0)
-	};
-};
-struct GameObject {
-public:
-	union {
-		DEFINE_MEMBER_0(DWORD* VTable)
-		DEFINE_MEMBER_N(unsigned short Index, 0x20)
-		DEFINE_MEMBER_N(int Team, 0x4c)
-		DEFINE_MEMBER_N(unsigned int NetworkID, 0xCC)
-		DEFINE_MEMBER_N(byte IsOnScreen, 0x1A8)
-		DEFINE_MEMBER_N(ImRender::ImVec3 Position, 0x1d8)
-		DEFINE_MEMBER_N(Vector3 ServerPosition, 0x1d8)
-		DEFINE_MEMBER_N(bool IsTargetable, 0xD00)
-		DEFINE_MEMBER_N(bool IsVisible, 0x23C)
-		DEFINE_MEMBER_N(float Health, 0xD98);
-		DEFINE_MEMBER_N(float MaxHealth, 0xDA8)
-		DEFINE_MEMBER_N(float Armor, 0x1890)
-		DEFINE_MEMBER_N(float BonusArmor, 0x18a0)
-		DEFINE_MEMBER_N(float AttackRange, 0x12EC)
-		DEFINE_MEMBER_N(float BaseAttackDamage, 0x17f0)
-		DEFINE_MEMBER_N(float BonusAttackDamage, 0x121C)
-		DEFINE_MEMBER_N(char* ChampionName, 0x2BB4);
-	};
-	float GameObject::GetBoundingRadius() {
-		return reinterpret_cast<float(__thiscall*)(GameObject*)>(this->VTable[35])(this);
-	}
-	bool IsAlive() {
-		typedef bool(__thiscall* fnIsAlive)(GameObject* pObj);
-		return ((fnIsAlive)(DEFINE_RVA(Offsets::Functions::IsAlive)))(this);
-	}
-	bool IsHero() {
-		typedef bool(__cdecl* fnIsHero)(GameObject* pObj);
-		return ((fnIsHero)(DEFINE_RVA(Offsets::Functions::IsHero)))(this);
-	}
-	bool IsMissile() {
-		typedef bool(__cdecl* fnIsMissile)(GameObject* pObj);
-		return ((fnIsMissile)(DEFINE_RVA(Offsets::Functions::IsMissile)))(this);
-	}
-	bool IsMinion() {
-		typedef bool(__cdecl* fnMinion)(GameObject* pObj);
-		return ((fnMinion)(DEFINE_RVA(Offsets::Functions::IsMinion)))(this);
-	}
-	bool IsInhibitor() {
-		typedef bool(__cdecl* fnIsInhibitor)(GameObject* pObj);
-		return ((fnIsInhibitor)(DEFINE_RVA(Offsets::Functions::IsInhib)))(this);
-	}
-	bool IsBaron() {
-		typedef bool(__cdecl* fnIsBaron)(GameObject* pObj);
-		return ((fnIsBaron)(DEFINE_RVA(Offsets::Functions::IsBaron)))(this);
-	}
-	bool IsNexus() {
-		typedef bool(__cdecl* fnIsNexus)(GameObject* pObj);
-		return ((fnIsNexus)(DEFINE_RVA(Offsets::Functions::IsNexus)))(this);
-	}
-	bool IsTurret() {
-		typedef bool(__cdecl* fnIsTurret)(GameObject* pObj);
-		return ((fnIsTurret)(DEFINE_RVA(Offsets::Functions::IsTurret)))(this);
-	}
-	float GetAttackDelay() {
-		typedef float(__cdecl* fnGetAttackDelay)(GameObject* pObj);
-		return ((fnGetAttackDelay)(DEFINE_RVA(Offsets::Functions::GetAttackDelay)))(this);
-	}
-	float GetAttackCastDelay() {
-		typedef float(__cdecl* fnGetAttackCastDelay)(GameObject* pObj);
-		return ((fnGetAttackCastDelay)(DEFINE_RVA(Offsets::Functions::GetAttackCastDelay)))(this);
-	}
-	bool IsAllyTo(GameObject* Obj) {
-		return Obj->Team == this->Team;
-	}
-	bool IsNeutral() {
-		return this->Team == 300;
-	}
-	bool IsEnemyTo(GameObject* Obj) {
-		if (this->IsNeutral() || Obj->IsNeutral())
-			return false;
-		return !IsAllyTo(Obj);
-	}
-	bool IsMonster() {
-		return this->IsNeutral() && this->MaxHealth > 6.0f;
-	}
-	bool IsVisibleOnScreen() {
-		return !(IsOnScreen % 2);
-	}
-	std::string GetChampionName() {
-		return std::string(this->ChampionName);
-	}
-	float CalcDamage(GameObject* Target) {
-		auto Damage = Target->BaseAttackDamage + Target->BonusAttackDamage;
-		return Damage - (Target->Armor + Target->BonusArmor);
-	}
-};
+
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
-	typedef int(__thiscall* fnOnFinishCast)(SpellInfo* ptr, GameObject* obj);
 	typedef int(__thiscall* fnCreateObject)(GameObject* obj, unsigned int NetworkID);
 	typedef int(__thiscall* fnDeleteObject)(void* thisPtr, GameObject* pObject);
-	typedef int(__thiscall* orgGetPing)(void* NetClient);
 	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
-	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
-	typedef void(__cdecl* fnDrawCircle)(ImRender::ImVec3* position, float range, int* color, int a4, float a5, int a6, float alpha);
-	typedef void(__thiscall* fnPrintChat)(DWORD ChatClient, const char* Message, int Color);
-	typedef bool(__cdecl* fnIsTroyEnt)(GameObject* pObj);
-	typedef bool(__thiscall* fnGetPing)(GameObject* pObj);
 }
 
 LeagueDecrypt rito_nuke;
@@ -290,22 +141,7 @@ Vector3 GetMouseWorldPosition()
 
 	return temp;
 }
-enum MouseSetting {
-	DOWN,
-	UP,
-	HOLD,
-};
-template<typename T>
-struct SEntityList {
-	char pad[0x4];
-	T** entities;
-	size_t size;
-	size_t max_size;
-};
 class ObjectManager {
-private:
-
-
 public:
 	static GameObject* GetFirstObject()
 	{
@@ -319,7 +155,7 @@ public:
 	}
 	static std::list<GameObject*> GetAllObjects() {
 		std::list<GameObject*> Object;
-		auto ObjectList = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(0x30CD584));
+		auto ObjectList = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Attackable_));
 		for (size_t i = 0; i < ObjectList->size; i++)
 		{
 			auto Target = ObjectList->entities[i];
@@ -349,7 +185,7 @@ public:
 	}
 	static std::list<GameObject*> GetAllMinions() {
 		std::list<GameObject*> heroes;
-		auto hero_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(0x30CD588));
+		auto hero_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Minion_));
 		for (size_t i = 0; i < hero_list->size; i++)
 		{
 			auto hero = hero_list->entities[i];
@@ -360,10 +196,6 @@ public:
 	static GameObject* GetLocalPlayer() {
 		return (GameObject*)*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer);
 	}
-	static DWORD* getUnderMouseObject()
-	{
-		return *reinterpret_cast<DWORD**>(DEFINE_RVA(0x180f208));
-	}
 };
 namespace Functions {
 	FuncTypes::Prototype_Reset Original_Reset;
@@ -372,11 +204,12 @@ namespace Functions {
 	FuncTypes::fnOnNewPath OnNewPath;
 	FuncTypes::fnCreateObject OnCreateObject;
 	FuncTypes::fnDeleteObject OnDeleteObject;
-	FuncTypes::orgGetPing GetPing;
 	WNDPROC Original_WndProc;
 }
 int GetPing() {
-	return Functions::GetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
+	typedef bool(__thiscall* fnGetPing)(void* netClient);
+	fnGetPing pGetPing = (fnGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
+	return pGetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
 }
 float LastAttackCommandT = 0;
 float LastMoveCommandT = 0;
@@ -466,20 +299,6 @@ HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CO
 
 	render.draw_text(ImVec2(5,5), "Space Glider", false, ImColor(255, 0, 0, 255));
 
-	std::list<GameObject*> Objects = ObjectManager::GetAllObjects();
-	for (auto obj : Objects) {
-		if (obj->IsTurret()) {
-			render.draw_circle(obj->Position, obj->AttackRange + obj->GetBoundingRadius(), ImColor(0, 255, 0, 255));
-		}
-	}
-
-	auto herolist = ObjectManager::GetAllHeros();
-	for (auto hero : herolist) {
-		if (hero->IsAlive()) {
-			if (hero->IsAllyTo(ObjectManager::GetLocalPlayer()))
-				render.draw_circle(hero->Position, hero->AttackRange + hero->GetBoundingRadius(), ImColor(0, 255, 0, 255));
-		}
-	}
 	render.end_draw();
 	return Functions::Original_Present(Device, pSrcRect, pDestRect, hDestWindow, pDirtyRegion);
 }
@@ -572,8 +391,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
 
-	Functions::GetPing = (FuncTypes::orgGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
-	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(0x310257c);
+	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	ApplyHooks();
 
 	while (!(GetAsyncKeyState(VK_END) & 1)) {

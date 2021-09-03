@@ -27,8 +27,11 @@ namespace Offsets {
 		LocalPlayer = 0x30DA914,
 		GameTime = 0x30d2c58,
 		ObjectManager = 0x183E1A0,
+		ManagerTemplate_Attackable_ = 0x30CD584,
 		ManagerTemplate_AIHero_ = 0x183C1A4,
+		ManagerTemplate_Minion_ = 0x30CD588,
 		HudInstance = 0x183e1dc,
+		D3DRender = 0x310257c
 	};
 	enum class GameObject {
 		Index = 0x20,

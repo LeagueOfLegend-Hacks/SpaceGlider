@@ -20,3 +20,20 @@ enum kSpellSlot
 	SpellSlot_BasicAttack1 = 64,
 	SpellSlot_BasicAttack2 = 65,
 };
+enum class GameObjectOrder
+{
+	None = 0,
+	HoldPosition,
+	MoveTo,
+	AttackUnit,
+	AutoAttackPet,
+	AutoAttack,
+	MovePet,
+	AttackTo,
+	Stop = 10,
+};
+enum MouseSetting {
+	DOWN,
+	UP,
+	HOLD,
+};
