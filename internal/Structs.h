@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Vector.h"
 #include "Enums.h"
+#include <string>
 // Custom
 struct MouseLockedPos {
 	Vector2 Position;
@@ -33,7 +34,6 @@ public:
 		DEFINE_MEMBER_N(unsigned short	Index,													Offsets::GameObject::Index)
 		DEFINE_MEMBER_N(int				Team,													Offsets::GameObject::TeamID)
 		DEFINE_MEMBER_N(unsigned int	NetworkID,												0xCC)
-		DEFINE_MEMBER_N(byte			IsOnScreen,												0x1A8)
 		DEFINE_MEMBER_N(Vector3			ServerPosition,											0x1D8)
 		DEFINE_MEMBER_N(Vector3			Position,												Offsets::GameObject::Position)
 		DEFINE_MEMBER_N(bool			IsVisible,												0x23C)
@@ -103,9 +103,6 @@ public:
 	}
 	bool IsMonster() {
 		return this->IsNeutral() && this->MaxHealth > 6.0f;
-	}
-	bool IsVisibleOnScreen() {
-		return !(IsOnScreen % 2);
 	}
 	std::string GetChampionName() {
 		return std::string(this->ChampionName);

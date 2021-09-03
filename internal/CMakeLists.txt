@@ -36,6 +36,10 @@ SET(core_sources
 	Structs.h
 	Enums.h
 	Vector.h
+	DelayedAction.cpp
+	DelayedAction.h
+	ObjectManager.cpp
+	ObjectManager.h
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib)
