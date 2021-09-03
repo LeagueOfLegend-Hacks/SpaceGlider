@@ -9,7 +9,7 @@ namespace FuncTypes {
 	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
 	typedef int(__thiscall* fnCreateObject)(GameObject* obj, unsigned int NetworkID);
 	typedef int(__thiscall* fnDeleteObject)(void* thisPtr, GameObject* pObject);
-	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
+	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
 }
 namespace Functions {
 	FuncTypes::Prototype_Reset Original_Reset;

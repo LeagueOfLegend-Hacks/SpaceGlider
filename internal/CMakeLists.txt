@@ -43,6 +43,7 @@ SET(core_sources
 	LeagueFunctions.h
 	Hooks.cpp
 	Hooks.h
+	D3DRenderer.h
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib)
