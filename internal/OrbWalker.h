@@ -44,7 +44,7 @@ public:
 	}
 };
 class OrbWalker {
-public:
+private:
 	D3DRenderer* riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	float LastAttackCommandT = 0;
 	float LastMoveCommandT = 0;
@@ -95,20 +95,6 @@ public:
 			break;
 		}
 	}
-	void DoOrbWalk(GameObject* target, float extraWindup = 0.0f) {
-		DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(0x183e1dc) + 0x24);
-		if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
-			if (target->IsAlive()) {
-				IssueOrder(ObjectManager::GetLocalPlayer(), GameObjectOrder::AttackTo, &target->ServerPosition, target, 1, 0, 1);
-				LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
-			}
-		}
-		if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
-		{
-			IssueOrder(ObjectManager::GetLocalPlayer(), GameObjectOrder::MoveTo, &GetMouseWorldPosition(), nullptr, 0, 0, 1);
-			LastMoveCommandT = GetTickCount64() + GetPing() + 50;
-		}
-	}
 	bool CanAttack() {
 		return float(GetTickCount64()) + GetPing() / 2.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
 	}
@@ -139,5 +125,28 @@ public:
 			}
 		}
 		return CurTarget;
+	}
+	void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
+		DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(0x183e1dc) + 0x24);
+		if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
+			if (target->IsAlive()) {
+				IssueOrder(ObjectManager::GetLocalPlayer(), GameObjectOrder::AttackTo, &target->ServerPosition, target, 1, 0, 1);
+				LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
+			}
+		}
+		if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
+		{
+			IssueOrder(ObjectManager::GetLocalPlayer(), GameObjectOrder::MoveTo, &GetMouseWorldPosition(), nullptr, 0, 0, 1);
+			LastMoveCommandT = GetTickCount64() + GetPing() + 50;
+		}
+	}
+public:
+	void OnTick() {
+		if (GetAsyncKeyState(VK_SPACE)) {
+			OrbWalk(this->tryFindTarget(TargetType::LowestHealth));
+		}
+	}
+	void DoAAReset() {
+		LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
 	}
 };

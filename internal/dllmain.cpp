@@ -18,6 +18,7 @@ HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
 ImRender render;
+OrbWalker orb;
 
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
@@ -74,7 +75,7 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 		case kSpellSlot::SpellSlot_BasicAttack1:
 		case kSpellSlot::SpellSlot_BasicAttack2:
 		case kSpellSlot::SpellSlot_SpecialAttack:
-			//LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
+			orb.DoAAReset();
 			break;
 		}
 	}
@@ -133,6 +134,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	ApplyHooks();
 
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
+		orb.OnTick();
 	}
 
 	RemoveHooks();
