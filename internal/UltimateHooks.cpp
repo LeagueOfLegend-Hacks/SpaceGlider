@@ -5,24 +5,25 @@
 
 std::vector<HookEntries> hookEntries;
 
+bool inRange(unsigned low, unsigned high, unsigned x)
+{
+	return  ((x - low) <= (high - low));
+}
+
 LONG __stdcall LeoHandler(EXCEPTION_POINTERS* pExceptionInfo)
 {
-	if (pExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
+	if (pExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION && pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 8)
 	{
 		for (HookEntries hs : hookEntries)
 		{
 			for (HookDetails hd : hs.hookDetails)
 			{
-				if ((hd.addressToHook == pExceptionInfo->ContextRecord->Eip) &&
-					(pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 8)) {
-					pExceptionInfo->ContextRecord->Eip = static_cast<DWORD>(hd.hookAddress);
+				if (hd.addressToHook == pExceptionInfo->ContextRecord->Eip) {
+					pExceptionInfo->ContextRecord->Eip = hd.hookAddress;
 					return EXCEPTION_CONTINUE_EXECUTION;
 				}
 			}
-			if ((hs.addressToHookMbiStart - 0x1000 <= pExceptionInfo->ContextRecord->Eip) &&
-				(hs.addressToHookMbiEnd + 0x1000 >= pExceptionInfo->ContextRecord->Eip) &&
-				(pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 8)
-				) {
+			if (inRange(hs.addressToHookMbiStart - 0x1000, hs.addressToHookMbiEnd + 0x1000, pExceptionInfo->ContextRecord->Eip)) {
 				int offset = pExceptionInfo->ContextRecord->Eip - hs.addressToHookMbiStart;
 				pExceptionInfo->ContextRecord->Eip = static_cast<DWORD>(hs.allocatedAddressStart + offset);
 				return EXCEPTION_CONTINUE_EXECUTION;
