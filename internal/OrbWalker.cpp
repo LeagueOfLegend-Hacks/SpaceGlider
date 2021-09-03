@@ -111,6 +111,12 @@ void OrbWalker::OnTick() {
 	}
 }
 
+void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
+{
+	auto pLocal = ObjectManager::GetLocalPlayer();
+	render.draw_circle(pLocal->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(0, 255, 0, 255));
+}
+
 void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 	if (ObjectManager::GetLocalPlayer()->Index == castInfo->source_id) {
 		switch (castInfo->Slot) {
@@ -130,4 +136,5 @@ void OrbWalker::Initalize() {
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	EventManager::AddEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
 	EventManager::AddEventHandler(EventManager::EventType::OnTick, OnTick);
+	EventManager::AddEventHandler(EventManager::EventType::OnDraw, OnDraw);
 }

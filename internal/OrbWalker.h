@@ -21,6 +21,7 @@ namespace OrbWalker {
 	bool CanMove(float extraWindup);
 	void OrbWalk(GameObject* target, float extraWindup = 0.0f);
 	void OnTick();
+	void OnDraw(LPDIRECT3DDEVICE9 Device);
 	void OnProcessSpell(void* spellBook, SpellInfo* castInfo);
 	void Initalize();
 }
