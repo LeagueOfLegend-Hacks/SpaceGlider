@@ -59,6 +59,8 @@ GameObject* OrbWalker::tryFindTarget(TargetType targetting_type) {
 	GameObject* CurTarget = nullptr;
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {
+			if (!pObject->IsHero())
+				continue;
 			if (pObject->Position.distance(pLocal->Position) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
 				if (!pLocal->IsAllyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
 					switch (targetting_type) {
