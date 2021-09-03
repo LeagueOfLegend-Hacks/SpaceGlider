@@ -11,91 +11,14 @@
 #include <ctime>
 #include <string>
 #include <list>
+#include "LeagueFunctions.h"
+#include "Hooks.h"
 
-PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
-Console console;
 UltimateHooks ulthook;
-ImRender render;
-OrbWalker orb;
+PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
 
-namespace FuncTypes {
-	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
-	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
-	typedef int(__thiscall* fnOnProcessSpell)(void* spellBook, SpellInfo* spellData);
-	typedef int(__thiscall* fnCreateObject)(GameObject* obj, unsigned int NetworkID);
-	typedef int(__thiscall* fnDeleteObject)(void* thisPtr, GameObject* pObject);
-	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
-}
-namespace Functions {
-	FuncTypes::Prototype_Reset Original_Reset;
-	FuncTypes::Prototype_Present Original_Present;
-	FuncTypes::fnOnProcessSpell OnProcessSpell;
-	FuncTypes::fnOnNewPath OnNewPath;
-	FuncTypes::fnCreateObject OnCreateObject;
-	FuncTypes::fnDeleteObject OnDeleteObject;
-	WNDPROC Original_WndProc;
-}
-
-HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
-	render.Init(Device);
-	render.begin_draw();
-	console.Render();
-
-	render.draw_text(ImVec2(5,5), "Space Glider", false, ImColor(255, 0, 0, 255));
-
-	render.end_draw();
-	return Functions::Original_Present(Device, pSrcRect, pDestRect, hDestWindow, pDirtyRegion);
-}
-HRESULT WINAPI Hooked_Reset(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
-{
-	ImGui_ImplDX9_InvalidateDeviceObjects();
-
-	HRESULT result = Functions::Original_Reset(pDevice, pPresentationParameters);
-
-	if (result >= 0)
-		ImGui_ImplDX9_CreateDeviceObjects();
-
-	return result;
-}
-LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-		return true;
-
-	return CallWindowProcA(Functions::Original_WndProc, hWnd, msg, wParam, lParam);
-}
-int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo) {
-	if (spellBook == nullptr || CastInfo == nullptr)
-		return Functions::OnProcessSpell(spellBook, CastInfo);
-	if (ObjectManager::GetLocalPlayer()->Index == CastInfo->source_id) {
-		switch (CastInfo->Slot) {
-		case kSpellSlot::SpellSlot_Unknown:
-		case kSpellSlot::SpellSlot_BasicAttack1:
-		case kSpellSlot::SpellSlot_BasicAttack2:
-		case kSpellSlot::SpellSlot_SpecialAttack:
-			orb.DoAAReset();
-			break;
-		}
-	}
-	return Functions::OnProcessSpell(spellBook, CastInfo);
-}
-int hk_OnNewPath(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7) {
-	if (obj == nullptr)
-		return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
-	return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
-}
-int __fastcall hk_OnCreateObject(GameObject* obj, void* edx, unsigned int netId) {
-	if (obj == nullptr)
-		return Functions::OnCreateObject(obj, netId);
-	return Functions::OnCreateObject(obj, netId);
-}
-int __fastcall hk_OnDeleteObject(void* thisPtr, void* edx, GameObject* obj) {
-	if (obj == nullptr || thisPtr == nullptr)
-		return Functions::OnDeleteObject(thisPtr, obj);
-	return Functions::OnDeleteObject(thisPtr, obj);
-}
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);

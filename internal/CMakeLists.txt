@@ -40,6 +40,9 @@ SET(core_sources
 	DelayedAction.h
 	ObjectManager.cpp
 	ObjectManager.h
+	LeagueFunctions.h
+	Hooks.cpp
+	Hooks.h
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib)
