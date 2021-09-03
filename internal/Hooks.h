@@ -4,10 +4,14 @@ Console console;
 ImRender render;
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
-	render.Init(Device);
-	render.begin_draw();
-	EventManager::Trigger(EventManager::EventType::OnDraw, Device);
-	render.end_draw();
+	if (Device != nullptr) {
+
+		render.Init(Device);
+		render.begin_draw();
+		console.Render();
+		EventManager::Trigger(EventManager::EventType::OnDraw, Device);
+		render.end_draw();
+	}
 	return Functions::Original_Present(Device, pSrcRect, pDestRect, hDestWindow, pDirtyRegion);
 }
 HRESULT WINAPI Hooked_Reset(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)

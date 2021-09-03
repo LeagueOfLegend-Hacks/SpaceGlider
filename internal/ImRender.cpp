@@ -8,6 +8,7 @@ void ImRender::Init(LPDIRECT3DDEVICE9 Device) {
 	ImGui_ImplWin32_Init(GetHwndProc());
 	ImGui_ImplDX9_Init(Device);
 	IsInitalized = true;
+	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 }
 void ImRender::Free() {
 	if (!IsInitalized)

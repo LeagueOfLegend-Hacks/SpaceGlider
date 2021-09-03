@@ -30,7 +30,7 @@ public:
 	void draw_circle(Vector2 screen_pos, float radius, ImColor color = ImColor(255, 255, 255, 255), DrawType type = DrawType::Normal, unsigned short points = 12, float thickness= 1.0f);
 	void draw_circle(Vector3 screen_pos, float radius, ImColor color = ImColor(255, 255, 255, 255), DrawType type = DrawType::Normal, float thickness= 1.0f);
 private:
-	D3DRenderer* riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
+	D3DRenderer* riot_render;
 	bool IsInitalized = false;
 	float m_width = 0.0f;
 	float m_height = 0.0f;
