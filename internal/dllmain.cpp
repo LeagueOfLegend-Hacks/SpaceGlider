@@ -55,11 +55,11 @@ DWORD WINAPI MainThread(LPVOID param) {
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
 
 	ApplyHooks();
-
+	EventManager::Trigger(EventManager::EventType::OnLoad);
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
 		orb.OnTick();
 	}
-
+	EventManager::Trigger(EventManager::EventType::OnUnLoad);
 	RemoveHooks();
 
 	render.Free();

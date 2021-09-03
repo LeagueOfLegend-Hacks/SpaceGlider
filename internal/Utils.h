@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
-#define DEFINE_RVA(address) ((DWORD)GetModuleHandleA(NULL) + (DWORD)address)
+#define baseAddress (DWORD)GetModuleHandleA(NULL)
+#define DEFINE_RVA(address) (baseAddress + (DWORD)address)
 #define STR_MERGE_IMPL(x, y)                x##y
 #define STR_MERGE(x,y)                        STR_MERGE_IMPL(x,y)
 #define MAKE_PAD(size)                        BYTE STR_MERGE(pad_, __COUNTER__) [ size ]
