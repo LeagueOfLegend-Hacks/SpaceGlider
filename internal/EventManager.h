@@ -9,6 +9,7 @@ namespace EventManager {
 		OnNewPath,
 		OnCreateObject,
 		OnDeleteObject,
+		OnTick,
 		Size
 	};
 	extern std::vector<void*> EventCallbacks[(unsigned int)EventType::Size];

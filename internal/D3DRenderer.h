@@ -45,3 +45,4 @@ public:
 		return Vector2((screen.x / 2.f * M.x) + (M.x + screen.x / 2.f), -(screen.y / 2.f * M.y) + (M.y + screen.y / 2.f));
 	}
 };
+extern D3DRenderer* riot_render;

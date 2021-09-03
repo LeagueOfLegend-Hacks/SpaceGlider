@@ -2,10 +2,12 @@
 
 Console console;
 ImRender render;
-OrbWalker orb;
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
+	render.Init(Device);
+	render.begin_draw();
 	EventManager::Trigger(EventManager::EventType::OnDraw, Device);
+	render.end_draw();
 	return Functions::Original_Present(Device, pSrcRect, pDestRect, hDestWindow, pDirtyRegion);
 }
 HRESULT WINAPI Hooked_Reset(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -30,16 +32,6 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 	if (spellBook == nullptr || CastInfo == nullptr)
 		return Functions::OnProcessSpell(spellBook, CastInfo);
 	EventManager::Trigger(EventManager::EventType::OnProcessSpell, spellBook, CastInfo);
-	if (ObjectManager::GetLocalPlayer()->Index == CastInfo->source_id) {
-		switch (CastInfo->Slot) {
-		case kSpellSlot::SpellSlot_Unknown:
-		case kSpellSlot::SpellSlot_BasicAttack1:
-		case kSpellSlot::SpellSlot_BasicAttack2:
-		case kSpellSlot::SpellSlot_SpecialAttack:
-			orb.DoAAReset();
-			break;
-		}
-	}
 	return Functions::OnProcessSpell(spellBook, CastInfo);
 }
 int hk_OnNewPath(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7) {

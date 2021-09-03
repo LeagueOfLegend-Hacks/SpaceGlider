@@ -15,6 +15,7 @@
 #include "Hooks.h"
 
 LeagueDecrypt rito_nuke;
+D3DRenderer* riot_render;
 HMODULE g_module;
 UltimateHooks ulthook;
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
@@ -53,11 +54,12 @@ DWORD WINAPI MainThread(LPVOID param) {
 	Sleep(200);
 	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
-
+	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	ApplyHooks();
+	OrbWalker::Initalize();
 	EventManager::Trigger(EventManager::EventType::OnLoad);
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
-		orb.OnTick();
+		EventManager::Trigger(EventManager::EventType::OnTick);
 	}
 	EventManager::Trigger(EventManager::EventType::OnUnLoad);
 	RemoveHooks();

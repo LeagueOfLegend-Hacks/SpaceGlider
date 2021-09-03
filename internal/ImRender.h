@@ -35,3 +35,4 @@ private:
 	float m_width = 0.0f;
 	float m_height = 0.0f;
 };
+extern ImRender render;
