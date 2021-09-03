@@ -2,6 +2,7 @@
 #include "Offsets.h"
 #include "Decrypt.h"
 #include "Console.h"
+#include "Vector.h"
 #include "UltimateHooks.h"
 #include "ImRender.h"
 #include <windows.h>
@@ -12,236 +13,17 @@
 #include <unordered_map>
 #include <functional>
 
-struct Vector2 {
-	Vector2() {};
-	Vector2(float _x, float _y) {
-		x = _x;
-		y = _y;
-	}
-
-	float x;
-	float y;
-
-	inline bool operator == (const Vector2& A) const
-	{
-		return A.x == x && A.y == y;
-	}
-
-	inline Vector2 operator + (const Vector2& A) const
-	{
-		return Vector2(x + A.x, y + A.y);
-	}
-
-	inline Vector2 operator + (const float A) const
-	{
-		return Vector2(x + A, y + A);
-	}
-
-	inline Vector2 operator * (const float A) const
-	{
-		return Vector2(A * x, A * y);
-	}
-
-	inline Vector2 operator * (const Vector2& A) const
-	{
-		return Vector2(A.x * x, A.y * y);
-	}
-
-	inline Vector2 operator - (const float A) const
-	{
-		return Vector2(A * x, A * y);
-	}
-
-	inline Vector2 operator - (const Vector2& A) const
-	{
-		return Vector2(A.x - x, A.y - y);
-	}
-
-	inline Vector2 operator / (const float A) const
-	{
-		return Vector2(A / x, A / y);
-	}
-
-	inline Vector2 operator / (const Vector2& A) const
-	{
-		return Vector2(A.x / x, A.y / y);
-	}
-
-	float length() {
-		return sqrt(x * x + y * y);
-	}
-
-	float distance(const Vector2& o) {
-		return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2));
-	}
-
-	Vector2 vscale(const Vector2& s) {
-		return Vector2(x * s.x, y * s.y);
-	}
-
-	Vector2 scale(float s) {
-		return Vector2(x * s, y * s);
-	}
-
-	Vector2 normalize() {
-		float l = length();
-		return Vector2(x / l, y / l);
-	}
-
-	Vector2 add(const Vector2& o) {
-		return Vector2(x + o.x, y + o.y);
-	}
-
-	Vector2 sub(const Vector2& o) {
-		return Vector2(x - o.x, y - o.y);
-	}
-
-	Vector2 clone() {
-		return Vector2(x, y);
-	}
-};
-struct Vector
+enum class GameObjectOrder
 {
-	float X, Y, Z;
-
-	Vector(void)
-	{
-	}
-
-	Vector(const float x, const float y, const float z)
-	{
-		X = x;
-		Y = y;
-		Z = z;
-	}
-	ImVec2 Cast_To_ImGui() {
-		return ImVec2(X, Y);
-	}
-	Vector operator +(const Vector& A) const
-	{
-		return Vector(X + A.X, Y + A.Y, Z + A.Z);
-	}
-
-	Vector operator +(const float A) const
-	{
-		return Vector(X + A, Y + A, Z + A);
-	}
-
-	Vector operator *(const float A) const
-	{
-		return Vector(A * X, A * Y, A * Z);
-	}
-
-	Vector operator *(const Vector& A) const
-	{
-		return Vector(A.X * X, A.Y * Y, A.Z * Z);
-	}
-
-	Vector operator -(const float A) const
-	{
-		return Vector(A * X, A * Y, A * Z);
-	}
-
-	Vector operator -(const Vector& A) const
-	{
-		return Vector(A.X - X, A.Y - Y, A.Z - Z);
-	}
-
-	Vector operator /(const float A) const
-	{
-		return Vector(A / X, A / Y, A / Z);
-	}
-
-	Vector operator /(const Vector& A) const
-	{
-		return Vector(A.X / X, A.Y / Y, A.Z / Z);
-	}
-
-	float dot(const Vector& vec) const
-	{
-		return X * vec.X + Y * vec.Y + Z * vec.Z;
-	}
-
-	float lengthSquared()
-	{
-		return X * X + Y * Y + Z * Z;
-	}
-
-	float length()
-	{
-		return static_cast<float>(sqrt(lengthSquared()));
-	}
-
-	Vector perpendicularTo()
-	{
-		return Vector(Z, Y, -X);
-	}
-
-	Vector Normalize()
-	{
-		float length = this->length();
-		if (length != 0)
-		{
-			float inv = 1.0f / length;
-			X *= inv;
-			Y *= inv;
-			Z *= inv;
-		}
-		return Vector(X, Y, Z);
-	}
-
-	float DistTo(const Vector& A)
-	{
-		float out = sqrtf(powf(X - A.X, 2) + powf(Y - A.Y, 2) + powf(Z - A.Z, 2));
-		return out < 0 ? out * -1 : out;
-	}
-};
-struct Vector4 {
-	Vector4() {};
-	Vector4(float _x, float _y, float _z, float _w) {
-		x = _x;
-		y = _y;
-		z = _z;
-		w = _w;
-	}
-
-	float x;
-	float y;
-	float z;
-	float w;
-
-	float length() {
-		return sqrt(x * x + y * y + z * z + w * w);
-	}
-
-	float distance(const Vector4& o) {
-		return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2) + pow(z - o.z, 2) + pow(w - o.w, 2));
-	}
-
-	Vector4 vscale(const Vector4& s) {
-		return Vector4(x * s.x, y * s.y, z * s.z, w * s.w);
-	}
-
-	Vector4 scale(float s) {
-		return Vector4(x * s, y * s, z * s, w * s);
-	}
-
-	Vector4 normalize() {
-		float l = length();
-		return Vector4(x / l, y / l, z / l, w / l);
-	}
-
-	Vector4 add(const Vector4& o) {
-		return Vector4(x + o.x, y + o.y, z + o.z, w + o.w);
-	}
-
-	Vector4 sub(const Vector4& o) {
-		return Vector4(x - o.x, y - o.y, z - o.z, w - o.w);
-	}
-
-	Vector4 clone() {
-		return Vector4(x, y, z, w);
-	}
+	None = 0,
+	HoldPosition,
+	MoveTo,
+	AttackUnit,
+	AutoAttackPet,
+	AutoAttack,
+	MovePet,
+	AttackTo,
+	Stop = 10,
 };
 class D3DRenderer {
 public:
@@ -268,22 +50,22 @@ public:
 			}
 		}
 	}
-	Vector2 WorldToScreen(const Vector& pos) {
+	Vector2 WorldToScreen(const Vector3& pos) {
 		float viewProjMatrix[16];
 		MultiplyMatrices(viewProjMatrix, GetViewMatrix(), GetProjectionMatrix());
 		Vector2 screen = { (float)GetWidth(), (float)GetHeight() };
 		static Vector4 clipCoords;
-		clipCoords.x = pos.X * viewProjMatrix[0] + pos.Y * viewProjMatrix[4] + pos.Z * viewProjMatrix[8] + viewProjMatrix[12];
-		clipCoords.y = pos.X * viewProjMatrix[1] + pos.Y * viewProjMatrix[5] + pos.Z * viewProjMatrix[9] + viewProjMatrix[13];
-		clipCoords.z = pos.X * viewProjMatrix[2] + pos.Y * viewProjMatrix[6] + pos.Z * viewProjMatrix[10] + viewProjMatrix[14];
-		clipCoords.w = pos.X * viewProjMatrix[3] + pos.Y * viewProjMatrix[7] + pos.Z * viewProjMatrix[11] + viewProjMatrix[15];
+		clipCoords.x = pos.x * viewProjMatrix[0] + pos.y * viewProjMatrix[4] + pos.z * viewProjMatrix[8] + viewProjMatrix[12];
+		clipCoords.y = pos.x * viewProjMatrix[1] + pos.y * viewProjMatrix[5] + pos.z * viewProjMatrix[9] + viewProjMatrix[13];
+		clipCoords.z = pos.x * viewProjMatrix[2] + pos.y * viewProjMatrix[6] + pos.z * viewProjMatrix[10] + viewProjMatrix[14];
+		clipCoords.w = pos.x * viewProjMatrix[3] + pos.y * viewProjMatrix[7] + pos.z * viewProjMatrix[11] + viewProjMatrix[15];
 		if (clipCoords.w < 1.0f)
 			clipCoords.w = 1.f;
-		Vector M;
-		M.X = clipCoords.x / clipCoords.w;
-		M.Y = clipCoords.y / clipCoords.w;
-		M.Z = clipCoords.z / clipCoords.w;
-		return Vector2((screen.x / 2.f * M.X) + (M.X + screen.x / 2.f), -(screen.y / 2.f * M.Y) + (M.Y + screen.y / 2.f));
+		Vector3 M;
+		M.x = clipCoords.x / clipCoords.w;
+		M.y = clipCoords.y / clipCoords.w;
+		M.z = clipCoords.z / clipCoords.w;
+		return Vector2((screen.x / 2.f * M.x) + (M.x + screen.x / 2.f), -(screen.y / 2.f * M.y) + (M.y + screen.y / 2.f));
 	}
 }*riot_render;
 
@@ -389,7 +171,7 @@ public:
 		DEFINE_MEMBER_N(unsigned int NetworkID, 0xCC)
 		DEFINE_MEMBER_N(byte IsOnScreen, 0x1A8)
 		DEFINE_MEMBER_N(ImRender::ImVec3 Position, 0x1d8)
-		DEFINE_MEMBER_N(Vector ServerPosition, 0x1d8)
+		DEFINE_MEMBER_N(Vector3 ServerPosition, 0x1d8)
 		DEFINE_MEMBER_N(bool IsTargetable, 0xD00)
 		DEFINE_MEMBER_N(bool IsVisible, 0x23C)
 		DEFINE_MEMBER_N(float Health, 0xD98);
@@ -469,6 +251,7 @@ public:
 		return Damage - (Target->Armor + Target->BonusArmor);
 	}
 };
+PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
@@ -481,32 +264,17 @@ namespace FuncTypes {
 	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
 	typedef void(__cdecl* fnDrawCircle)(ImRender::ImVec3* position, float range, int* color, int a4, float a5, int a6, float alpha);
 	typedef void(__thiscall* fnPrintChat)(DWORD ChatClient, const char* Message, int Color);
-	typedef bool(__cdecl* WorldToScreen)(Vector* vectorIn, Vector* vectorOut);
 	typedef bool(__cdecl* fnIsTroyEnt)(GameObject* pObj);
 	typedef bool(__thiscall* fnGetPing)(GameObject* pObj);
 }
-namespace Functions {
-	FuncTypes::Prototype_Reset Original_Reset;
-	FuncTypes::Prototype_Present Original_Present;
-	FuncTypes::fnOnProcessSpell OnProcessSpell;
-	FuncTypes::fnOnNewPath OnNewPath;
-	FuncTypes::fnCreateObject OnCreateObject;
-	FuncTypes::fnDeleteObject OnDeleteObject;
-	FuncTypes::orgGetPing GetPing;
-	FuncTypes::WorldToScreen WorldToScreen;
-	FuncTypes::fnOnFinishCast OnFinishCast;
-	WNDPROC Original_WndProc;
-}
+
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
 Console console;
 UltimateHooks ulthook;
 ImRender render;
-INPUT input = { 0 };
-PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject, NewOnFinishCast;
-clock_t lastMove;
 clock_t lastAttack;
-Vector GetMouseWorldPosition()
+Vector3 GetMouseWorldPosition()
 {
 	DWORD MousePtr = DEFINE_RVA(Offsets::Data::HudInstance);
 	auto aux1 = *(DWORD*)MousePtr;
@@ -514,26 +282,29 @@ Vector GetMouseWorldPosition()
 	auto aux2 = *(DWORD*)aux1;
 	aux2 += 0x1C;
 
-	Vector temp;
+	Vector3 temp;
 
-	temp.X = *(float*)(aux2 + 0x0);
-	temp.Y = *(float*)(aux2 + 0x4);
-	temp.Z = *(float*)(aux2 + 0x8);
+	temp.x = *(float*)(aux2 + 0x0);
+	temp.y = *(float*)(aux2 + 0x4);
+	temp.z = *(float*)(aux2 + 0x8);
 
 	return temp;
 }
-int GetPing() {
-	return Functions::GetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
-}
+enum MouseSetting {
+	DOWN,
+	UP,
+	HOLD,
+};
+template<typename T>
+struct SEntityList {
+	char pad[0x4];
+	T** entities;
+	size_t size;
+	size_t max_size;
+};
 class ObjectManager {
 private:
-	template<typename T>
-	struct SEntityList {
-		char pad[0x4];
-		T** entities;
-		size_t size;
-		size_t max_size;
-	};
+
 
 public:
 	static GameObject* GetFirstObject()
@@ -589,27 +360,26 @@ public:
 	static GameObject* GetLocalPlayer() {
 		return (GameObject*)*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer);
 	}
+	static DWORD* getUnderMouseObject()
+	{
+		return *reinterpret_cast<DWORD**>(DEFINE_RVA(0x180f208));
+	}
 };
-float LastAttackCommandT = 0;
-struct MouseLockedPos {
-	long x;
-	long y;
-	bool enabled;
-}MLP;
-float LastMoveCommandT = 0;
-void PressRightClick()
-{
-	input.type = INPUT_MOUSE;
-	input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-	SendInput(1, &input, sizeof(INPUT));
-	input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-	SendInput(1, &input, sizeof(INPUT));
+namespace Functions {
+	FuncTypes::Prototype_Reset Original_Reset;
+	FuncTypes::Prototype_Present Original_Present;
+	FuncTypes::fnOnProcessSpell OnProcessSpell;
+	FuncTypes::fnOnNewPath OnNewPath;
+	FuncTypes::fnCreateObject OnCreateObject;
+	FuncTypes::fnDeleteObject OnDeleteObject;
+	FuncTypes::orgGetPing GetPing;
+	WNDPROC Original_WndProc;
 }
-action ac([&] {
-	PressRightClick();
-	Sleep(25);
-	MLP.enabled = false;
-	}, 25);
+int GetPing() {
+	return Functions::GetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
+}
+float LastAttackCommandT = 0;
+float LastMoveCommandT = 0;
 bool CanAttack() {
 	return float(GetTickCount64()) + GetPing() / 2.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
 }
@@ -625,7 +395,7 @@ GameObject* tryFindTarget(TargetType targetting_type) {
 	GameObject* CurTarget = nullptr;
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {
-			if (pObject->ServerPosition.DistTo(pLocal->ServerPosition) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
+			if (pObject->ServerPosition.distance(pLocal->ServerPosition) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
 				if (!pLocal->IsAllyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
 					switch (targetting_type) {
 					case TargetType::LowestHealth:
@@ -641,36 +411,68 @@ GameObject* tryFindTarget(TargetType targetting_type) {
 	}
 	return CurTarget;
 }
+void IssueOrder(GameObject* ThisPtr, GameObjectOrder order, Vector3* position, GameObject* Target, bool IsAttack, bool IsMinion, bool Unknown) {
+	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(0x183e1dc) + 0x24);
+	DWORD HUDSpellLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(0x183e1dc) + 0x34);
+	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
+	fnIssueClick IssueClick = (fnIssueClick)(DEFINE_RVA(0x5AE550));
+	Vector2 w2s;
+	switch (order) {
+	case GameObjectOrder::MoveTo:
+		w2s = riot_render->WorldToScreen(GetMouseWorldPosition());
+		IssueClick(HUDInputLogic, 0, IsAttack, 0, w2s.x, w2s.y, 0);
+		IssueClick(HUDInputLogic, 1, IsAttack, 0, w2s.x, w2s.y, 0);
+		break;
+	case GameObjectOrder::AttackUnit:
+		if (Target != nullptr) {
+			w2s = riot_render->WorldToScreen(Target->ServerPosition);
+			IssueClick(HUDInputLogic, 0, IsAttack, 0, w2s.x, w2s.y, 0);
+			IssueClick(HUDInputLogic, 1, IsAttack, 0, w2s.x, w2s.y, 0);
+		}
+		break;
+	case GameObjectOrder::Stop:
+		w2s = riot_render->WorldToScreen(ThisPtr->ServerPosition);
+		IssueClick(HUDInputLogic, 0, IsAttack, 0, w2s.x, w2s.y, 0);
+		IssueClick(HUDInputLogic, 1, IsAttack, 0, w2s.x, w2s.y, 0);
+		break;
+	}
+}
 void OrbWalk(GameObject* target, float extraWindup = 0.0f) {
+	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(0x183e1dc) + 0x24);
 	if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
 		if (target->IsAlive()) {
-			if (!MLP.enabled) {
-				Vector2 TargetPos_W2S = riot_render->WorldToScreen(target->ServerPosition);
-				MLP.x = TargetPos_W2S.x;
-				MLP.y = TargetPos_W2S.y;
-				MLP.enabled = true;
-				DelayedAction.add(ac);
-			}
+			IssueOrder(ObjectManager::GetLocalPlayer(), GameObjectOrder::AttackTo, &target->ServerPosition, target, 1, 0, 1);
+			LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
 		}
 	}
 	if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
 	{
-		PressRightClick();
+		IssueOrder(ObjectManager::GetLocalPlayer(), GameObjectOrder::MoveTo, &GetMouseWorldPosition(), nullptr, 0, 0, 1);
 		LastMoveCommandT = GetTickCount64() + GetPing() + 50;
 	}
 }
+
 void MainLoop() {
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(tryFindTarget(TargetType::LowestHealth));
 	}
 }
+
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
 	render.Init(Device);
 	render.begin_draw();
-
+	MainLoop();
 	console.Render();
 
 	render.draw_text(ImVec2(5,5), "Space Glider", false, ImColor(255, 0, 0, 255));
+
+	std::list<GameObject*> Objects = ObjectManager::GetAllObjects();
+	for (auto obj : Objects) {
+		if (obj->IsTurret()) {
+			render.draw_circle(obj->Position, obj->AttackRange + obj->GetBoundingRadius(), ImColor(0, 255, 0, 255));
+		}
+	}
+
 	auto herolist = ObjectManager::GetAllHeros();
 	for (auto hero : herolist) {
 		if (hero->IsAlive()) {
@@ -714,11 +516,6 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 	}
 	return Functions::OnProcessSpell(spellBook, CastInfo);
 }
-int __fastcall hk_OnFinishCast(SpellInfo* castInfo, void* edx, GameObject* object) {
-	if (!object || !castInfo)
-		return Functions::OnFinishCast(castInfo, object);
-	return Functions::OnFinishCast(castInfo, object);
-}
 int hk_OnNewPath(GameObject* obj, ImRender::ImVec3* start, ImRender::ImVec3* end, ImRender::ImVec3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7) {
 	if (obj == nullptr)
 		return Functions::OnNewPath(obj, start, end, tail, unk1, dashSpeed, dash, unk3, unk4, unk5, unk6, unk7);
@@ -734,16 +531,6 @@ int __fastcall hk_OnDeleteObject(void* thisPtr, void* edx, GameObject* obj) {
 		return Functions::OnDeleteObject(thisPtr, obj);
 	return Functions::OnDeleteObject(thisPtr, obj);
 }
-auto Original_GetCursorPos = &GetCursorPos;
-BOOL WINAPI hGetCursorPos(LPPOINT lpPoint)
-{
-	auto org = Original_GetCursorPos(lpPoint);
-	if (MLP.enabled) {
-		lpPoint->x = MLP.x;
-		lpPoint->y = MLP.y;
-	}
-	return org;
-}
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
@@ -756,16 +543,11 @@ void ApplyHooks() {
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourAttach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
-	DetourAttach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourTransactionCommit();
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 #ifndef _DEBUG
 	if (GetSystemDEPPolicy() && rito_nuke.IsMemoryDecrypted((PVOID)DEFINE_RVA(Offsets::Functions::OnProcessSpell))) {
 		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnNewPath), (DWORD)hk_OnNewPath, Functions::OnNewPath, 0x28F, NewOnNewPath, 2);
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnCreateObject), (DWORD) hk_OnCreateObject, Functions::OnCreateObject, 0xAE, NewOnCreateObject, 3);
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnDeleteObject), (DWORD) hk_OnDeleteObject, Functions::OnDeleteObject, 0x151, NewOnDeleteObject, 4);
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnFinishCast), (DWORD)hk_OnFinishCast, Functions::OnFinishCast, 0x2A2, NewOnFinishCast, 5);
 	}
 #endif
 }
@@ -775,7 +557,6 @@ void RemoveHooks() {
 	DetourUpdateThread(GetCurrentThread());
 	DetourDetach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourDetach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
-	DetourDetach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourTransactionCommit();
 #ifndef _DEBUG
 	if (GetSystemDEPPolicy())
@@ -792,15 +573,11 @@ DWORD WINAPI MainThread(LPVOID param) {
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
 
 	Functions::GetPing = (FuncTypes::orgGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
-	Functions::WorldToScreen = (FuncTypes::WorldToScreen)(DEFINE_RVA(0x971F30));
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(0x310257c);
 	ApplyHooks();
 
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
 		DelayedAction.update(GetTickCount64());
-		if (GetAsyncKeyState(VK_SPACE)) {
-			OrbWalk(tryFindTarget(TargetType::LowestHealth));
-		}
 	}
 
 	RemoveHooks();
