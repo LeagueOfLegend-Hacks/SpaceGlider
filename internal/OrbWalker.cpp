@@ -56,10 +56,12 @@ void OrbWalker::IssueOrder(GameObject* ThisPtr, GameObjectOrder order, Vector3* 
 
 GameObject* OrbWalker::tryFindTarget(TargetType targetting_type) {
 	auto pLocal = ObjectManager::GetLocalPlayer();
-	std::list<GameObject*> Objects = ObjectManager::GetAllObjects();
+	std::list<GameObject*> Objects = ObjectManager::GetAllHeros();
 	GameObject* CurTarget = nullptr;
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {
+			if (!pObject->IsHero())
+				continue;
 			if (pObject->Position.distance(pLocal->Position) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
 				if (!pLocal->IsAllyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
 					switch (targetting_type) {
@@ -78,31 +80,33 @@ GameObject* OrbWalker::tryFindTarget(TargetType targetting_type) {
 }
 
 bool OrbWalker::CanAttack() {
-	return float(GetTickCount64()) + GetPing() / 2.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
+	return float(GetTickCount()) + GetPing() / 2.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
+	//return float(GetTickCount()) + GetPing() / 2.f + 25.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
 }
 
 bool OrbWalker::CanMove(float extraWindup) {
-	return GetTickCount64() >= LastAttackCommandT + static_cast<int>(ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000) + GetPing() || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
+	return GetTickCount() >= LastAttackCommandT + static_cast<int>(ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000.f) + GetPing()  + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
+	//return float(GetTickCount()) + GetPing() * 0.5f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000.f + (GetPing() * 1.5f) + extraWindup;
 }
 
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
 	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
 	fnIssueClick IssueClick = (fnIssueClick)(DEFINE_RVA(0x5AE550));
-	if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
+	if (CanAttack() && target != nullptr) {
 		if (target->IsAlive()) {
 			auto w2s = riot_render->WorldToScreen(target->ServerPosition);
 			IssueClick(HUDInputLogic, 0, 1, 0, w2s.x, w2s.y, 0);
 			IssueClick(HUDInputLogic, 1, 1, 0, w2s.x, w2s.y, 0);
-			LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
+			LastAttackCommandT = GetTickCount() + GetPing();
 		}
 	}
-	if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
+	if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount())
 	{
 		auto w2s = riot_render->WorldToScreen(GetMouseWorldPosition());
 		IssueClick(HUDInputLogic, 0, 0, 0, w2s.x, w2s.y, 0);
 		IssueClick(HUDInputLogic, 1, 0, 0, w2s.x, w2s.y, 0);
-		LastMoveCommandT = GetTickCount64() + GetPing() + 50;
+		LastMoveCommandT = GetTickCount() + 50;
 	}
 }
 
@@ -115,8 +119,9 @@ void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 	static clock_t lastAntiAfk = 0;
 	render.draw_circle(pLocal->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(0, 255, 0, 255));
 	if (GetAsyncKeyState(VK_SPACE)) {
-		OrbWalk(tryFindTarget(TargetType::LowestHealth));
+		OrbWalk(tryFindTarget(TargetType::LowestHealth),90.f);
 	}
+	/*
 	else {
 		if (lastAntiAfk == NULL || clock() - lastAntiAfk > 600) {
 			lastAntiAfk = clock();
@@ -125,10 +130,12 @@ void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 			IssueClick(HUDInputLogic, 1, 0, 0, w2s.x, w2s.y, 0);
 		}
 	}
+	*/
 }
 
 void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 	if (ObjectManager::GetLocalPlayer()->Index == castInfo->source_id) {
+		/*
 		switch (castInfo->Slot) {
 		case kSpellSlot::SpellSlot_Unknown:
 		case kSpellSlot::SpellSlot_BasicAttack1:
@@ -137,6 +144,7 @@ void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 			LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
 			break;
 		}
+		*/
 	}
 }
 
