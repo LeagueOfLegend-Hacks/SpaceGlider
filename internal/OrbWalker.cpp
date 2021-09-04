@@ -10,10 +10,10 @@ GameObject* OrbWalker::tryFindTarget(TargetType targetting_type) {
 	GameObject* CurTarget = nullptr;
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {
-			if (!pObject->IsHero())
+			if (!Functions::IsHero(pObject))
 				continue;
 			if (pObject->Position.distance(pLocal->Position) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
-				if (!pLocal->IsAllyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
+				if (!pLocal->IsAllyTo(pObject) && pObject->IsTargetable && Functions::IsAlive(pObject)) {
 					switch (targetting_type) {
 					case TargetType::LowestHealth:
 						if (CurTarget == nullptr)
@@ -30,11 +30,11 @@ GameObject* OrbWalker::tryFindTarget(TargetType targetting_type) {
 }
 
 bool OrbWalker::CanAttack() {
-	return float(GetTickCount()) + Functions::GetPing() / 2.f >= LastAttackCommandT + ObjectManager::GetLocalPlayer()->GetAttackDelay() * 1000.f;
+	return float(GetTickCount()) + Functions::GetPing() / 2.f >= LastAttackCommandT + Functions::GetAttackDelay(ObjectManager::GetLocalPlayer()) * 1000.f;
 }
 
 bool OrbWalker::CanMove(float extraWindup) {
-	return GetTickCount() >= LastAttackCommandT + static_cast<int>(ObjectManager::GetLocalPlayer()->GetAttackCastDelay() * 1000.f) + Functions::GetPing()  + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
+	return GetTickCount() >= LastAttackCommandT + static_cast<int>(Functions::GetAttackCastDelay(ObjectManager::GetLocalPlayer()) * 1000.f) + Functions::GetPing()  + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
 }
 
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
@@ -42,7 +42,7 @@ void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
 	fnIssueClick IssueClick = (fnIssueClick)(DEFINE_RVA(0x5AE550));
 	if (CanAttack() && target != nullptr) {
-		if (target->IsAlive()) {
+		if (Functions::IsAlive(target)) {
 			auto w2s = riot_render->WorldToScreen(target->ServerPosition);
 			IssueClick(HUDInputLogic, 0, 1, 0, w2s.x, w2s.y, 0);
 			IssueClick(HUDInputLogic, 1, 1, 0, w2s.x, w2s.y, 0);

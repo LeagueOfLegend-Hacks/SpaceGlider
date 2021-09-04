@@ -1,5 +1,6 @@
 #pragma once
 #include "Structs.h"
+#include "LeagueFunctions.h"
 #include <list>
 class ObjectManager {
 public:
@@ -89,7 +90,7 @@ public:
 		std::list<MissileObject*> ObjectList;
 		auto Object = GetFirstObject();
 		while (Object) {
-			if (Object->IsMissile())
+			if (Functions::IsMissile(Object))
 				ObjectList.push_back((MissileObject*)Object);
 			Object = GetNextObject(Object);
 		}

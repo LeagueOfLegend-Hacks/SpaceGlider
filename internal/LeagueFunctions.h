@@ -21,4 +21,14 @@ namespace Functions {
 
 	int GetPing();
 	Vector3 GetMouseWorldPosition();
+	bool IsAlive(GameObject* Object);
+	bool IsHero(GameObject* Object);
+	bool IsMissile(GameObject* Object);
+	bool IsMinion(GameObject* Object);
+	bool IsInhibitor(GameObject* Object);
+	bool IsBaron(GameObject* Object);
+	bool IsNexus(GameObject* Object);
+	bool IsTurret(GameObject* Object);
+	float GetAttackDelay(GameObject* Object);
+	float GetAttackCastDelay(GameObject* Object);
 }

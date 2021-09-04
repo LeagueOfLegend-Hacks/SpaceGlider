@@ -27,3 +27,63 @@ Vector3 Functions::GetMouseWorldPosition()
 
 	return temp;
 }
+
+bool Functions::IsAlive(GameObject* Object)
+{
+	typedef bool(__thiscall* fnIsAlive)(GameObject* pObj);
+	return ((fnIsAlive)(DEFINE_RVA(Offsets::Functions::IsAlive)))(Object);
+}
+
+bool Functions::IsHero(GameObject* Object)
+{
+	typedef bool(__cdecl* fnIsHero)(GameObject* pObj);
+	return ((fnIsHero)(DEFINE_RVA(Offsets::Functions::IsHero)))(Object);
+}
+
+bool Functions::IsMissile(GameObject* Object)
+{
+	typedef bool(__cdecl* fnIsMissile)(GameObject* pObj);
+	return ((fnIsMissile)(DEFINE_RVA(Offsets::Functions::IsMissile)))(Object);
+}
+
+bool Functions::IsMinion(GameObject* Object)
+{
+	typedef bool(__cdecl* fnMinion)(GameObject* pObj);
+	return ((fnMinion)(DEFINE_RVA(Offsets::Functions::IsMinion)))(Object);
+}
+
+bool Functions::IsInhibitor(GameObject* Object)
+{
+	typedef bool(__cdecl* fnIsInhibitor)(GameObject* pObj);
+	return ((fnIsInhibitor)(DEFINE_RVA(Offsets::Functions::IsInhib)))(Object);
+}
+
+bool Functions::IsBaron(GameObject* Object)
+{
+	typedef bool(__cdecl* fnIsBaron)(GameObject* pObj);
+	return ((fnIsBaron)(DEFINE_RVA(Offsets::Functions::IsBaron)))(Object);
+}
+
+bool Functions::IsNexus(GameObject* Object)
+{
+	typedef bool(__cdecl* fnIsNexus)(GameObject* pObj);
+	return ((fnIsNexus)(DEFINE_RVA(Offsets::Functions::IsNexus)))(Object);
+}
+
+bool Functions::IsTurret(GameObject* Object)
+{
+	typedef bool(__cdecl* fnIsTurret)(GameObject* pObj);
+	return ((fnIsTurret)(DEFINE_RVA(Offsets::Functions::IsTurret)))(Object);
+}
+
+float Functions::GetAttackDelay(GameObject* Object)
+{
+	typedef float(__cdecl* fnGetAttackDelay)(GameObject* pObj);
+	return ((fnGetAttackDelay)(DEFINE_RVA(Offsets::Functions::GetAttackDelay)))(Object);
+}
+
+float Functions::GetAttackCastDelay(GameObject* Object)
+{
+	typedef float(__cdecl* fnGetAttackCastDelay)(GameObject* pObj);
+	return ((fnGetAttackCastDelay)(DEFINE_RVA(Offsets::Functions::GetAttackCastDelay)))(Object);
+}
