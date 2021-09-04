@@ -86,12 +86,12 @@ public:
 		}
 		return ObjectList;
 	}
-	static std::list<MissileObject*> MissileList() { // dirty way of getting all the missiles.... FIX THIS ASAP...
-		std::list<MissileObject*> ObjectList;
+	static std::list<GameObject*> MissileList() { // dirty way of getting all the missiles.... FIX THIS ASAP...
+		std::list<GameObject*> ObjectList;
 		auto Object = GetFirstObject();
 		while (Object) {
 			if (Functions::IsMissile(Object))
-				ObjectList.push_back((MissileObject*)Object);
+				ObjectList.push_back((GameObject*)Object);
 			Object = GetNextObject(Object);
 		}
 		return ObjectList;

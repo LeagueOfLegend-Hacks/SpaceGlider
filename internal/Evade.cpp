@@ -39,8 +39,7 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 				Color = ImColor(0.0f, 1.0f, 0.0f, 0.4f);
 
 			auto SpellWidth = 10.0f;
-			render.draw_line(StartPos_W2S, EndPos_W2S, SpellWidth);
-			render.draw_text(StartPos_W2S, "");
+			render.draw_line(StartPos_W2S, EndPos_W2S, Color, SpellWidth);
 		}
 	}
 }

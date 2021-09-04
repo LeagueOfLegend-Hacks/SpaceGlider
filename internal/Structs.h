@@ -46,6 +46,10 @@ public:
 		DEFINE_MEMBER_N(float			BaseAttackDamage,										Offsets::GameObject::BaseAttackDamage)
 		DEFINE_MEMBER_N(float			BonusAttackDamage,										0x121C)
 		DEFINE_MEMBER_N(char*			ChampionName,											0x2BB4)
+		DEFINE_MEMBER_N(int				MissileSrcInx, 0x2BC)
+		DEFINE_MEMBER_N(Vector3			MissileStartPos, 0x2D4)
+		DEFINE_MEMBER_N(Vector3			MissileEndPos, 0x2E0)
+		DEFINE_MEMBER_N(int				MissileDestIdx, 0x314)
 		DEFINE_MEMBER_N(SpellBook		SpellBook,												0x2350)
 	};
 	float GameObject::GetBoundingRadius() {
@@ -65,16 +69,6 @@ public:
 	std::string GetChampionName() {
 		return std::string(this->ChampionName);
 	}
-};
-class MissileObject : GameObject {
-public:
-	union {
-		DEFINE_MEMBER_0(DWORD* Base)
-		DEFINE_MEMBER_N(int				MissileSrcInx,			0x2BC)
-		DEFINE_MEMBER_N(Vector3			MissileStartPos,		0x2D4)
-		DEFINE_MEMBER_N(Vector3			MissileEndPos,			0x2E0)
-		DEFINE_MEMBER_N(int				MissileDestIdx,			0x314)
-	};
 };
 template<typename T>
 struct SEntityList {
