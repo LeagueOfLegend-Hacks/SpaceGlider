@@ -1,4 +1,5 @@
 #include "OrbWalker.h"
+#include <ctime>
 
 float OrbWalker::LastAttackCommandT = 0;
 float OrbWalker::LastMoveCommandT = 0;
@@ -40,13 +41,13 @@ void OrbWalker::IssueOrder(GameObject* ThisPtr, GameObjectOrder order, Vector3* 
 		break;
 	case GameObjectOrder::AttackUnit:
 		if (Target != nullptr) {
-			w2s = riot_render->WorldToScreen(Target->Position);
+			w2s = riot_render->WorldToScreen(Target->ServerPosition);
 			IssueClick(HUDInputLogic, 0, IsAttack, 0, w2s.x, w2s.y, 0);
 			IssueClick(HUDInputLogic, 1, IsAttack, 0, w2s.x, w2s.y, 0);
 		}
 		break;
 	case GameObjectOrder::Stop:
-		w2s = riot_render->WorldToScreen(ThisPtr->Position);
+		w2s = riot_render->WorldToScreen(ThisPtr->ServerPosition);
 		IssueClick(HUDInputLogic, 0, IsAttack, 0, w2s.x, w2s.y, 0);
 		IssueClick(HUDInputLogic, 1, IsAttack, 0, w2s.x, w2s.y, 0);
 		break;
@@ -59,8 +60,6 @@ GameObject* OrbWalker::tryFindTarget(TargetType targetting_type) {
 	GameObject* CurTarget = nullptr;
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {
-			if (!pObject->IsHero())
-				continue;
 			if (pObject->Position.distance(pLocal->Position) < pLocal->AttackRange + pLocal->GetBoundingRadius()) {
 				if (!pLocal->IsAllyTo(pObject) && pObject->IsTargetable && pObject->IsAlive()) {
 					switch (targetting_type) {
@@ -92,7 +91,7 @@ void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 	fnIssueClick IssueClick = (fnIssueClick)(DEFINE_RVA(0x5AE550));
 	if (CanAttack() && LastAttackCommandT < GetTickCount64() && target != nullptr) {
 		if (target->IsAlive()) {
-			auto w2s = riot_render->WorldToScreen(target->Position);
+			auto w2s = riot_render->WorldToScreen(target->ServerPosition);
 			IssueClick(HUDInputLogic, 0, 1, 0, w2s.x, w2s.y, 0);
 			IssueClick(HUDInputLogic, 1, 1, 0, w2s.x, w2s.y, 0);
 			LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
@@ -107,16 +106,25 @@ void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 	}
 }
 
-void OrbWalker::OnTick() {
+void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
+{
+	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
+	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
+	fnIssueClick IssueClick = (fnIssueClick)(DEFINE_RVA(0x5AE550));
+	auto pLocal = ObjectManager::GetLocalPlayer();
+	static clock_t lastAntiAfk = 0;
+	render.draw_circle(pLocal->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(0, 255, 0, 255));
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(tryFindTarget(TargetType::LowestHealth));
 	}
-}
-
-void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
-{
-	auto pLocal = ObjectManager::GetLocalPlayer();
-	render.draw_circle(pLocal->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(0, 255, 0, 255));
+	else {
+		if (lastAntiAfk == NULL || clock() - lastAntiAfk > 600) {
+			lastAntiAfk = clock();
+			auto w2s = riot_render->WorldToScreen(pLocal->ServerPosition);
+			IssueClick(HUDInputLogic, 0, 0, 0, w2s.x, w2s.y, 0);
+			IssueClick(HUDInputLogic, 1, 0, 0, w2s.x, w2s.y, 0);
+		}
+	}
 }
 
 void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
@@ -137,6 +145,5 @@ void OrbWalker::Initalize() {
 	LastAttackCommandT = 0;
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	EventManager::AddEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
-	EventManager::AddEventHandler(EventManager::EventType::OnTick, OnTick);
 	EventManager::AddEventHandler(EventManager::EventType::OnDraw, OnDraw);
 }
