@@ -1,6 +1,20 @@
 #pragma once
-
 namespace Offsets {
+	enum class SpellInfo {
+		Slot = 0x4,
+		StartTime = 0x8,
+		SpellIndex = 0xC,
+		Level = 0x58,
+		source_id = 0x64,
+		SourceNetworkID = 0x6C,
+		StartPosition = 0x7C,
+		EndPosition = 0x88,
+		HasTarget = 0xB4,
+		TargetID = 0xB8
+	};
+	enum class Spell {
+		kInvalid = 0x4
+	};
 	enum class Functions {
 		GetPing = 0x320610,
 		OnProcessSpell = 0x4f8840,

@@ -32,7 +32,15 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 		if (Missile->MissileDestIdx == 0) {
 			auto StartPos_W2S = riot_render->WorldToScreen(Missile->MissileStartPos);
 			auto EndPos_W2S = riot_render->WorldToScreen(Missile->MissileEndPos);
-			render.draw_line(StartPos_W2S, EndPos_W2S);
+			ImColor Color = ImColor(1.0f, 1.0f, 1.0f, 0.4f);
+			if (ObjectManager::FindObjectByIndex(ObjectManager::HeroList(), Missile->MissileSrcInx)->IsEnemyTo(ObjectManager::GetLocalPlayer()))
+				Color = ImColor(1.0f, 0.0f, 0.0f, 0.4f);
+			else
+				Color = ImColor(0.0f, 1.0f, 0.0f, 0.4f);
+
+			auto SpellWidth = 10.0f;
+			render.draw_line(StartPos_W2S, EndPos_W2S, SpellWidth);
+			render.draw_text(StartPos_W2S, "");
 		}
 	}
 }

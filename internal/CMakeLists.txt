@@ -40,6 +40,7 @@ SET(core_sources
 	DelayedAction.h
 	ObjectManager.cpp
 	ObjectManager.h
+	LeagueFunctions.cpp
 	LeagueFunctions.h
 	Hooks.cpp
 	Hooks.h

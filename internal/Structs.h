@@ -4,26 +4,27 @@
 #include "Vector.h"
 #include "Enums.h"
 #include <string>
-// Custom
-struct MouseLockedPos {
-	Vector2 Position;
-	bool Enabled;
-};
-// League Specific
 class SpellInfo {
 public:
 	union {
 		DEFINE_MEMBER_0(DWORD*			VTable)
-		DEFINE_MEMBER_N(kSpellSlot		Slot,				0x4)
-		DEFINE_MEMBER_N(float			StartTime,			0x8)
-		DEFINE_MEMBER_N(int				SpellIndex,			0xC)
-		DEFINE_MEMBER_N(unsigned int	Level,				0x58)
-		DEFINE_MEMBER_N(unsigned short	source_id,			0x64)
-		DEFINE_MEMBER_N(unsigned int	SourceNetworkID,	0x6C)
-		DEFINE_MEMBER_N(Vector3			StartPosition,		0x7C)
-		DEFINE_MEMBER_N(Vector3			EndPosition,		0x88)
-		DEFINE_MEMBER_N(bool			HasTarget,			0xB4)
-		DEFINE_MEMBER_N(unsigned short	TargetId,			0xB8)
+		DEFINE_MEMBER_N(kSpellSlot		Slot,				Offsets::SpellInfo::Slot)
+		DEFINE_MEMBER_N(float			StartTime,			Offsets::SpellInfo::StartTime)
+		DEFINE_MEMBER_N(int				SpellIndex,			Offsets::SpellInfo::SpellIndex)
+		DEFINE_MEMBER_N(unsigned int	Level,				Offsets::SpellInfo::Level)
+		DEFINE_MEMBER_N(unsigned short	source_id,			Offsets::SpellInfo::source_id)
+		DEFINE_MEMBER_N(unsigned int	SourceNetworkID,	Offsets::SpellInfo::SourceNetworkID)
+		DEFINE_MEMBER_N(Vector3			StartPosition,		Offsets::SpellInfo::StartPosition)
+		DEFINE_MEMBER_N(Vector3			EndPosition,		Offsets::SpellInfo::EndPosition)
+		DEFINE_MEMBER_N(bool			HasTarget,			Offsets::SpellInfo::HasTarget)
+		DEFINE_MEMBER_N(unsigned short	TargetId,			Offsets::SpellInfo::TargetID)
+	};
+};
+class SpellBook {
+public:
+	union {
+		DEFINE_MEMBER_0(DWORD* VTable)
+		DEFINE_MEMBER_N(DWORD*			Info,													Offsets::Spell::kInvalid)
 	};
 };
 class GameObject {
@@ -36,9 +37,6 @@ public:
 		DEFINE_MEMBER_N(Vector3			ServerPosition,											0x1D8)
 		DEFINE_MEMBER_N(Vector3			Position,												Offsets::GameObject::Position)
 		DEFINE_MEMBER_N(bool			IsVisible,												0x23C)
-		DEFINE_MEMBER_N(Vector3			MissileStartPos,										0x2D4)
-		DEFINE_MEMBER_N(Vector3			MissileEndPos,											0x2E0)
-		DEFINE_MEMBER_N(int				MissileDestIdx,											0x314)
 		DEFINE_MEMBER_N(bool			IsTargetable,											Offsets::GameObject::mIsTargetable)
 		DEFINE_MEMBER_N(float			Health,													Offsets::GameObject::HP)
 		DEFINE_MEMBER_N(float			MaxHealth,												Offsets::GameObject::MaxHP)
@@ -48,6 +46,7 @@ public:
 		DEFINE_MEMBER_N(float			BaseAttackDamage,										Offsets::GameObject::BaseAttackDamage)
 		DEFINE_MEMBER_N(float			BonusAttackDamage,										0x121C)
 		DEFINE_MEMBER_N(char*			ChampionName,											0x2BB4)
+		DEFINE_MEMBER_N(SpellBook		SpellBook,												0x2350)
 	};
 	float GameObject::GetBoundingRadius() {
 		return reinterpret_cast<float(__thiscall*)(GameObject*)>(this->VTable[35])(this);
@@ -103,16 +102,19 @@ public:
 			return false;
 		return !IsAllyTo(Obj);
 	}
-	bool IsMonster() {
-		return this->IsNeutral() && this->MaxHealth > 6.0f;
-	}
 	std::string GetChampionName() {
 		return std::string(this->ChampionName);
 	}
-	float CalcDamage(GameObject* Target) {
-		auto Damage = Target->BaseAttackDamage + Target->BonusAttackDamage;
-		return Damage - (Target->Armor + Target->BonusArmor);
-	}
+};
+class MissileObject : GameObject {
+public:
+	union {
+		DEFINE_MEMBER_0(DWORD* Base)
+		DEFINE_MEMBER_N(int				MissileSrcInx,			0x2BC)
+		DEFINE_MEMBER_N(Vector3			MissileStartPos,		0x2D4)
+		DEFINE_MEMBER_N(Vector3			MissileEndPos,			0x2E0)
+		DEFINE_MEMBER_N(int				MissileDestIdx,			0x314)
+	};
 };
 template<typename T>
 struct SEntityList {

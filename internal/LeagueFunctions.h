@@ -1,9 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <d3d9.h>
-#include "ImRender.h"
 #include "Structs.h"
-#include "EventManager.h"
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
@@ -13,11 +11,14 @@ namespace FuncTypes {
 	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
 }
 namespace Functions {
-	FuncTypes::Prototype_Reset Original_Reset;
-	FuncTypes::Prototype_Present Original_Present;
-	FuncTypes::fnOnProcessSpell OnProcessSpell;
-	FuncTypes::fnOnNewPath OnNewPath;
-	FuncTypes::fnCreateObject OnCreateObject;
-	FuncTypes::fnDeleteObject OnDeleteObject;
-	WNDPROC Original_WndProc;
+	extern FuncTypes::Prototype_Reset Original_Reset;
+	extern FuncTypes::Prototype_Present Original_Present;
+	extern FuncTypes::fnOnProcessSpell OnProcessSpell;
+	extern FuncTypes::fnOnNewPath OnNewPath;
+	extern FuncTypes::fnCreateObject OnCreateObject;
+	extern FuncTypes::fnDeleteObject OnDeleteObject;
+	extern WNDPROC Original_WndProc;
+
+	int GetPing();
+	Vector3 GetMouseWorldPosition();
 }

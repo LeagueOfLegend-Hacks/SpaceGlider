@@ -11,7 +11,6 @@
 #include <ctime>
 #include <string>
 #include <list>
-#include "LeagueFunctions.h"
 #include "Hooks.h"
 #include "Evade.h"
 
