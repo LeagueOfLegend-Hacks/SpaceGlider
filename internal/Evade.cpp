@@ -4,7 +4,6 @@ std::unordered_map<float, SpellInfo> Evade::ActiveSpells;
 
 void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 	std::unordered_map<float, SpellInfo>::iterator it;
-	// also need to iterate through missiles and filter based off spell names and such.
 	for (it = ActiveSpells.begin(); it != ActiveSpells.end(); it++) {
 		if (it->second.StartTime > *(float*)(DEFINE_RVA(Offsets::Data::GameTime))) {
 			Vector2 StartPos_W2S, EndPos_W2S;
@@ -26,6 +25,14 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 		}
 		else {
 			ActiveSpells.erase(it);
+		}
+	}
+	auto Missiles = ObjectManager::MissileList();
+	for (auto Missile : Missiles) {
+		if (Missile->MissileDestIdx == 0) {
+			auto StartPos_W2S = riot_render->WorldToScreen(Missile->MissileStartPos);
+			auto EndPos_W2S = riot_render->WorldToScreen(Missile->MissileEndPos);
+			render.draw_line(StartPos_W2S, EndPos_W2S);
 		}
 	}
 }

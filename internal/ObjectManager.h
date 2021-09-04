@@ -85,6 +85,16 @@ public:
 		}
 		return ObjectList;
 	}
+	static std::list<GameObject*> MissileList() { // dirty way of getting all the missiles.... FIX THIS ASAP...
+		std::list<GameObject*> ObjectList;
+		auto Object = GetFirstObject();
+		while (Object) {
+			if (Object->IsMissile())
+				ObjectList.push_back(Object);
+			Object = GetNextObject(Object);
+		}
+		return ObjectList;
+	}
 	static GameObject* GetLocalPlayer() {
 		return (GameObject*)*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer);
 	}
