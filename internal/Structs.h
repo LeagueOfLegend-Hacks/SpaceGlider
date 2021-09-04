@@ -22,7 +22,6 @@ public:
 		DEFINE_MEMBER_N(unsigned int	SourceNetworkID,	0x6C)
 		DEFINE_MEMBER_N(Vector3			StartPosition,		0x7C)
 		DEFINE_MEMBER_N(Vector3			EndPosition,		0x88)
-		DEFINE_MEMBER_N(Vector3			CastPos,			0x94)
 		DEFINE_MEMBER_N(bool			HasTarget,			0xB4)
 		DEFINE_MEMBER_N(unsigned short	TargetId,			0xB8)
 	};

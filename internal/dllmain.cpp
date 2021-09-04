@@ -13,6 +13,7 @@
 #include <list>
 #include "LeagueFunctions.h"
 #include "Hooks.h"
+#include "Evade.h"
 
 LeagueDecrypt rito_nuke;
 D3DRenderer* riot_render;
@@ -60,6 +61,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	ApplyHooks();
 	OrbWalker::Initalize();
+	Evade::Initalize();
 	EventManager::Trigger(EventManager::EventType::OnLoad);
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
 		EventManager::Trigger(EventManager::EventType::OnTick);

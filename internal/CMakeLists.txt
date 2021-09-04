@@ -46,6 +46,8 @@ SET(core_sources
 	D3DRenderer.h
 	EventManager.cpp
 	EventManager.h
+	Evade.cpp
+	Evade.h
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib)
