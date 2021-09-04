@@ -27,9 +27,13 @@ namespace Offsets {
 		LocalPlayer = 0x30DA914,
 		GameTime = 0x30d2c58,
 		ObjectManager = 0x183E1A0,
-		ManagerTemplate_Attackable_ = 0x30CD584,
-		ManagerTemplate_AIHero_ = 0x183C1A4,
-		ManagerTemplate_Minion_ = 0x30CD588,
+		ManagerTemplate_Minions = 0x30CD588,
+		ManagerTemplate_AttackableUnits = 0x30CD584,
+		ManagerTemplate_Turrets = 0x30D1AF8,
+		ManagerTemplate_Shops = 0x30CE500,
+		ManagerTemplate_Inhibitors = 0x30DB7F8,
+		MangerTemplate_Buildings = 0x183B9DC,
+		ManagerTemplate_Heros = 0x183C1A4,
 		HudInstance = 0x183e1dc,
 		D3DRender = 0x310257c
 	};

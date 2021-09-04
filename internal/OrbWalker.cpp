@@ -56,7 +56,7 @@ void OrbWalker::IssueOrder(GameObject* ThisPtr, GameObjectOrder order, Vector3* 
 
 GameObject* OrbWalker::tryFindTarget(TargetType targetting_type) {
 	auto pLocal = ObjectManager::GetLocalPlayer();
-	std::list<GameObject*> Objects = ObjectManager::GetAllHeros();
+	std::list<GameObject*> Objects = ObjectManager::HeroList();
 	GameObject* CurTarget = nullptr;
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {

@@ -11,7 +11,7 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 			StartPos_W2S = riot_render->WorldToScreen(it->second.StartPosition);
 			EndPos_W2S = riot_render->WorldToScreen(it->second.EndPosition);
 
-			auto Caster = ObjectManager::FindObjectByIndex(ObjectManager::GetAllHeros(), it->second.source_id);
+			auto Caster = ObjectManager::FindObjectByIndex(ObjectManager::HeroList(), it->second.source_id);
 
 			//auto SpellWidth = Caster->GetSpellSlotByID(it->second.SpellSlot)->GetSpellInfo()->GetSpellData()->GetSpellWidth();
 			auto SpellWidth = 10.0f;

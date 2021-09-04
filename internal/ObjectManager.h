@@ -13,17 +13,6 @@ public:
 		typedef GameObject* (__thiscall* fnGetNext)(void*, GameObject*);
 		return ((fnGetNext)(DEFINE_RVA(Offsets::Functions::GetNextObject)))(*(void**)(DEFINE_RVA(Offsets::Data::ObjectManager)), object);
 	}
-	static std::list<GameObject*> GetAllObjects() {
-		std::list<GameObject*> Object;
-		auto ObjectList = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Attackable_));
-		for (size_t i = 0; i < ObjectList->size; i++)
-		{
-			auto Target = ObjectList->entities[i];
-			if (Target->IsTargetable && Target->Health > 0.0f)
-				Object.push_back(Target);
-		}
-		return Object;
-	}
 	static GameObject* FindObjectByIndex(std::list<GameObject*> heroList, short casterIndex)
 	{
 		for (GameObject* a : heroList)
@@ -33,25 +22,68 @@ public:
 		}
 		return nullptr;
 	}
-	static std::list<GameObject*> GetAllHeros() {
-		std::list<GameObject*> heroes;
-		auto hero_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_AIHero_));
-		for (size_t i = 0; i < hero_list->size; i++)
-		{
-			auto hero = hero_list->entities[i];
-			heroes.push_back(hero);
+	static std::list<GameObject*> MinionList() {
+		std::list<GameObject*> ObjectList;
+		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Minions));
+		for (size_t i = 0; i < Object_list->size; i++) {
+			auto Object = Object_list->entities[i];
+			ObjectList.push_back(Object);
 		}
-		return heroes;
+		return ObjectList;
 	}
-	static std::list<GameObject*> GetAllMinions() {
-		std::list<GameObject*> heroes;
-		auto hero_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Minion_));
-		for (size_t i = 0; i < hero_list->size; i++)
-		{
-			auto hero = hero_list->entities[i];
-			heroes.push_back(hero);
+	static std::list<GameObject*> AttackableUnitList() {
+		std::list<GameObject*> ObjectList;
+		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_AttackableUnits));
+		for (size_t i = 0; i < Object_list->size; i++) {
+			auto Object = Object_list->entities[i];
+			ObjectList.push_back(Object);
 		}
-		return heroes;
+		return ObjectList;
+	}
+	static std::list<GameObject*> TurretList() {
+		std::list<GameObject*> ObjectList;
+		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Turrets));
+		for (size_t i = 0; i < Object_list->size; i++) {
+			auto Object = Object_list->entities[i];
+			ObjectList.push_back(Object);
+		}
+		return ObjectList;
+	}
+	static std::list<GameObject*> ShopList() {
+		std::list<GameObject*> ObjectList;
+		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Shops));
+		for (size_t i = 0; i < Object_list->size; i++) {
+			auto Object = Object_list->entities[i];
+			ObjectList.push_back(Object);
+		}
+		return ObjectList;
+	}
+	static std::list<GameObject*> InhibitorList() {
+		std::list<GameObject*> ObjectList;
+		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Inhibitors));
+		for (size_t i = 0; i < Object_list->size; i++) {
+			auto Object = Object_list->entities[i];
+			ObjectList.push_back(Object);
+		}
+		return ObjectList;
+	}
+	static std::list<GameObject*> BuildingList() {
+		std::list<GameObject*> ObjectList;
+		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::MangerTemplate_Buildings));
+		for (size_t i = 0; i < Object_list->size; i++) {
+			auto Object = Object_list->entities[i];
+			ObjectList.push_back(Object);
+		}
+		return ObjectList;
+	}
+	static std::list<GameObject*> HeroList() {
+		std::list<GameObject*> ObjectList;
+		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Heros));
+		for (size_t i = 0; i < Object_list->size; i++) {
+			auto Object = Object_list->entities[i];
+			ObjectList.push_back(Object);
+		}
+		return ObjectList;
 	}
 	static GameObject* GetLocalPlayer() {
 		return (GameObject*)*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer);
