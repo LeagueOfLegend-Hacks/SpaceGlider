@@ -10,7 +10,8 @@
 #include <vector>
 #include <map>
 #include <filesystem>
-#pragma comment(lib, "d3d9.lib")
+#include <string>
+#include <d3dx9.h>
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

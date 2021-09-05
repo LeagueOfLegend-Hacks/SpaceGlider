@@ -1,9 +1,8 @@
 #include "ImRender.h"
-
 bool ImRender::LoadTextureFromFile(LPDIRECT3DDEVICE9 device, LPCSTR filename, PDIRECT3DTEXTURE9* out_texture)
 {
 	PDIRECT3DTEXTURE9 texture;
-	HRESULT hr = D3DXCreateTextureFromFile(device, filename, &texture);
+	HRESULT hr = D3DXCreateTextureFromFileA(device, filename, &texture);
 	if (hr != S_OK)
 		return false;
 	*out_texture = texture;
@@ -15,8 +14,8 @@ void ImRender::LoadIcons(LPDIRECT3DDEVICE9 device, std::string& path)
 	std::string folder(path);
 	WIN32_FIND_DATAA findData;
 	HANDLE hFind;
-	
-	int nrFiles = std::distance(filesystem::directory_iterator(path), filesystem::directory_iterator());
+
+	int nrFiles = std::distance(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator());
 	int nrFile = 0;
 	hFind = FindFirstFileA((folder + "\\*.png").c_str(), &findData);
 	do {
