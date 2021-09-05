@@ -1,5 +1,5 @@
 #include "Evade.h"
-
+#include "Console.h"
 std::unordered_map<float, SpellInfo> Evade::ActiveSpells;
 std::unordered_map<std::string, SpellDataEntry> Evade::SpellData;
 
@@ -26,10 +26,10 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 
 				switch (spellData->second.type) {
 				case SpellType::Line:
-					render.draw_line(StartPos_W2S, EndPos_W2S, Color, spellData->second.width);
+					render.draw_line(StartPos_W2S, EndPos_W2S, Color, it->second.BasicAttackSpellData->Resource->Width);
 					break;
 				case SpellType::Circle:
-					render.draw_circle(it->second.EndPosition, spellData->second.width, Color, ImRender::DrawType::Filled);
+					render.draw_circle(it->second.EndPosition, it->second.BasicAttackSpellData->Resource->Radius, Color, ImRender::DrawType::Filled);
 					break;
 				}
 			}
@@ -41,7 +41,6 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 			ActiveSpells.erase(it);
 		}
 	}
-	render.draw_text({ 5, 5 }, std::to_string(ActiveSpells.size()).c_str());
 }
 
 void Evade::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
@@ -49,8 +48,8 @@ void Evade::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 }
 
 void Evade::Initalize() {
-	SpellData.insert({ "MorganaQ", { 100, SpellType::Line, 1.2, kDangerLevel::High}});
-	SpellData.insert({ "MorganaW", { 275, SpellType::Circle, 5, kDangerLevel::Low}});
+	SpellData.insert({ "MorganaQ", { SpellType::Line, 1.2, kDangerLevel::High}});
+	SpellData.insert({ "MorganaW", { SpellType::Circle, 5, kDangerLevel::Low}});
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	EventManager::AddEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
 	EventManager::AddEventHandler(EventManager::EventType::OnDraw, OnDraw);

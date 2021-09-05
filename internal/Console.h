@@ -14,3 +14,4 @@ private:
 	bool ShowConsole = true;
 	std::deque<std::string> consoleEvents;
 };
+extern Console console;
