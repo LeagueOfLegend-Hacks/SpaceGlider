@@ -276,9 +276,9 @@ struct Vector3 {
 		}
 		return theta;
 	}
-	Vector3 Perpendicular() const
+	Vector3 Perpendicular()
 	{
-		return { -z,y,x };
+		return Vector3(z, y, -x);
 	}
 	Vector2 To2D() const
 	{
@@ -308,9 +308,13 @@ struct Vector3 {
 		return Vector3(x + A, y + A, z + A);
 	}
 
-	inline Vector3 operator * (const float A) const
+	inline Vector3 operator * (float A) const
 	{
 		return Vector3(A * x, A * y, A * z);
+	}
+	float operator*(Vector3& a) const
+	{
+		return ((x * a.x) + (y * a.y) + (z * a.z));
 	}
 
 	inline Vector3 operator * (const Vector3& A) const

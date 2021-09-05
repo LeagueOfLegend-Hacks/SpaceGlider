@@ -24,10 +24,7 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 					Color = ImColor(1.0f, 0.0f, 0.0f, Alpha);
 				else
 					Color = ImColor(0.0f, 1.0f, 0.0f, Alpha);
-				Vector3 dir = (it->second.EndPosition - it->second.StartPosition).Perpendicular().normalize() * (400);
-				auto startPos = it->second.EndPosition - dir;
-				auto endPos = it->second.EndPosition + dir;
-				auto Poly = Geometry::Rectangle(startPos, endPos, it->second.BasicAttackSpellData->Resource->Width).ToPolygon();
+				auto Poly = Geometry::Rectangle(it->second.StartPosition, it->second.EndPosition, it->second.BasicAttackSpellData->Resource->Width).ToPolygon(5);
 				switch (spellData->second.type) {
 				case SpellType::Line:
 					for (size_t i = 0; i <= Poly.Points.size() - 1; i++)
@@ -35,7 +32,7 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 						auto iNextIdx = (Poly.Points.size() - 1 == i) ? 0 : (i + 1);
 						StartPos_W2S = riot_render->WorldToScreen(Poly.Points[i]);
 						EndPos_W2S = riot_render->WorldToScreen(Poly.Points[iNextIdx]);
-						render.draw_line(StartPos_W2S, EndPos_W2S, Color);
+						render.draw_line(StartPos_W2S, EndPos_W2S, Color, 5);
 					}
 					break;
 				case SpellType::Circle:
