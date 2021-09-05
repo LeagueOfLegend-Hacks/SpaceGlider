@@ -54,7 +54,8 @@ SET(core_sources
 	Geometry.h
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
-include_directories("C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Include")
-target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib d3d9.lib "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x86/d3dx9.lib")
+include_directories($ENV{DXSDK_DIR}/Include)
+target_link_directories(${PROJECT_NAME} PUBLIC "$ENV{DXSDK_DIR}/Lib/x86") 
+target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib d3d9.lib d3dx9.lib)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Includes)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Includes/Zydis/src)
