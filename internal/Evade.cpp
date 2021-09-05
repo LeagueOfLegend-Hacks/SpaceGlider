@@ -17,11 +17,12 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 
 				auto SpellWidth = 10.0f;
 
-				ImColor Color = ImColor(1.0f, 1.0f, 1.0f, 0.4f);
+				float Alpha = (float)spellData->second.DangerLevel / 10;
+				ImColor Color = ImColor(1.0f, 1.0f, 1.0f, Alpha);
 				if (Caster->IsEnemyTo(ObjectManager::GetLocalPlayer()))
-					Color = ImColor(1.0f, 0.0f, 0.0f, 0.4f);
+					Color = ImColor(1.0f, 0.0f, 0.0f, Alpha);
 				else
-					Color = ImColor(0.0f, 1.0f, 0.0f, 0.4f);
+					Color = ImColor(0.0f, 1.0f, 0.0f, Alpha);
 
 				switch (spellData->second.type) {
 				case SpellType::Line:
@@ -48,8 +49,8 @@ void Evade::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 }
 
 void Evade::Initalize() {
-	SpellData.insert({ "MorganaQ", { 100, SpellType::Line, 1.2}});
-	SpellData.insert({ "MorganaW", { 275, SpellType::Circle, 5}});
+	SpellData.insert({ "MorganaQ", { 100, SpellType::Line, 1.2, kDangerLevel::High}});
+	SpellData.insert({ "MorganaW", { 275, SpellType::Circle, 5, kDangerLevel::Low}});
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	EventManager::AddEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
 	EventManager::AddEventHandler(EventManager::EventType::OnDraw, OnDraw);

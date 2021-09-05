@@ -8,6 +8,8 @@ struct SpellDataEntry {
 	int width;
 	SpellType type;
 	float duration;
+	kDangerLevel DangerLevel;
+
 };
 class SpellData
 {

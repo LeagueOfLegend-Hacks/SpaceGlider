@@ -42,3 +42,11 @@ enum class SpellType {
 	Circle,
 	Arc3
 };
+enum class kDangerLevel {
+	None,
+	VeryLow,
+	Low,
+	Medium,
+	High,
+	VeryHigh
+};
