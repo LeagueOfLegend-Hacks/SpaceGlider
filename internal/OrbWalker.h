@@ -15,11 +15,13 @@ namespace OrbWalker {
 
 	extern float LastAttackCommandT;
 	extern float LastMoveCommandT;
-	GameObject* tryFindTarget(TargetType targetting_type);
 	bool CanAttack();
 	bool CanMove(float extraWindup);
 	void OrbWalk(GameObject* target, float extraWindup = 0.0f);
 	void OnDraw(LPDIRECT3DDEVICE9 Device);
 	void OnProcessSpell(void* spellBook, SpellInfo* castInfo);
 	void Initalize();
+
+	std::string AttackResets[];
+
 }
