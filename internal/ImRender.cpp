@@ -8,14 +8,13 @@ bool ImRender::LoadTextureFromFile(LPDIRECT3DDEVICE9 device, LPCSTR filename, PD
 	*out_texture = texture;
 	return true;
 }
-
 void ImRender::LoadIcons(LPDIRECT3DDEVICE9 device, std::string& path)
 {
 	std::string folder(path);
 	WIN32_FIND_DATAA findData;
 	HANDLE hFind;
 
-	int nrFiles = std::distance(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator());
+	int nrFiles = std::distance(std::experimental::filesystem::directory_iterator(path), std::experimental::filesystem::directory_iterator());
 	int nrFile = 0;
 	hFind = FindFirstFileA((folder + "\\*.png").c_str(), &findData);
 	do {
