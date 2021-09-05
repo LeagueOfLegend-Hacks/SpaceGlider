@@ -49,6 +49,8 @@ SET(core_sources
 	EventManager.h
 	Evade.cpp
 	Evade.h
+	clipper.h
+	Geometry.h
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib)

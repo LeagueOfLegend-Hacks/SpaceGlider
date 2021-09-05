@@ -1,5 +1,12 @@
 #pragma once
 #include <cmath>
+#include <cfloat>
+#define M_PI 3.14159265358979323846f
+__forceinline float ToDegree(float Args)
+{
+	const float flPi = 3.141592654f;
+	return (Args * (180.f / flPi));
+}
 struct Vector2 {
 	Vector2() {};
 	Vector2(float _x, float _y) {
@@ -9,7 +16,10 @@ struct Vector2 {
 
 	float x;
 	float y;
-
+	float operator*(Vector2& a) const
+	{
+		return ((x * a.x) + (y * a.y));
+	}
 	inline bool operator == (const Vector2& A) const
 	{
 		return A.x == x && A.y == y;
@@ -54,6 +64,28 @@ struct Vector2 {
 	{
 		return Vector2(A.x / x, A.y / y);
 	}
+	Vector2& operator*=(const float a)
+	{
+		x *= a;
+		y *= a;
+		return *this;
+	}
+	friend Vector2 operator*(const float a, const Vector2 b)
+	{
+		return Vector2(b.x * a, b.y * a);
+	}
+	Vector2 Rotated(float Angle)
+	{
+		float c = cosf(Angle);
+		float s = sinf(Angle);
+
+		return Vector2(x * c - y * s, y * c + x * s);
+	}
+
+	Vector2 Perpendicular()
+	{
+		return Vector2(y, -x);
+	}
 
 	float length() {
 		return sqrt(x * x + y * y);
@@ -87,6 +119,101 @@ struct Vector2 {
 	Vector2 clone() {
 		return Vector2(x, y);
 	}
+	bool Intersects(Vector2 const& Seg1End, Vector2 const& Seg2Start, Vector2 const& Seg2End, Vector2* IntersectionOut)
+	{
+		double deltaACy = y - Seg2Start.y;
+		double deltaDCx = Seg2End.x - Seg2Start.x;
+		double deltaACx = x - Seg2Start.x;
+		double deltaDCy = Seg2End.y - Seg2Start.y;
+		double deltaBAx = Seg1End.x - x;
+		double deltaBAy = Seg1End.y - y;
+
+		auto denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
+		auto numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
+
+		if (fabs(denominator) < FLT_EPSILON)
+		{
+			if (fabs(numerator) < FLT_EPSILON)
+			{
+				// collinear. Potentially infinite intersection points.
+				// Check and return one of them.
+				if (x >= Seg2Start.x && x <= Seg2End.x)
+				{
+					if (IntersectionOut)
+						*IntersectionOut = *this;
+
+					return true;
+				}
+
+				if (Seg2Start.x >= x && Seg2Start.x <= Seg1End.x)
+				{
+					if (IntersectionOut)
+						*IntersectionOut = Seg2Start;
+
+					return true;
+				}
+
+				return false;
+			}
+
+			// parallel
+			return false;
+		}
+
+		auto r = numerator / denominator;
+
+		if (r < 0 || r > 1)
+			return false;
+
+		auto s = (deltaACy * deltaBAx - deltaACx * deltaBAy) / denominator;
+
+		if (s < 0 || s > 1)
+			return false;
+
+		if (IntersectionOut)
+			*IntersectionOut = Vector2(x + r * deltaBAx, y + r * deltaBAy);
+
+		return true;
+	}
+	bool Close(float a, float b, float eps) const
+	{
+		if (fabs(eps) < FLT_EPSILON)
+			eps = (float)1e-9;
+
+		return fabs(a - b) <= eps;
+	}
+	float Polar() const
+	{
+		if (Close(x, 0, 0))
+		{
+			if (y > 0)
+				return 90;
+
+			return y < 0 ? 270.f : 0.f;
+		}
+
+		float flTheta = ToDegree(atanf(y / x));
+
+		if (x < 0)
+			flTheta += 180.f;
+
+		if (flTheta < 0)
+			flTheta += 360.f;
+
+		return flTheta;
+	}
+	float AngleBetween(Vector2 const& Other) const
+	{
+		float flTheta = Polar() - Other.Polar();
+
+		if (flTheta < 0)
+			flTheta += 360.f;
+
+		if (flTheta > 180.f)
+			flTheta = 360.f - flTheta;
+
+		return flTheta;
+	}
 };
 struct Vector3 {
 	Vector3() {};
@@ -99,6 +226,64 @@ struct Vector3 {
 	float x;
 	float y;
 	float z;
+	Vector3 Rotated(float angle) const
+	{
+		auto const c = cos(angle);
+		auto const s = sin(angle);
+
+		return { static_cast<float>(x * c - z * s), y, static_cast<float>(z * c + x * s) };
+	}
+	bool Close(float a, float b, float eps) const
+	{
+		if (abs(eps) < FLT_EPSILON)
+		{
+			eps = static_cast<float>(1e-9);
+		}
+		return abs(a - b) <= eps;
+	}
+	float Polar() const
+	{
+		if (this->Close(x, 0.f, 0.f))
+		{
+			if (y > 0.f)
+			{
+				return 90.f;
+			}
+			return y < 0.f ? 270.f : 0.f;
+		}
+
+		auto theta = atan(y / x) * 180.f / M_PI;
+		if (x < 0.f)
+		{
+			theta = theta + 180.f;
+		}
+		if (theta < 0.f)
+		{
+			theta = theta + 360.f;
+		}
+		return theta;
+	}
+	float AngleBetween(Vector3 const& other) const
+	{
+		auto theta = Polar() - other.Polar();
+		if (theta < 0.f)
+		{
+			theta = theta + 360.f;
+		}
+		if (theta > 180.f)
+		{
+			theta = 360.f - theta;
+		}
+		return theta;
+	}
+	Vector3 Perpendicular() const
+	{
+		return { -z,y,x };
+	}
+	Vector2 To2D() const
+	{
+		return Vector2(x, z);
+	}
 
 	float length() {
 		return sqrt(x * x + y * y + z * z);
