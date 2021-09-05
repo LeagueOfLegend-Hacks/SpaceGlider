@@ -53,6 +53,24 @@ public:
 		DEFINE_MEMBER_N(SpellDataResource* Resource, 0x44)
 	};
 };
+
+class AIManager
+{
+public:
+	union
+	{
+		DEFINE_MEMBER_N(Vector3 NavStartPos, 0x1cc)
+		DEFINE_MEMBER_N(Vector3 NavEndPos, 0x224)
+		DEFINE_MEMBER_N(Vector3 ServerPos, 0x2e4)
+		DEFINE_MEMBER_N(Vector3 Velocity, 0x2f0)
+		DEFINE_MEMBER_N(bool Moving, 0x1c0)
+		DEFINE_MEMBER_N(bool Dashing, 0x214)
+		DEFINE_MEMBER_N(float DashingSpeed, 0x1f8)
+		DEFINE_MEMBER_N(Vector3* NavArray, 0x1e4)
+		DEFINE_MEMBER_N(Vector3* NavArrayEnd, 0x1e8)
+	};
+};
+
 class SpellInfo {
 public:
 	union {

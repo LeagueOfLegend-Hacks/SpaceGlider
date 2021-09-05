@@ -40,7 +40,9 @@ enum MouseSetting {
 enum class SpellType {
 	Line,
 	Circle,
-	Arc3
+	Arc3,
+	Ring,
+	Cone
 };
 enum class kDangerLevel {
 	None,
@@ -49,4 +51,16 @@ enum class kDangerLevel {
 	Medium,
 	High,
 	VeryHigh
+};
+
+enum class SpellState
+{
+	Ready = 0,
+	NotAvailable = 4,
+	Surpressed = 8,
+	NotLearned = 12,
+	Processing = 24,
+	Cooldown = 32,
+	NoMana = 64,
+	Unknown
 };
