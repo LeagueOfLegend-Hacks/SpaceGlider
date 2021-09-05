@@ -4,10 +4,23 @@
 #include "Vector.h"
 #include "Enums.h"
 #include <string>
+struct SpellDataEntry {
+	int width;
+	SpellType type;
+	float duration;
+};
+class SpellData
+{
+public:
+	union
+	{
+		DEFINE_MEMBER_N(std::string Name, 0x18)
+	};
+};
 class SpellInfo {
 public:
 	union {
-		DEFINE_MEMBER_0(DWORD*			VTable)
+		DEFINE_MEMBER_0(SpellData*		BasicAttackSpellData)
 		DEFINE_MEMBER_N(kSpellSlot		Slot,				Offsets::SpellInfo::Slot)
 		DEFINE_MEMBER_N(float			StartTime,			Offsets::SpellInfo::StartTime)
 		DEFINE_MEMBER_N(int				SpellIndex,			Offsets::SpellInfo::SpellIndex)
@@ -46,6 +59,7 @@ public:
 		DEFINE_MEMBER_N(float			BaseAttackDamage,										Offsets::GameObject::BaseAttackDamage)
 		DEFINE_MEMBER_N(float			BonusAttackDamage,										0x121C)
 		DEFINE_MEMBER_N(char*			ChampionName,											0x2BB4)
+		DEFINE_MEMBER_N(SpellData*		MissileSpellInfo, 0x258)
 		DEFINE_MEMBER_N(int				MissileSrcInx, 0x2BC)
 		DEFINE_MEMBER_N(Vector3			MissileStartPos, 0x2D4)
 		DEFINE_MEMBER_N(Vector3			MissileEndPos, 0x2E0)

@@ -37,3 +37,8 @@ enum MouseSetting {
 	UP,
 	HOLD,
 };
+enum class SpellType {
+	Line,
+	Circle,
+	Arc3
+};
