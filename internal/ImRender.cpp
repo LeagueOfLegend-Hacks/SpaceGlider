@@ -1,4 +1,41 @@
 #include "ImRender.h"
+
+bool ImRender::LoadTextureFromFile(LPDIRECT3DDEVICE9 device, LPCSTR filename, PDIRECT3DTEXTURE9* out_texture)
+{
+	PDIRECT3DTEXTURE9 texture;
+	HRESULT hr = D3DXCreateTextureFromFile(device, filename, &texture);
+	if (hr != S_OK)
+		return false;
+	*out_texture = texture;
+	return true;
+}
+
+void ImRender::LoadIcons(LPDIRECT3DDEVICE9 device, std::string& path)
+{
+	std::string folder(path);
+	WIN32_FIND_DATAA findData;
+	HANDLE hFind;
+	
+	int nrFiles = std::distance(filesystem::directory_iterator(path), filesystem::directory_iterator());
+	int nrFile = 0;
+	hFind = FindFirstFileA((folder + "\\*.png").c_str(), &findData);
+	do {
+		if (hFind != INVALID_HANDLE_VALUE) {
+
+			std::string filePath = folder + "/" + findData.cFileName;
+			PDIRECT3DTEXTURE9 loadtexture;
+			bool image = LoadTextureFromFile(device, filePath.c_str(), &loadtexture);
+			if (image)
+			{
+				std::string fileName(findData.cFileName);
+				fileName.erase(fileName.find(".png"), 4);
+				Images[fileName] = loadtexture;
+			}
+		}
+		nrFile++;
+	} while (FindNextFileA(hFind, &findData));
+}
+
 void ImRender::Init(LPDIRECT3DDEVICE9 Device) {
 	if (IsInitalized)
 		return;
@@ -9,7 +46,11 @@ void ImRender::Init(LPDIRECT3DDEVICE9 Device) {
 	ImGui_ImplDX9_Init(Device);
 	IsInitalized = true;
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
+
+	LoadIcons(Device, std::string("path 1"));
+	LoadIcons(Device, std::string("path 2"));
 }
+
 void ImRender::Free() {
 	if (!IsInitalized)
 		return;
@@ -17,8 +58,9 @@ void ImRender::Free() {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 }
+
 void ImRender::begin_draw() {
-		if (!IsInitalized)
+	if (!IsInitalized)
 		return;
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -129,4 +171,14 @@ void ImRender::draw_circle(Vector3 screen_pos, float radius, ImColor color, Draw
 		ImGui::GetWindowDrawList()->PathStroke(color, 0, thickness);
 	else
 		ImGui::GetWindowDrawList()->PathFillConvex(color);
+}
+
+void ImRender::draw_image(const char* img, Vector3 pos, Vector2 body, ImColor color)
+{
+	static ImVec2 zero = ImVec2(0.f, 0.f);
+    static ImVec2 one = ImVec2(1.f, 1.f);
+	auto it = Images.find(std::string(img));
+	if (it == Images.end())
+		return;
+	ImGui::GetWindowDrawList()->AddImage(it->second, ImVec2(pos.x, pos.y), ImVec2(body.x + pos.x, body.y + pos.y), zero, one, color);
 }
