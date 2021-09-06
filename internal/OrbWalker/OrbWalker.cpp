@@ -46,10 +46,15 @@ void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 {
 	auto pLocal = ObjectManager::GetLocalPlayer();
+	auto target = TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth);
+
 	static clock_t lastAntiAfk = 0;
 	render.draw_circle(pLocal->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(0, 255, 0, 255));
 	if (GetAsyncKeyState(VK_SPACE)) {
-		OrbWalk(TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth), 90.f);
+		OrbWalk(target, 90.f);
+
+		if(target != nullptr)
+		render.draw_circle(target->Position, 50.f, ImColor(255, 0, 0, 255), ImRender::DrawType::Normal, 5.f);
 	}
 
 	/*
@@ -64,39 +69,32 @@ void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 	*/
 }
 void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
-	if (ObjectManager::GetLocalPlayer()->Index == castInfo->source_id) {
 
-		if (castInfo->Slot == kSpellSlot::SpellSlot_SpecialAttack)
-		{
-			LastAttackCommandT = 0;
-			return;
-		}
+	if (ObjectManager::GetLocalPlayer()->Index != castInfo->source_id)
+		return;
 
-
-		for each (std::string var in AttackResets)
-		{
-			if (castInfo->BasicAttackSpellData->Name.compare(var))
-			{
-				LastAttackCommandT = 0;
-				break;
-			}
-
-		}
-
-		if (castInfo->BasicAttackSpellData != nullptr)
-			LastAttackCommandT = GetTickCount64() - Functions::GetPing() / 2;
-
-		/*
-		switch (castInfo->Slot) {
-		case kSpellSlot::SpellSlot_Unknown:
-		case kSpellSlot::SpellSlot_BasicAttack1:
-		case kSpellSlot::SpellSlot_BasicAttack2:
-		case kSpellSlot::SpellSlot_SpecialAttack:
-			LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
-			break;
-		}
-		*/
+	if (castInfo->Slot == kSpellSlot::SpellSlot_SpecialAttack)
+	{
+		LastAttackCommandT = 0;
+		return;
 	}
+
+
+
+
+	if (castInfo->BasicAttackSpellData != nullptr)
+		LastAttackCommandT = GetTickCount64() - Functions::GetPing() / 2;
+
+	/*
+	switch (castInfo->Slot) {
+	case kSpellSlot::SpellSlot_Unknown:
+	case kSpellSlot::SpellSlot_BasicAttack1:
+	case kSpellSlot::SpellSlot_BasicAttack2:
+	case kSpellSlot::SpellSlot_SpecialAttack:
+		LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
+		break;
+	}
+	*/
 }
 
 void OrbWalker::Initalize() {

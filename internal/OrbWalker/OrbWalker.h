@@ -8,6 +8,7 @@
 #include "../LeagueFunctions/LeagueFunctions.h"
 #include "../Console/Console.h"
 #include "../XorStr.h"
+#include "../Evade/Evade.h"
 
 namespace OrbWalker {
 	// move these to utils when possible
