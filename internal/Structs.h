@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Vector.h"
 #include "Enums.h"
+#include "CharacterData.h"
 #include <string>
 struct SpellDataEntry {
 	SpellType type;
@@ -38,10 +39,10 @@ public:
 		//DEFINE_MEMBER_N(bool ChannelIsInterruptedByAttacking, Offsets::SpellDataResource::ChannelIsInterruptedByAttacking)
 		//DEFINE_MEMBER_N(bool CanMoveWhileChanneling, Offsets::SpellDataResource::CanMoveWhileChanneling)
 		DEFINE_MEMBER_N(float MissileSpeed, 0x454)
-		DEFINE_MEMBER_N(float Width, 0x488)
-		DEFINE_MEMBER_N(float Radius, 0x400)
-		//DEFINE_MEMBER_N(float EffectRange, Offsets::SpellDataResource::SpellDataEffectSpellRange)
-		//DEFINE_MEMBER_N(float AfterEffectRange, Offsets::SpellDataResource::SpellDataEffectSpellRangeAfterEffect)
+			DEFINE_MEMBER_N(float Width, 0x488)
+			DEFINE_MEMBER_N(float Radius, 0x400)
+			//DEFINE_MEMBER_N(float EffectRange, Offsets::SpellDataResource::SpellDataEffectSpellRange)
+			//DEFINE_MEMBER_N(float AfterEffectRange, Offsets::SpellDataResource::SpellDataEffectSpellRangeAfterEffect)
 	};
 };
 class SpellData
@@ -50,7 +51,7 @@ public:
 	union
 	{
 		DEFINE_MEMBER_N(std::string Name, 0x18)
-		DEFINE_MEMBER_N(SpellDataResource* Resource, 0x44)
+			DEFINE_MEMBER_N(SpellDataResource* Resource, 0x44)
 	};
 };
 
@@ -60,65 +61,66 @@ public:
 	union
 	{
 		DEFINE_MEMBER_N(Vector3 NavStartPos, 0x1cc)
-		DEFINE_MEMBER_N(Vector3 NavEndPos, 0x224)
-		DEFINE_MEMBER_N(Vector3 ServerPos, 0x2e4)
-		DEFINE_MEMBER_N(Vector3 Velocity, 0x2f0)
-		DEFINE_MEMBER_N(bool Moving, 0x1c0)
-		DEFINE_MEMBER_N(bool Dashing, 0x214)
-		DEFINE_MEMBER_N(float DashingSpeed, 0x1f8)
-		DEFINE_MEMBER_N(Vector3* NavArray, 0x1e4)
-		DEFINE_MEMBER_N(Vector3* NavArrayEnd, 0x1e8)
+			DEFINE_MEMBER_N(Vector3 NavEndPos, 0x224)
+			DEFINE_MEMBER_N(Vector3 ServerPos, 0x2e4)
+			DEFINE_MEMBER_N(Vector3 Velocity, 0x2f0)
+			DEFINE_MEMBER_N(bool Moving, 0x1c0)
+			DEFINE_MEMBER_N(bool Dashing, 0x214)
+			DEFINE_MEMBER_N(float DashingSpeed, 0x1f8)
+			DEFINE_MEMBER_N(Vector3* NavArray, 0x1e4)
+			DEFINE_MEMBER_N(Vector3* NavArrayEnd, 0x1e8)
 	};
 };
 
 class SpellInfo {
 public:
 	union {
-		DEFINE_MEMBER_0(SpellData*		BasicAttackSpellData)
-		DEFINE_MEMBER_N(kSpellSlot		Slot,				Offsets::SpellInfo::Slot)
-		DEFINE_MEMBER_N(float			StartTime,			Offsets::SpellInfo::StartTime)
-		DEFINE_MEMBER_N(int				SpellIndex,			Offsets::SpellInfo::SpellIndex)
-		DEFINE_MEMBER_N(unsigned int	Level,				Offsets::SpellInfo::Level)
-		DEFINE_MEMBER_N(unsigned short	source_id,			Offsets::SpellInfo::source_id)
-		DEFINE_MEMBER_N(unsigned int	SourceNetworkID,	Offsets::SpellInfo::SourceNetworkID)
-		DEFINE_MEMBER_N(Vector3			StartPosition,		Offsets::SpellInfo::StartPosition)
-		DEFINE_MEMBER_N(Vector3			EndPosition,		Offsets::SpellInfo::EndPosition)
-		DEFINE_MEMBER_N(bool			HasTarget,			Offsets::SpellInfo::HasTarget)
-		DEFINE_MEMBER_N(unsigned short	TargetId,			Offsets::SpellInfo::TargetID)
+		DEFINE_MEMBER_0(SpellData* BasicAttackSpellData)
+			DEFINE_MEMBER_N(kSpellSlot		Slot, Offsets::SpellInfo::Slot)
+			DEFINE_MEMBER_N(float			StartTime, Offsets::SpellInfo::StartTime)
+			DEFINE_MEMBER_N(int				SpellIndex, Offsets::SpellInfo::SpellIndex)
+			DEFINE_MEMBER_N(unsigned int	Level, Offsets::SpellInfo::Level)
+			DEFINE_MEMBER_N(unsigned short	source_id, Offsets::SpellInfo::source_id)
+			DEFINE_MEMBER_N(unsigned int	SourceNetworkID, Offsets::SpellInfo::SourceNetworkID)
+			DEFINE_MEMBER_N(Vector3			StartPosition, Offsets::SpellInfo::StartPosition)
+			DEFINE_MEMBER_N(Vector3			EndPosition, Offsets::SpellInfo::EndPosition)
+			DEFINE_MEMBER_N(bool			HasTarget, Offsets::SpellInfo::HasTarget)
+			DEFINE_MEMBER_N(unsigned short	TargetId, Offsets::SpellInfo::TargetID)
 	};
 };
 class SpellBook {
 public:
 	union {
 		DEFINE_MEMBER_0(DWORD* VTable)
-		DEFINE_MEMBER_N(DWORD*			Info,													Offsets::Spell::kInvalid)
+			DEFINE_MEMBER_N(DWORD* Info, Offsets::Spell::kInvalid)
 	};
 };
 class GameObject {
 public:
 	union {
-		DEFINE_MEMBER_0(DWORD*			VTable)
-		DEFINE_MEMBER_N(unsigned short	Index,													Offsets::GameObject::Index)
-		DEFINE_MEMBER_N(int				Team,													Offsets::GameObject::TeamID)
-		DEFINE_MEMBER_N(unsigned int	NetworkID,												0xCC)
-		DEFINE_MEMBER_N(Vector3			ServerPosition,											0x1D8)
-		DEFINE_MEMBER_N(Vector3			Position,												Offsets::GameObject::Position)
-		DEFINE_MEMBER_N(bool			IsVisible,												0x23C)
-		DEFINE_MEMBER_N(bool			IsTargetable,											Offsets::GameObject::mIsTargetable)
-		DEFINE_MEMBER_N(float			Health,													Offsets::GameObject::HP)
-		DEFINE_MEMBER_N(float			MaxHealth,												Offsets::GameObject::MaxHP)
-		DEFINE_MEMBER_N(float			Armor,													Offsets::GameObject::Armor)
-		DEFINE_MEMBER_N(float			BonusArmor,												Offsets::GameObject::BonusArmor)
-		DEFINE_MEMBER_N(float			AttackRange,											Offsets::GameObject::AttackRange)
-		DEFINE_MEMBER_N(float			BaseAttackDamage,										Offsets::GameObject::BaseAttackDamage)
-		DEFINE_MEMBER_N(float			BonusAttackDamage,										0x121C)
-		DEFINE_MEMBER_N(char*			ChampionName,											0x2BB4)
-		DEFINE_MEMBER_N(SpellData*		MissileSpellInfo, 0x258)
-		DEFINE_MEMBER_N(int				MissileSrcInx, 0x2BC)
-		DEFINE_MEMBER_N(Vector3			MissileStartPos, 0x2D4)
-		DEFINE_MEMBER_N(Vector3			MissileEndPos, 0x2E0)
-		DEFINE_MEMBER_N(int				MissileDestIdx, 0x314)
-		DEFINE_MEMBER_N(SpellBook		SpellBook,												0x2350)
+		DEFINE_MEMBER_0(DWORD* VTable)
+			DEFINE_MEMBER_N(unsigned short	Index, Offsets::GameObject::Index)
+			DEFINE_MEMBER_N(int				Team, Offsets::GameObject::TeamID)
+			DEFINE_MEMBER_N(unsigned int	NetworkID, 0xCC)
+			DEFINE_MEMBER_N(Vector3			ServerPosition, 0x1D8)
+			DEFINE_MEMBER_N(Vector3			Position, Offsets::GameObject::Position)
+			DEFINE_MEMBER_N(bool			IsVisible, 0x23C)
+			DEFINE_MEMBER_N(bool			IsTargetable, Offsets::GameObject::mIsTargetable)
+			DEFINE_MEMBER_N(float			Health, Offsets::GameObject::HP)
+			DEFINE_MEMBER_N(float			MaxHealth, Offsets::GameObject::MaxHP)
+			DEFINE_MEMBER_N(float			Armor, Offsets::GameObject::Armor)
+			DEFINE_MEMBER_N(float			BonusArmor, Offsets::GameObject::BonusArmor)
+			DEFINE_MEMBER_N(float			AttackRange, Offsets::GameObject::AttackRange)
+			DEFINE_MEMBER_N(float			BaseAttackDamage, Offsets::GameObject::BaseAttackDamage)
+			DEFINE_MEMBER_N(float			BonusAttackDamage, Offsets::GameObject::BonusAttackDamage)
+			DEFINE_MEMBER_N(char* ChampionName, Offsets::GameObject::ChampionName)
+			DEFINE_MEMBER_N(SpellData* MissileSpellInfo, Offsets::GameObject::MissileSpellInfo)
+			DEFINE_MEMBER_N(int				MissileSrcInx, Offsets::GameObject::MissileSrcIndex)
+			DEFINE_MEMBER_N(Vector3			MissileStartPos, Offsets::GameObject::MissileStartPos)
+			DEFINE_MEMBER_N(Vector3			MissileEndPos, Offsets::GameObject::MissileEndPos)
+			DEFINE_MEMBER_N(int				MissileDestIdx, Offsets::GameObject::MissileDestIndex)
+			DEFINE_MEMBER_N(SpellBook		SpellBook, Offsets::GameObject::SpellBook)
+			DEFINE_MEMBER_N(CharacterData* BaseCharacterData, Offsets::GameObject::BaseCharacterData)
 	};
 	float GameObject::GetBoundingRadius() {
 		return reinterpret_cast<float(__thiscall*)(GameObject*)>(this->VTable[35])(this);

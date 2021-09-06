@@ -52,6 +52,11 @@ SET(core_sources
 	Evade.h
 	clipper.h
 	Geometry.h
+	XorStr.h
+	TargetSelector.h
+	TargetSelector.cpp
+	ModuleLoader.h
+	ModuleLoader.cpp
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 include_directories($ENV{DXSDK_DIR}/Include)

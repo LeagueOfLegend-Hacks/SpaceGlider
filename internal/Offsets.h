@@ -12,6 +12,7 @@ namespace Offsets {
 		HasTarget = 0xB4,
 		TargetID = 0xB8
 	};
+
 	enum class Spell {
 		kInvalid = 0x4
 	};
@@ -100,6 +101,8 @@ namespace Offsets {
 		PercentAttackSpeedMod = 0x17d0,
 		PercentMultiplicativeAttackSpeedMod = 0x17e0,
 		BaseAttackDamage = 0x17f0,
+		BonusAttackDamage = 0x121C,
+		ChampionName = 0x2BB4,
 		BaseAttackDamageSansPercentScale = 0x1800,
 		FlatBaseAttackDamageMod = 0x1810,
 		PercentBaseAttackDamageMod = 0x1820,
@@ -153,5 +156,16 @@ namespace Offsets {
 		InputLocks = 0x3a74,
 		ShutdownValue = 0x39fc,
 		BaseGoldGivenOnDeath = 0x3a0c,
+
+		MissileSpellInfo = 0x258,
+		MissileSrcIndex = 0x2BC,
+		MissileStartPos = 0x2D4,
+		MissileEndPos = 0x2E0,
+		MissileDestIndex = 0x314,
+		BaseCharacterData = 0x2B24,
+	};
+
+	enum class CharacterData {
+		SkinHash = 0x10,
 	};
 }

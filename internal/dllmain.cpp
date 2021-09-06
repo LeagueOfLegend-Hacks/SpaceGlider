@@ -13,12 +13,14 @@
 #include <list>
 #include "Hooks.h"
 #include "Evade.h"
+#include "ModuleLoader.h"
 
 LeagueDecrypt rito_nuke;
 D3DRenderer* riot_render;
 HMODULE g_module;
 UltimateHooks ulthook;
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
+ModuleLoader Loader;
 
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
@@ -61,6 +63,9 @@ DWORD WINAPI MainThread(LPVOID param) {
 	ApplyHooks();
 	OrbWalker::Initalize();
 	Evade::Initalize();
+
+	Loader.LoadChampionModule();
+
 	EventManager::Trigger(EventManager::EventType::OnLoad);
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
 		EventManager::Trigger(EventManager::EventType::OnTick);
@@ -73,7 +78,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	FreeLibraryAndExitThread(g_module, 0);
 	return 1;
 }
-BOOL APIENTRY DllMain(HMODULE hModule,DWORD  ul_reason_for_call,LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
 	g_module = hModule;
 	DisableThreadLibraryCalls(hModule);

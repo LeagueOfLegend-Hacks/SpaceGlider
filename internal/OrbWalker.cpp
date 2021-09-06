@@ -60,7 +60,7 @@ void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 	else {
 		if (lastAntiAfk == NULL || clock() - lastAntiAfk > 600) {
 			lastAntiAfk = clock();
-			auto w2s = riot_render->WorldToScreen(pLocal->ServerPosition);
+			auto w2s = riot_render->WorldToScreen(pLocal->ServerPosition)g;
 			IssueClick(HUDInputLogic, 0, 0, 0, w2s.x, w2s.y, 0);
 			IssueClick(HUDInputLogic, 1, 0, 0, w2s.x, w2s.y, 0);
 		}
