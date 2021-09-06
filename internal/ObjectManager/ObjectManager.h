@@ -1,6 +1,6 @@
 #pragma once
-#include "Structs.h"
-#include "LeagueFunctions.h"
+#include "../Patchables/Structs.h"
+#include "../LeagueFunctions/LeagueFunctions.h"
 #include <list>
 class ObjectManager {
 public:

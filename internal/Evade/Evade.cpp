@@ -1,6 +1,5 @@
 #include "Evade.h"
-#include "Console.h"
-#include "Geometry.h"
+
 std::unordered_map<float, SpellInfo> Evade::ActiveSpells;
 std::unordered_map<std::string, SpellDataEntry> Evade::SpellData;
 

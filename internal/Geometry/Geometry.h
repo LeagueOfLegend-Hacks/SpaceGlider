@@ -1,8 +1,8 @@
 #pragma once
 #include <list>
 #include <vector>
-#include "Vector.h"
-#include "ImRender.h"
+#include "../Vector.h"
+#include "../Rendering/ImRender.h"
 #include "clipper.h"
 #define CircleLineSegmentN 16
 namespace Geometry

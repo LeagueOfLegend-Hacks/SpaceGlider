@@ -1,7 +1,9 @@
 #pragma once
-#include "ObjectManager.h"
-#include "EventManager.h"
-#include "ImRender.h"
+#include "../ObjectManager/ObjectManager.h"
+#include "../EventManager/EventManager.h"
+#include "../Rendering/ImRender.h"
+#include "../Console/Console.h"
+#include "../Geometry/Geometry.h"
 #include <unordered_map>
 namespace Evade {
 	extern std::unordered_map<float, SpellInfo> ActiveSpells;

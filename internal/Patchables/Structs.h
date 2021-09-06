@@ -1,9 +1,9 @@
 #pragma once
 #include "Offsets.h"
-#include "Utils.h"
-#include "Vector.h"
-#include "Enums.h"
-#include "CharacterData.h"
+#include "../Utils/Utils.h"
+#include "../Vector.h"
+#include "../Enums.h"
+#include "../Patchables/CharacterData.h"
 #include <string>
 struct SpellDataEntry {
 	SpellType type;

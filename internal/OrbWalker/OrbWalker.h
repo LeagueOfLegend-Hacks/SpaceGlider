@@ -1,9 +1,13 @@
 #pragma once
-#include "ObjectManager.h"
-#include "D3DRenderer.h"
-#include "EventManager.h"
-#include "ImRender.h"
-#include "LeagueFunctions.h"
+#include "../ObjectManager/ObjectManager.h"
+#include "../Rendering/D3DRenderer.h"
+#include "../EventManager/EventManager.h"
+#include "../Rendering/ImRender.h"
+#include "../LeagueFunctions/LeagueFunctions.h"
+#include "../TargetSelector/TargetSelector.h"
+#include "../LeagueFunctions/LeagueFunctions.h"
+#include "../Console/Console.h"
+#include "../XorStr.h"
 
 namespace OrbWalker {
 	// move these to utils when possible

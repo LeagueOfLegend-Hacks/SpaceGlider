@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <d3d9.h>
-#include "Structs.h"
+#include "../Patchables/Structs.h"
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);

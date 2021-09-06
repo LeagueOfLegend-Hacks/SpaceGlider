@@ -1,6 +1,6 @@
 #pragma once
-#include "Offsets.h"
-#include "Utils.h"
+#include "../Patchables/Offsets.h"
+#include "../Utils/Utils.h"
 #include "D3DRenderer.h"
 #include <d3d9.h>
 #include <imgui.h>

@@ -21,42 +21,42 @@ set(zydis_source
 )
 SET(core_sources
 	dllmain.cpp 
-	Utils.cpp
-	Utils.h 
-	Decrypt.cpp 
-	Decrypt.h 
-	Offsets.h
-	Console.cpp
-	Console.h
-	UltimateHooks.cpp
-	UltimateHooks.h
-	ImRender.cpp
-	ImRender.h
-	OrbWalker.cpp
-	OrbWalker.h
-	Structs.h
+	Utils/Utils.cpp
+	Utils/Utils.h 
+	Decrypt/Decrypt.cpp 
+	Decrypt/Decrypt.h 
+	Patchables/Offsets.h
+	Console/Console.cpp
+	Console/Console.h
+	Hooks/UltimateHooks.cpp
+	Hooks/UltimateHooks.h
+	Rendering/ImRender.cpp
+	Rendering/ImRender.h
+	OrbWalker/OrbWalker.cpp
+	OrbWalker/OrbWalker.h
+	Patchables/Structs.h
 	Enums.h
 	Vector.h
-	DelayedAction.cpp
-	DelayedAction.h
-	ObjectManager.cpp
-	ObjectManager.h
-	LeagueFunctions.cpp
-	LeagueFunctions.h
-	Hooks.cpp
-	Hooks.h
-	D3DRenderer.h
-	EventManager.cpp
-	EventManager.h
-	Evade.cpp
-	Evade.h
-	clipper.h
-	Geometry.h
+	DelayedAction/DelayedAction.cpp
+	DelayedAction/DelayedAction.h
+	ObjectManager/ObjectManager.cpp
+	ObjectManager/ObjectManager.h
+	LeagueFunctions/LeagueFunctions.cpp
+	LeagueFunctions/LeagueFunctions.h
+	Hooks/Hooks.cpp
+	Hooks/Hooks.h
+	Rendering/D3DRenderer.h
+	EventManager/EventManager.cpp
+	EventManager/EventManager.h
+	Evade/Evade.cpp
+	Evade/Evade.h
+	Geometry/clipper.h
+	Geometry/Geometry.h
 	XorStr.h
-	TargetSelector.h
-	TargetSelector.cpp
-	ModuleLoader.h
-	ModuleLoader.cpp
+	TargetSelector/TargetSelector.h
+	TargetSelector/TargetSelector.cpp
+	ModuleLoader/ModuleLoader.h
+	ModuleLoader/ModuleLoader.cpp
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 include_directories($ENV{DXSDK_DIR}/Include)
@@ -64,3 +64,10 @@ target_link_directories(${PROJECT_NAME} PUBLIC "$ENV{DXSDK_DIR}/Lib/x86")
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui MSDetours Dbghelp.lib d3d9.lib d3dx9.lib)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Includes)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Includes/Zydis/src)
+
+foreach(_source IN ITEMS ${core_sources} ${zydis_source})
+    get_filename_component(_source_path "${_source}" PATH)
+    string(REPLACE "${CMAKE_SOURCE_DIR}" "" _group_path "${_source_path}")
+    string(REPLACE "/" "\\" _group_path "${_group_path}")
+    source_group("${_group_path}" FILES "${_source}")
+endforeach()

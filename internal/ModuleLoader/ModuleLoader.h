@@ -1,7 +1,7 @@
 #pragma once
-#include "ObjectManager.h"
-#include "XorStr.h"
-
+#include "../ObjectManager/ObjectManager.h"
+#include "../XorStr.h"
+#include "../Console/Console.h"
 
 class ModuleLoader
 {

@@ -1,9 +1,5 @@
 #include "OrbWalker.h"
-#include "TargetSelector.h"
-#include "LeagueFunctions.h"
-#include "Console.h"
 #include <ctime>
-#include "XorStr.h"
 
 float OrbWalker::LastAttackCommandT = 0;
 float OrbWalker::LastMoveCommandT = 0;

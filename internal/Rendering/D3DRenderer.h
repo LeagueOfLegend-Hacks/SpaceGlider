@@ -1,6 +1,6 @@
 #pragma once
 #include <Windows.h>
-#include "Vector.h"
+#include "../Vector.h"
 
 class D3DRenderer {
 public:
