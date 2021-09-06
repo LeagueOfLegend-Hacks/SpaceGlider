@@ -33,6 +33,7 @@ void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 		if (Functions::IsAlive(target)) {
 			auto w2s = riot_render->WorldToScreen(target->ServerPosition);
 			Functions::IssueOrder(EOrderType::attack, w2s.x, w2s.y);
+			LastAttackCommandT = GetTickCount64() - Functions::GetPing() / 2;
 		}
 	}
 	if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
