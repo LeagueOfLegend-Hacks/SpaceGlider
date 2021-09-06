@@ -2,24 +2,25 @@
 #include "TargetSelector.h"
 #include "Console.h"
 #include <ctime>
+#include "XorStr.h"
 
 float OrbWalker::LastAttackCommandT = 0;
 float OrbWalker::LastMoveCommandT = 0;
 
 std::string OrbWalker::AttackResets[] =
 {
-	"dariusnoxiantacticsonh", "fiorae", "garenq", "gravesmove",
-	"hecarimrapidslash", "jaxempowertwo", "jaycehypercharge",
-	"leonashieldofdaybreak", "luciane", "monkeykingdoubleattack",
-	"mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze",
-	"netherblade", "gangplankqwrapper", "powerfist",
-	"renektonpreexecute", "rengarq", "shyvanadoubleattack",
-	"sivirw", "takedown", "talonnoxiandiplomacy",
-	"trundletrollsmash", "vaynetumble", "vie", "volibearq",
-	"xenzhaocombotarget", "yorickspectral", "reksaiq",
-	"itemtitanichydracleave", "masochism", "illaoiw",
-	"elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds",
-	"asheq", "camilleq", "camilleq2"
+	xorstr("dariusnoxiantacticsonh"), xorstr("fiorae"), xorstr("garenq"), xorstr("gravesmove"),
+	xorstr("hecarimrapidslash"), xorstr("jaxempowertwo"), xorstr("jaycehypercharge"),
+	xorstr("leonashieldofdaybreak"), xorstr("luciane"), xorstr("monkeykingdoubleattack"),
+	xorstr("mordekaisermaceofspades"), xorstr("nasusq"), xorstr("nautiluspiercinggaze"),
+	xorstr("netherblade"), xorstr("gangplankqwrapper"), xorstr("powerfist"),
+	xorstr("renektonpreexecute"), xorstr("rengarq"), xorstr("shyvanadoubleattack"),
+	xorstr("sivirw"), xorstr("takedown"), xorstr("talonnoxiandiplomacy"),
+	xorstr("trundletrollsmash"), xorstr("vaynetumble"), xorstr("vie"), xorstr("volibearq"),
+	xorstr("xenzhaocombotarget"), xorstr("yorickspectral"), xorstr("reksaiq"),
+	xorstr("itemtitanichydracleave"), xorstr("masochism"), xorstr("illaoiw"),
+	xorstr("elisespiderw"), xorstr("fiorae"), xorstr("meditate"), xorstr("sejuaninorthernwinds"),
+	xorstr("asheq"), xorstr("camilleq"), xorstr("camilleq2")
 };
 
 bool OrbWalker::CanAttack() {
@@ -63,6 +64,7 @@ void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth), 90.f);
 	}
+	
 	/*
 	else {
 		if (lastAntiAfk == NULL || clock() - lastAntiAfk > 600) {
@@ -82,11 +84,11 @@ void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 			LastAttackCommandT = 0;
 			return;
 		}
-			
 
-		for each (std::string castName in AttackResets)
+
+		for each (std::string var in AttackResets)
 		{
-			if (castInfo->BasicAttackSpellData->Name.compare(castName))
+			if (castInfo->BasicAttackSpellData->Name.compare(var))
 			{
 				LastAttackCommandT = 0;
 				break;
