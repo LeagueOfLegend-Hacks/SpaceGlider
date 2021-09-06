@@ -5,6 +5,8 @@ FuncTypes::fnOnProcessSpell Functions::OnProcessSpell;
 FuncTypes::fnOnNewPath Functions::OnNewPath;
 FuncTypes::fnCreateObject Functions::OnCreateObject;
 FuncTypes::fnDeleteObject Functions::OnDeleteObject;
+FuncTypes::fnIssueClick Functions::IssueClick;
+
 WNDPROC Functions::Original_WndProc;
 int Functions::GetPing() {
 	typedef bool(__thiscall* fnGetPing)(void* netClient);
@@ -74,6 +76,13 @@ bool Functions::IsTurret(GameObject* Object)
 {
 	typedef bool(__cdecl* fnIsTurret)(GameObject* pObj);
 	return ((fnIsTurret)(DEFINE_RVA(Offsets::Functions::IsTurret)))(Object);
+}
+
+void Functions::IssueOrder(EOrderType orderType, int screen_x, int screen_y)
+{
+	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
+	Functions::IssueClick(HUDInputLogic, 0, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
+	Functions::IssueClick(HUDInputLogic, 1, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
 }
 
 float Functions::GetAttackDelay(GameObject* Object)

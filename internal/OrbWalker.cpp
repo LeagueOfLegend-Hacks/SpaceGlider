@@ -1,5 +1,6 @@
 #include "OrbWalker.h"
 #include "TargetSelector.h"
+#include "LeagueFunctions.h"
 #include "Console.h"
 #include <ctime>
 #include "XorStr.h"
@@ -32,39 +33,29 @@ bool OrbWalker::CanMove(float extraWindup) {
 }
 
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
-	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
-	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
-	fnIssueClick IssueClick = (fnIssueClick)(DEFINE_RVA(0x5AE550));
 	if (CanAttack() && target != nullptr) {
 		if (Functions::IsAlive(target)) {
 			auto w2s = riot_render->WorldToScreen(target->ServerPosition);
-			IssueClick(HUDInputLogic, 0, 1, 0, w2s.x, w2s.y, 0);
-			IssueClick(HUDInputLogic, 1, 1, 0, w2s.x, w2s.y, 0);
-
-
+			Functions::IssueOrder(EOrderType::attack, w2s.x, w2s.y);
 		}
 	}
 	if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
 	{
 		auto w2s = riot_render->WorldToScreen(Functions::GetMouseWorldPosition());
-		IssueClick(HUDInputLogic, 0, 0, 0, w2s.x, w2s.y, 0);
-		IssueClick(HUDInputLogic, 1, 0, 0, w2s.x, w2s.y, 0);
+		Functions::IssueOrder(EOrderType::move, w2s.x, w2s.y);
 		LastMoveCommandT = GetTickCount64() + 50;
 	}
 }
 
 void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 {
-	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
-	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
-	fnIssueClick IssueClick = (fnIssueClick)(DEFINE_RVA(0x5AE550));
 	auto pLocal = ObjectManager::GetLocalPlayer();
 	static clock_t lastAntiAfk = 0;
 	render.draw_circle(pLocal->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(0, 255, 0, 255));
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth), 90.f);
 	}
-	
+
 	/*
 	else {
 		if (lastAntiAfk == NULL || clock() - lastAntiAfk > 600) {
@@ -113,6 +104,8 @@ void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 }
 
 void OrbWalker::Initalize() {
+	Functions::IssueClick = (FuncTypes::fnIssueClick)(DEFINE_RVA(Offsets::Functions::IssueClick));
+
 	LastMoveCommandT = 0;
 	LastAttackCommandT = 0;
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);

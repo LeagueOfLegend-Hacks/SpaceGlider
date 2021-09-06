@@ -34,7 +34,8 @@ namespace Offsets {
 		GetAttackCastDelay = 0x275f90,
 		OnCreateObject = 0x27E1E0,	//0xAE
 		OnDeleteObject = 0x276BF0,	//0x151
-		OnFinishCast = 0x4EAB00
+		OnFinishCast = 0x4EAB00,
+		IssueClick = 0x5AE550,
 	};
 	enum class Data {
 		NetClient = 0x30E223C,

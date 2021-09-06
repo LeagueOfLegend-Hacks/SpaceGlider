@@ -145,3 +145,8 @@ struct SEntityList {
 	size_t size;
 	size_t max_size;
 };
+
+enum EOrderType {
+	move,
+	attack
+};

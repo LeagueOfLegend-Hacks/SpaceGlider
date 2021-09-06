@@ -9,6 +9,7 @@ namespace FuncTypes {
 	typedef int(__thiscall* fnCreateObject)(GameObject* obj, unsigned int NetworkID);
 	typedef int(__thiscall* fnDeleteObject)(void* thisPtr, GameObject* pObject);
 	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
+	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
 }
 namespace Functions {
 	extern FuncTypes::Prototype_Reset Original_Reset;
@@ -17,6 +18,7 @@ namespace Functions {
 	extern FuncTypes::fnOnNewPath OnNewPath;
 	extern FuncTypes::fnCreateObject OnCreateObject;
 	extern FuncTypes::fnDeleteObject OnDeleteObject;
+	extern FuncTypes::fnIssueClick IssueClick;
 	extern WNDPROC Original_WndProc;
 
 	int GetPing();
@@ -31,4 +33,5 @@ namespace Functions {
 	bool IsTurret(GameObject* Object);
 	float GetAttackDelay(GameObject* Object);
 	float GetAttackCastDelay(GameObject* Object);
+	void IssueOrder(EOrderType orderType, int screen_x, int screen_y);
 }
