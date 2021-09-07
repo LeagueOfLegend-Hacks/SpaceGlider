@@ -87,32 +87,40 @@ void Functions::IssueOrder(EOrderType orderType, int screen_x, int screen_y)
 	Functions::IssueClick(HUDInputLogic, 0, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
 	Functions::IssueClick(HUDInputLogic, 1, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
 }
-void MoveCursorTo(float x, float y)
+UINT PressKey(WORD scanCode)
 {
-	static float fScreenWidth = (float)::GetSystemMetrics(SM_CXSCREEN) - 1;
-	static float fScreenHeight = (float)::GetSystemMetrics(SM_CYSCREEN) - 1;
+	INPUT input[1] = { 0 };
+	input[0].type = INPUT_KEYBOARD;
+	input[0].ki.wVk = 0;
+	input[0].ki.wScan = scanCode;
+	input[0].ki.dwFlags = KEYEVENTF_SCANCODE;
 
-	INPUT input = { 0 };
-	input.type = INPUT_MOUSE;
-	input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
-	input.mi.dx = (LONG)(x * (65535.0f / fScreenWidth));
-	input.mi.dy = (LONG)(y * (65535.0f / fScreenHeight));
+	UINT ret = SendInput(1, input, sizeof(INPUT));
 
-	// Sometimes this fails idk why the fuck but calling the function two times seems to solve it
-	SendInput(1, &input, sizeof(INPUT));
-	SendInput(1, &input, sizeof(INPUT));
+	return ret;
+}
+
+UINT ReleaseKey(WORD scanCode)
+{
+	INPUT input[1] = { 0 };
+	input[0].type = INPUT_KEYBOARD;
+	input[0].ki.wVk = 0;
+	input[0].ki.wScan = scanCode;
+	input[0].ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+
+	UINT ret = SendInput(1, input, sizeof(INPUT));
+
+	return ret;
 }
 void Functions::CastSpell(int Slot, int screen_x, int screen_y) {
-	MLP.enabled = true;
-	MLP.x = screen_x;
-	MLP.y = screen_y;
-	DWORD HUDSpellLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
-	Functions::IssueSpell(HUDSpellLogic, Slot, 4, 0);
-	auto SlotCopy = Slot;
+		MLP.x = screen_x;
+		MLP.y = screen_y;
+		MLP.enabled = true;
+		PressKey(0x10);
+		ReleaseKey(0x10);
 	action ReleaseMouse([=] {
-		Functions::IssueSpell(HUDSpellLogic, SlotCopy, 4, 1);
 		MLP.enabled = false;
-		}, 50);
+		}, 8);
 	DelayedAction.add(ReleaseMouse);
 }
 

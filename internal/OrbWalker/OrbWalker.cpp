@@ -31,7 +31,7 @@ static clock_t lastCast;
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 	if (CanAttack() && target != nullptr) {
 		if (Functions::IsAlive(target)) {
-			auto w2s = riot_render->WorldToScreen(target->ServerPosition);
+			auto w2s = riot_render->WorldToScreen(target->Position);
 			Functions::IssueOrder(EOrderType::attack, w2s.x, w2s.y);
 			LastAttackCommandT = GetTickCount64() - Functions::GetPing() / 2;
 		}
