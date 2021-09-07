@@ -25,6 +25,16 @@ HRESULT WINAPI Hooked_Reset(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pP
 
 	return result;
 }
+auto Original_GetCursorPos = &GetCursorPos;
+BOOL WINAPI hGetCursorPos(LPPOINT lpPoint)
+{
+	auto org = Original_GetCursorPos(lpPoint);
+	if (MLP.enabled) {
+		lpPoint->x = MLP.x;
+		lpPoint->y = MLP.y;
+	}
+	return org;
+}
 LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))

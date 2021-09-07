@@ -21,24 +21,28 @@ HMODULE g_module;
 UltimateHooks ulthook;
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
 ModuleLoader Loader;
+MouseLockedPos MLP;
+
 
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
 	ulthook.RestoreRtlAddVectoredExceptionHandler();
 	ulthook.RestoreZwQueryInformationProcess();
+	Original_GetCursorPos = &GetCursorPos;
+	Functions::IssueSpell = (FuncTypes::fnIssueSpell)(DEFINE_RVA(Offsets::Functions::IssueSpell));
 	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (FuncTypes::Prototype_Reset)GetDeviceAddress(16);
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourAttach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourAttach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
 	DetourTransactionCommit();
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 	if (GetSystemDEPPolicy()) {
 		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
-		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnNewPath), (DWORD)hk_OnNewPath, Functions::OnNewPath, 0x28F, NewOnNewPath, 2);
 		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnCreateObject), (DWORD)hk_OnCreateObject, Functions::OnCreateObject, 0xAE, NewOnCreateObject, 3);
 		//ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnDeleteObject), (DWORD)hk_OnDeleteObject, Functions::OnDeleteObject, 0x151, NewOnDeleteObject, 4);
 	}
@@ -47,6 +51,7 @@ void RemoveHooks() {
 	SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)Functions::Original_WndProc);
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
+	DetourDetach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourDetach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourDetach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
 	DetourTransactionCommit();
@@ -69,6 +74,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	EventManager::Trigger(EventManager::EventType::OnLoad);
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
 		EventManager::Trigger(EventManager::EventType::OnTick);
+		DelayedAction.update(GetTickCount64());
 	}
 	EventManager::Trigger(EventManager::EventType::OnUnLoad);
 	RemoveHooks();

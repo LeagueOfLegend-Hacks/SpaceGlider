@@ -52,4 +52,5 @@ public:
 			else ++iter;
 		}
 	}
-}DelayedAction;
+};
+extern delayAction DelayedAction;

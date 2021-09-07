@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include <d3d9.h>
 #include "../Patchables/Structs.h"
+#include "../DelayedAction/DelayedAction.h"
+#include "../Console/Console.h"
 namespace FuncTypes {
 	typedef HRESULT(WINAPI* Prototype_Present)(LPDIRECT3DDEVICE9, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 	typedef HRESULT(WINAPI* Prototype_Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
@@ -10,6 +12,7 @@ namespace FuncTypes {
 	typedef int(__thiscall* fnDeleteObject)(void* thisPtr, GameObject* pObject);
 	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
 	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int unknown2, int screen_x, int screen_y, char unknown3);
+	typedef int(__thiscall* fnIssueSpell)(int HudSpellLogic, int Slot, int always4, int State);
 }
 namespace Functions {
 	extern FuncTypes::Prototype_Reset Original_Reset;
@@ -19,6 +22,7 @@ namespace Functions {
 	extern FuncTypes::fnCreateObject OnCreateObject;
 	extern FuncTypes::fnDeleteObject OnDeleteObject;
 	extern FuncTypes::fnIssueClick IssueClick;
+	extern FuncTypes::fnIssueSpell IssueSpell;
 	extern WNDPROC Original_WndProc;
 
 	int GetPing();
@@ -34,4 +38,5 @@ namespace Functions {
 	float GetAttackDelay(GameObject* Object);
 	float GetAttackCastDelay(GameObject* Object);
 	void IssueOrder(EOrderType orderType, int screen_x, int screen_y);
+	void CastSpell(int Slot, int screen_x, int screen_y);
 }

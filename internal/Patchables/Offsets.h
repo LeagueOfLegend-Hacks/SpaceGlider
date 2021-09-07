@@ -37,6 +37,7 @@ namespace Offsets {
 		OnDeleteObject = 0x276BF0,	//0x151
 		OnFinishCast = 0x4EAB00,
 		IssueClick = 0x5AE550,
+		IssueSpell = 0x5DCE20
 	};
 	enum class Data {
 		NetClient = 0x30E223C,

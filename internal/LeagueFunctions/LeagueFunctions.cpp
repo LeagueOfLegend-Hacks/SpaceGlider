@@ -1,4 +1,5 @@
 #include "LeagueFunctions.h"
+#include <ctime>
 FuncTypes::Prototype_Reset Functions::Original_Reset;
 FuncTypes::Prototype_Present Functions::Original_Present;
 FuncTypes::fnOnProcessSpell Functions::OnProcessSpell;
@@ -6,7 +7,7 @@ FuncTypes::fnOnNewPath Functions::OnNewPath;
 FuncTypes::fnCreateObject Functions::OnCreateObject;
 FuncTypes::fnDeleteObject Functions::OnDeleteObject;
 FuncTypes::fnIssueClick Functions::IssueClick;
-
+FuncTypes::fnIssueSpell Functions::IssueSpell;
 WNDPROC Functions::Original_WndProc;
 int Functions::GetPing() {
 	typedef bool(__thiscall* fnGetPing)(void* netClient);
@@ -80,9 +81,39 @@ bool Functions::IsTurret(GameObject* Object)
 
 void Functions::IssueOrder(EOrderType orderType, int screen_x, int screen_y)
 {
+	if (MLP.enabled)
+		return;
 	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
 	Functions::IssueClick(HUDInputLogic, 0, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
 	Functions::IssueClick(HUDInputLogic, 1, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
+}
+void MoveCursorTo(float x, float y)
+{
+	static float fScreenWidth = (float)::GetSystemMetrics(SM_CXSCREEN) - 1;
+	static float fScreenHeight = (float)::GetSystemMetrics(SM_CYSCREEN) - 1;
+
+	INPUT input = { 0 };
+	input.type = INPUT_MOUSE;
+	input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+	input.mi.dx = (LONG)(x * (65535.0f / fScreenWidth));
+	input.mi.dy = (LONG)(y * (65535.0f / fScreenHeight));
+
+	// Sometimes this fails idk why the fuck but calling the function two times seems to solve it
+	SendInput(1, &input, sizeof(INPUT));
+	SendInput(1, &input, sizeof(INPUT));
+}
+void Functions::CastSpell(int Slot, int screen_x, int screen_y) {
+	MLP.enabled = true;
+	MLP.x = screen_x;
+	MLP.y = screen_y;
+	DWORD HUDSpellLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
+	Functions::IssueSpell(HUDSpellLogic, Slot, 4, 0);
+	auto SlotCopy = Slot;
+	action ReleaseMouse([=] {
+		Functions::IssueSpell(HUDSpellLogic, SlotCopy, 4, 1);
+		MLP.enabled = false;
+		}, 50);
+	DelayedAction.add(ReleaseMouse);
 }
 
 float Functions::GetAttackDelay(GameObject* Object)

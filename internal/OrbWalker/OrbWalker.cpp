@@ -1,5 +1,5 @@
 #include "OrbWalker.h"
-#include <ctime>
+
 
 float OrbWalker::LastAttackCommandT = 0;
 float OrbWalker::LastMoveCommandT = 0;
@@ -27,7 +27,7 @@ bool OrbWalker::CanAttack() {
 bool OrbWalker::CanMove(float extraWindup) {
 	return GetTickCount64() >= LastAttackCommandT + Functions::GetAttackCastDelay(ObjectManager::GetLocalPlayer()) * 1000.f + Functions::GetPing() + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
 }
-
+static clock_t lastCast;
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 	if (CanAttack() && target != nullptr) {
 		if (Functions::IsAlive(target)) {
@@ -81,26 +81,14 @@ void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 	}
 
 
-
-
 	if (castInfo->BasicAttackSpellData != nullptr)
 		LastAttackCommandT = GetTickCount64() - Functions::GetPing() / 2;
 
-	/*
-	switch (castInfo->Slot) {
-	case kSpellSlot::SpellSlot_Unknown:
-	case kSpellSlot::SpellSlot_BasicAttack1:
-	case kSpellSlot::SpellSlot_BasicAttack2:
-	case kSpellSlot::SpellSlot_SpecialAttack:
-		LastAttackCommandT = float(GetTickCount64()) + GetPing() / 2;
-		break;
-	}
-	*/
+
 }
 
 void OrbWalker::Initalize() {
 	Functions::IssueClick = (FuncTypes::fnIssueClick)(DEFINE_RVA(Offsets::Functions::IssueClick));
-
 	LastMoveCommandT = 0;
 	LastAttackCommandT = 0;
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);

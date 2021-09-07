@@ -11,6 +11,12 @@ struct SpellDataEntry {
 	kDangerLevel DangerLevel;
 
 };
+struct MouseLockedPos {
+	long x;
+	long y;
+	bool enabled;
+};
+extern MouseLockedPos MLP;
 class SpellDataResource
 {
 public:
