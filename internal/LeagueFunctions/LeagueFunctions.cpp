@@ -84,8 +84,8 @@ void Functions::IssueOrder(EOrderType orderType, int screen_x, int screen_y)
 	if (MLP.enabled)
 		return;
 	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
-	Functions::IssueClick(HUDInputLogic, 0, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
-	Functions::IssueClick(HUDInputLogic, 1, static_cast<int>(orderType), 0, screen_x, screen_y, 0);
+	Functions::IssueClick(HUDInputLogic, 0, static_cast<int>(orderType), 1, screen_x, screen_y, 0);
+	Functions::IssueClick(HUDInputLogic, 1, static_cast<int>(orderType), 1, screen_x, screen_y, 0);
 }
 UINT PressKey(WORD scanCode)
 {
