@@ -166,6 +166,20 @@ namespace Offsets {
 		BaseCharacterData = 0x2B24,
 	};
 
+	enum class AIManager
+	{
+		NavStart = 0x1cc,
+		NavEnd = 0x224,
+		ServerPos = 0x2e4,
+		Velocity = 0x2f0,
+		Moving = 0x1c0,
+		CurrentSegment = 0x1c4,
+		Dashing = 0x214,
+		DashingSpeed = 0x1f8,
+		NavArray = 0x1e4,
+		NavArrayEnd = 0x1e8
+	};
+	
 	enum class CharacterData {
 		SkinHash = 0x10,
 	};
