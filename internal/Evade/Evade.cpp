@@ -8,7 +8,8 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 	for (it = ActiveSpells.begin(); it != ActiveSpells.end(); it++) {
 		auto spellData = SpellData.find(it->second.BasicAttackSpellData->Name);
 		if (spellData != SpellData.end()) {
-			if (it->second.StartTime + spellData->second.duration > *(float*)(DEFINE_RVA(Offsets::Data::GameTime))) {
+			float duration = spellData->second.type == SpellType::Line ? it->second.StartPosition.distance(it->second.EndPosition) / it->second.BasicAttackSpellData->Resource->MissileSpeed : spellData->second.duration;
+			if (it->second.StartTime + duration >= *(float*)(DEFINE_RVA(Offsets::Data::GameTime))) {
 				Vector2 StartPos_W2S, EndPos_W2S;
 				StartPos_W2S = riot_render->WorldToScreen(it->second.StartPosition);
 				EndPos_W2S = riot_render->WorldToScreen(it->second.EndPosition);
