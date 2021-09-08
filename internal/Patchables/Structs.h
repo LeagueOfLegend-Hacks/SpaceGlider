@@ -5,10 +5,11 @@
 #include "../Enums.h"
 #include "../Patchables/CharacterData.h"
 #include <string>
+
 struct SpellDataEntry {
 	SpellType type;
-	float duration;
-	kDangerLevel DangerLevel;
+	float duration = 0.0f;
+	kDangerLevel DangerLevel = kDangerLevel::None;
 
 };
 struct MouseLockedPos {
@@ -66,16 +67,30 @@ class AIManager
 public:
 	union
 	{
-		DEFINE_MEMBER_N(Vector3 NavStartPos, 0x1cc)
-			DEFINE_MEMBER_N(Vector3 NavEndPos, 0x224)
-			DEFINE_MEMBER_N(Vector3 ServerPos, 0x2e4)
-			DEFINE_MEMBER_N(Vector3 Velocity, 0x2f0)
-			DEFINE_MEMBER_N(bool Moving, 0x1c0)
-			DEFINE_MEMBER_N(bool Dashing, 0x214)
-			DEFINE_MEMBER_N(float DashingSpeed, 0x1f8)
-			DEFINE_MEMBER_N(Vector3* NavArray, 0x1e4)
-			DEFINE_MEMBER_N(Vector3* NavArrayEnd, 0x1e8)
+		DEFINE_MEMBER_N(Vector3 NavStartPos, Offsets::AIManager::NavStart)
+			DEFINE_MEMBER_N(Vector3 NavEndPos, Offsets::AIManager::NavEnd)
+			DEFINE_MEMBER_N(Vector3 ServerPos, Offsets::AIManager::ServerPos)
+			DEFINE_MEMBER_N(Vector3 Velocity, Offsets::AIManager::Velocity)
+			DEFINE_MEMBER_N(bool Moving, Offsets::AIManager::Moving)
+			DEFINE_MEMBER_N(bool Dashing, Offsets::AIManager::Dashing)
+			DEFINE_MEMBER_N(float DashingSpeed, Offsets::AIManager::DashingSpeed)
+			DEFINE_MEMBER_N(Vector3* NavArray, Offsets::AIManager::NavArray)
+			DEFINE_MEMBER_N(Vector3* NavArrayEnd, Offsets::AIManager::NavArrayEnd)
 	};
+
+	int pathSize()
+	{
+		return ((DWORD)this->NavArrayEnd - (DWORD)this->NavArray) / (sizeof(Vector3));
+	}
+
+	float pathLength()
+	{
+		float length = 0;
+		for (int i = 0; i < this->pathSize(); ++i)
+			length += this->NavArray[i + 1].distance(this->NavArray[i]);
+
+		return length;
+	}
 };
 
 class SpellInfo {
@@ -128,6 +143,11 @@ public:
 			DEFINE_MEMBER_N(SpellBook		SpellBook, Offsets::GameObject::SpellBook)
 			DEFINE_MEMBER_N(CharacterData* BaseCharacterData, Offsets::GameObject::BaseCharacterData)
 	};
+
+	AIManager* GameObject::GetAIManager() {
+		return reinterpret_cast<AIManager*(__thiscall*)(GameObject*)>(this->VTable[149])(this);
+	}
+
 	float GameObject::GetBoundingRadius() {
 		return reinterpret_cast<float(__thiscall*)(GameObject*)>(this->VTable[35])(this);
 	}
@@ -154,7 +174,7 @@ struct SEntityList {
 	size_t max_size;
 };
 
-enum EOrderType {
+enum class EOrderType {
 	move,
 	attack
 };

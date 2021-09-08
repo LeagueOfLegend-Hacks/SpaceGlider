@@ -25,7 +25,7 @@ bool OrbWalker::CanAttack() {
 }
 
 bool OrbWalker::CanMove(float extraWindup) {
-	return GetTickCount64() >= LastAttackCommandT + Functions::GetAttackCastDelay(ObjectManager::GetLocalPlayer()) * 1000.f + Functions::GetPing() + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
+	return GetTickCount64() >= LastAttackCommandT + Functions::GetAttackCastDelay(ObjectManager::GetLocalPlayer()) * 1000.f + Functions::GetPing() / 2 + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
 }
 static clock_t lastCast;
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
@@ -54,8 +54,8 @@ void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(target, 90.f);
 
-		if(target != nullptr)
-		render.draw_circle(target->Position, 50.f, ImColor(255, 0, 0, 255), ImRender::DrawType::Normal, 5.f);
+		if (target != nullptr)
+			render.draw_circle(target->Position, 50.f, ImColor(255, 0, 0, 255), ImRender::DrawType::Normal, 5.f);
 	}
 
 	/*
