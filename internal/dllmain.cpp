@@ -30,7 +30,6 @@ void ApplyHooks() {
 	ulthook.RestoreRtlAddVectoredExceptionHandler();
 	ulthook.RestoreZwQueryInformationProcess();
 	Original_GetCursorPos = &GetCursorPos;
-	Functions::IssueSpell = (FuncTypes::fnIssueSpell)(DEFINE_RVA(Offsets::Functions::IssueSpell));
 	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (FuncTypes::Prototype_Reset)GetDeviceAddress(16);
 	DetourRestoreAfterWith();
