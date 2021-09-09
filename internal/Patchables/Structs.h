@@ -123,7 +123,6 @@ public:
 			DEFINE_MEMBER_N(unsigned short	Index, Offsets::GameObject::Index)
 			DEFINE_MEMBER_N(int				Team, Offsets::GameObject::TeamID)
 			DEFINE_MEMBER_N(unsigned int	NetworkID, 0xCC)
-			DEFINE_MEMBER_N(Vector3			ServerPosition, 0x1D8)
 			DEFINE_MEMBER_N(Vector3			Position, Offsets::GameObject::Position)
 			DEFINE_MEMBER_N(bool			IsVisible, 0x23C)
 			DEFINE_MEMBER_N(bool			IsTargetable, Offsets::GameObject::mIsTargetable)
