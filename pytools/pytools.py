@@ -201,9 +201,6 @@ def main():
         ["PercentCooldownCapMod", GetCharacterIntermediate()+FindOffset("mPercentCooldownCapMod",0x5,1)],
         ["PassiveCooldownEndTime", GetCharacterIntermediate()+FindOffset("mPassiveCooldownEndTime",-0x3,1)],
         ["PassiveCooldownTotalTime", GetCharacterIntermediate()+FindOffset("mPassiveCooldownTotalTime",0x5,1)],
-        # MISSING: 0x50
-        # MISSING: 0x60
-        # MISSING: 0x70
         ["FlatPhysicalDamageMod", GetCharacterIntermediate()+0xFFFFFF00-FindOffset("mFlatPhysicalDamageMod",0x5,1)], # this is weird in asm, its the only one we need to subtract this odd offset to get the correct offset.
         ["PercentPhysicalDamageMod", GetCharacterIntermediate()+FindOffset("mPercentPhysicalDamageMod",0x5,1)],
         ["PercentBonusPhysicalDamageMod", GetCharacterIntermediate()+ FindOffset("mPercentBonusPhysicalDamageMod",0x5,1)],
@@ -233,7 +230,6 @@ def main():
         ["HPRegenRate", GetCharacterIntermediate()+ FindOffset("mHPRegenRate",0x5,1)],
         ["BaseHPRegenRate", GetCharacterIntermediate()+ FindOffset("mBaseHPRegenRate",0x5,1)],
         ["MoveSpeed", GetCharacterIntermediate()+ FindOffset("mMoveSpeed",0x5,1)],
-        # MISSING: 0x250
         ["AttackRange", GetCharacterIntermediate()+ FindOffset("mAttackRange",0x5,1)],
         ["FlatBubbleRadiusMod", GetCharacterIntermediate()+ FindOffset("mFlatBubbleRadiusMod",0x5,1)],
         ["PercentBubbleRadiusMod", GetCharacterIntermediate()+ FindOffset("mPercentBubbleRadiusMod",0x5,1)],
@@ -258,7 +254,6 @@ def main():
         ["PrimaryARBaseRegenRateRep", GetCharacterIntermediate()+ FindOffset("mPrimaryARBaseRegenRateRep",-0x6,1)],
         ["SecondaryARRegenRateRep", GetCharacterIntermediate()+ FindOffset("mSecondaryARRegenRateRep",0x5,1)],
         ["SecondaryARBaseRegenRateRep", GetCharacterIntermediate()+ FindOffset("mSecondaryARBaseRegenRateRep",0x5,1)],
-        # MISSING: 0x3F0 - not actually sure if this is missing or we just stop at 0x3D0, would make more sense to stop at a even break point though... will figure out later...
         ["Gold", FindOffset("mGold",0x5,1)],
         ["GoldTotal", FindOffset("mGoldTotal",0x5,1)],
         ["MinimumGold", FindOffset("mGoldTotal",-0xC,1)],
