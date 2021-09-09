@@ -41,9 +41,9 @@ namespace Offsets {
 	};
 	enum class Data {
 		NetClient = 0x30E223C,
-		LocalPlayer = 0x30DA914,
-		GameTime = 0x30d2c58,
-		ObjectManager = 0x183E1A0,
+		LocalPlayer = 0x30D2FD4,						// 11.18
+		GameTime = 0x30CB3AC,							// 11.18
+		ObjectManager = 0x18363C0,						// 11.18
 		ManagerTemplate_Minions = 0x30CD588,
 		ManagerTemplate_AttackableUnits = 0x30CD584,
 		ManagerTemplate_Turrets = 0x30D1AF8,
@@ -52,7 +52,7 @@ namespace Offsets {
 		MangerTemplate_Buildings = 0x183B9DC,
 		ManagerTemplate_Heros = 0x183C1A4,
 		HudInstance = 0x183e1dc,
-		D3DRender = 0x310257c
+		D3DRender = 0x30FA8D4							// 11.18
 	};
 	enum class GameObject {
 		Index = 0x20,
