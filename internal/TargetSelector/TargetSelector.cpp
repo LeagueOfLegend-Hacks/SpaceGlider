@@ -1,10 +1,9 @@
 #include "TargetSelector.h"
 #include "../Constants.h"
 
-GameObject* TargetSelector::tryFindTarget(TargetType targetting_type)
+GameObject* TargetSelector::tryFindTarget(TargetType targetting_type, std::list<GameObject*> Objects)
 {
 	auto pLocal =  ObjectManager::GetLocalPlayer();
-	std::list<GameObject*> Objects = ObjectManager::HeroList();
 	GameObject* CurTarget = nullptr;
 	for (auto pObject : Objects) {
 		if (pObject != nullptr) {

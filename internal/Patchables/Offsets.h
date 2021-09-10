@@ -17,37 +17,37 @@ namespace Offsets {
 		kInvalid = 0x4
 	};
 	enum class Functions {
-		GetPing = 0x322500,								// 11.18		55 8B EC 83 EC 08 0F B6
-		OnProcessSpell = 0x4FC190,						// 11.18		E8 ?? ?? ?? ?? 8B CE E8 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? ?? D8
-		WorldToScreen = 0x972BA0,						// 11.18		83 EC 10 56 E8 ? ? ? ? 8B 08
-		GetFirstObject = 0x27A880,						// 11.18		8B 44 24 04 56 8B 71 18
-		GetNextObject = 0x27B280,						// 11.18		E8 ? ? ? ? 8B F0 85 F6 74 21 0F 1F 44 00 ?
-		IsAlive = 0x13EDF0,								// 11.18		56 8B F1 8B 06 8B 80 ? ? ? ? FF D0 84 C0 74 19
-		IsHero = 0x1A94C0,								// 11.18		E8 ? ? ? ? 83 C4 04 84 C0 74 52
-		IsMissile = 0x1A9520,							// 11.18		E8 ? ? ? ? 83 C4 04 84 C0 74 3F
-		IsMinion = 0x1a70c0,							// 11.17		E8 ? ? ? ? 83 C4 04 80 7F 26 06
-		IsInhib = 0x1a6f00,								// 11.17		E8 ? ? ? ? 55 88 44 24 1F
-		IsBaron = 0x165B20,								// 11.17		56 81 C1 ? ? ? ? E8 ? ? ? ? 68
-		IsNexus = 0x1a7000,								// 11.17		E8 ? ? ? ? 55 88 44 24 20
-		IsTurret = 0x1a6ec0,							// 11.17		E8 ? ? ? ? 83 C4 04 84 C0 75 ?
-		GetAttackDelay = 0x2781A0,						// 11.18		8B 44 24 04 51 F3
-		GetAttackCastDelay = 0x2780a0,					// 11.18		83 EC 0C 53 8B 5C 24 14 8B CB 56
-		IssueClick = 0x5F5B40,							// 11.18		E8 ? ? ? ? 84 C0 74 12 5F
+		GetPing = 0x322500,								// 11.18
+		OnProcessSpell = 0x4FC190,						// 11.18
+		WorldToScreen = 0x972BA0,						// 11.18
+		GetFirstObject = 0x27A880,						// 11.18
+		GetNextObject = 0x27B280,						// 11.18
+		IsAlive = 0x13EDF0,								// 11.18
+		IsHero = 0x1A94C0,								// 11.18
+		IsMissile = 0x1A9520,							// 11.18
+		IsMinion = 0x1a70c0,							// 11.17
+		IsInhib = 0x1a6f00,								// 11.17
+		IsBaron = 0x165B20,								// 11.17
+		IsNexus = 0x1a7000,								// 11.17
+		IsTurret = 0x1a6ec0,							// 11.17
+		GetAttackDelay = 0x2781A0,						// 11.18
+		GetAttackCastDelay = 0x2780a0,					// 11.18
+		IssueClick = 0x5F5B40,							// 11.18
 	};
 	enum class Data {
-		NetClient = 0x30DA3EC,							// 11.18		8B 0D ? ? ? ? 85 C9 74 07 8B 01 6A 01 FF 50 08 8B
-		LocalPlayer = 0x30D2FD4,						// 11.18		A1 ?? ?? ?? ?? 85 C0 74 07 05 ?? ?? ?? ?? EB 02 33 C0 56
-		GameTime = 0x30CB3AC,							// 11.18		F3 0F 11 05 ? ? ? ? 8B 49
-		ObjectManager = 0x18363C0,						// 11.18		8B 0D ? ? ? ? 89 74 24 14
-		ManagerTemplate_Minions = 0x30CD588,			// 11.17		A1 ?? ?? ?? ?? 53 55 8B 6C 24 1C
-		ManagerTemplate_AttackableUnits = 0x30CD584,	// 11.17
-		ManagerTemplate_Turrets = 0x30D1AF8,			// 11.17		A1 ? ? ? ? 53 56 8B 70 04
-		ManagerTemplate_Shops = 0x30CE500,				// 11.17
-		ManagerTemplate_Inhibitors = 0x30DB7F8,			// 11.17
-		MangerTemplate_Buildings = 0x183B9DC,			// 11.17
-		ManagerTemplate_Heros = 0x18343AC,				// 11.18		8B 0D ?? ?? ?? ?? 50 8D 44 24 18
-		HudInstance = 0x18363F8,						// 11.18		8B 0D ? ? ? ? 6A 00 8B 49 34 E8 ? ? ? ? B0 01 C2
-		D3DRender = 0x30FA8D4							// 11.18		8B 15 ? ? ? ? 83 EC 08
+		NetClient = 0x30DA3EC,							// 11.18
+		LocalPlayer = 0x30D2FD4,						// 11.18
+		GameTime = 0x30CB3AC,							// 11.18
+		ObjectManager = 0x18363C0,						// 11.18
+		ManagerTemplate_Minions = 0x1836454,			// 11.18
+		ManagerTemplate_AttackableUnits = 0x30C5994,	// 11.18
+		ManagerTemplate_Turrets = 0x30C5990,			// 11.18
+		ManagerTemplate_Shops = 0x30C67C8,				// 11.18
+		ManagerTemplate_Inhibitors = 0x30D3714,			// 11.18
+		MangerTemplate_Buildings = 0x1833C4C,			// 11.18
+		ManagerTemplate_Heros = 0x18343AC,				// 11.18
+		HudInstance = 0x18363F8,						// 11.18
+		D3DRender = 0x30FA8D4							// 11.18
 	};
 	enum class GameObject {
 		Index = 0x20,									// 11.18

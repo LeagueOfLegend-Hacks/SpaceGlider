@@ -50,12 +50,16 @@ void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 
 void OrbWalker::OnDraw()
 {
-	auto pLocal = ObjectManager::GetLocalPlayer();
-	auto target = TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth);
+	auto target = TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth, ObjectManager::HeroList());
 
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(target, 90.f);
-
+	}
+	else if (GetAsyncKeyState(0x56)) {
+		auto ObjectList = ObjectManager::MinionList();
+		ObjectList.merge(ObjectManager::BuildingList());
+		target = TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth, ObjectList);
+		OrbWalk(target, 90.0f);
 	}
 
 }

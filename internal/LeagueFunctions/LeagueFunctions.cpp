@@ -35,7 +35,7 @@ Vector3 Functions::GetMouseWorldPosition()
 bool Functions::IsAlive(GameObject* Object)
 {
 	typedef bool(__thiscall* fnIsAlive)(GameObject* pObj);
-	return ((fnIsAlive)(DEFINE_RVA(Offsets::Functions::IsAlive)))(Object);
+	return ((fnIsAlive)(DEFINE_RVA(Offsets::Functions::IsAlive)))(Object) && Object->Health > 0.0f;
 }
 
 bool Functions::IsHero(GameObject* Object)

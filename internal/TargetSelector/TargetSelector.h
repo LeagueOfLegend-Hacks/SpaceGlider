@@ -7,5 +7,5 @@ namespace TargetSelector
 		LowestHealth,
 	}; 
 	
-	GameObject* tryFindTarget(TargetType targetting_type);
+	GameObject* tryFindTarget(TargetType targetting_type, std::list<GameObject*> Objects);
 }
