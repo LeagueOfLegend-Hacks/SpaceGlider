@@ -1,6 +1,5 @@
 #include "OrbWalker.h"
 
-
 float OrbWalker::LastAttackCommandT = 0;
 float OrbWalker::LastMoveCommandT = 0;
 
@@ -20,12 +19,17 @@ std::string OrbWalker::AttackResets[] =
 	xorstr("asheq"), xorstr("camilleq"), xorstr("camilleq2")
 };
 
+int OrbWalker::GetGameTick()
+{
+	return (int)(*(float*)(DEFINE_RVA(Offsets::Data::GameTime)) * 1000);
+}
+
 bool OrbWalker::CanAttack() {
-	return GetTickCount64() + Functions::GetPing() / 2.f >= LastAttackCommandT + Functions::GetAttackDelay(ObjectManager::GetLocalPlayer()) * 1000.f;
+	return GetGameTick() + Functions::GetPing() / 2.f >= LastAttackCommandT + Functions::GetAttackDelay(ObjectManager::GetLocalPlayer()) * 1000.f;
 }
 
 bool OrbWalker::CanMove(float extraWindup) {
-	return GetTickCount64() >= LastAttackCommandT + Functions::GetAttackCastDelay(ObjectManager::GetLocalPlayer()) * 1000.f + Functions::GetPing() / 2 + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
+	return GetGameTick() >= LastAttackCommandT + Functions::GetAttackCastDelay(ObjectManager::GetLocalPlayer()) * 1000.f + Functions::GetPing() / 2 + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
 }
 static clock_t lastCast;
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
@@ -33,41 +37,27 @@ void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 		if (Functions::IsAlive(target)) {
 			auto w2s = riot_render->WorldToScreen(target->Position);
 			Functions::IssueOrder(EOrderType::attack, w2s.x, w2s.y);
-			LastAttackCommandT = GetTickCount64() - Functions::GetPing() / 2;
+			LastAttackCommandT = GetGameTick() - Functions::GetPing() / 2;
 		}
 	}
-	if (CanMove(extraWindup) && LastMoveCommandT < GetTickCount64())
+	if (CanMove(extraWindup) && LastMoveCommandT < GetGameTick())
 	{
 		auto w2s = riot_render->WorldToScreen(Functions::GetMouseWorldPosition());
 		Functions::IssueOrder(EOrderType::move, w2s.x, w2s.y);
-		LastMoveCommandT = GetTickCount64() + 50;
+		LastMoveCommandT = GetGameTick() + 50;
 	}
 }
 
-void OrbWalker::OnDraw(LPDIRECT3DDEVICE9 Device)
+void OrbWalker::OnDraw()
 {
 	auto pLocal = ObjectManager::GetLocalPlayer();
 	auto target = TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth);
 
-	static clock_t lastAntiAfk = 0;
-	render.draw_circle(pLocal->Position, pLocal->AttackRange + pLocal->GetBoundingRadius(), ImColor(0, 255, 0, 255));
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(target, 90.f);
 
-		if (target != nullptr)
-			render.draw_circle(target->Position, 50.f, ImColor(255, 0, 0, 255), ImRender::DrawType::Normal, 5.f);
 	}
 
-	/*
-	else {
-		if (lastAntiAfk == NULL || clock() - lastAntiAfk > 600) {
-			lastAntiAfk = clock();
-			auto w2s = riot_render->WorldToScreen(pLocal->ServerPosition)g;
-			IssueClick(HUDInputLogic, 0, 0, 0, w2s.x, w2s.y, 0);
-			IssueClick(HUDInputLogic, 1, 0, 0, w2s.x, w2s.y, 0);
-		}
-	}
-	*/
 }
 void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 
@@ -82,16 +72,28 @@ void OrbWalker::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 
 
 	if (castInfo->BasicAttackSpellData != nullptr)
-		LastAttackCommandT = GetTickCount64() - Functions::GetPing() / 2;
+		LastAttackCommandT = GetGameTick() - Functions::GetPing() / 2;
 
 
 }
 
-void OrbWalker::Initalize() {
+void OrbWalker::Initialize() {
 	Functions::IssueClick = (FuncTypes::fnIssueClick)(DEFINE_RVA(Offsets::Functions::IssueClick));
+	EventManager::AddEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
+	EventManager::AddEventHandler(EventManager::EventType::OnDraw, OnDraw);
+
+	EventManager::AddEventHandler(EventManager::EventType::OnLoad, OnLoad);
+	EventManager::AddEventHandler(EventManager::EventType::OnUnLoad, OnUnload);
+}
+
+void OrbWalker::OnLoad()
+{
 	LastMoveCommandT = 0;
 	LastAttackCommandT = 0;
-	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
-	EventManager::AddEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
+}
+
+void OrbWalker::OnUnload()
+{
+	EventManager::RemoveEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
 	EventManager::AddEventHandler(EventManager::EventType::OnDraw, OnDraw);
 }

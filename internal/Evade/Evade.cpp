@@ -1,4 +1,5 @@
 #include "Evade.h"
+#include "../Constants.h"
 
 std::unordered_map<float, SpellInfo> Evade::ActiveSpells;
 std::unordered_map<std::string, SpellDataEntry> Evade::SpellData;
@@ -20,7 +21,7 @@ void Evade::OnDraw(LPDIRECT3DDEVICE9 Device) {
 
 				float Alpha = (float)spellData->second.DangerLevel / 10;
 				ImColor Color = ImColor(1.0f, 1.0f, 1.0f, Alpha);
-				if (Caster->IsEnemyTo(ObjectManager::GetLocalPlayer()))
+				if (Caster->IsEnemyTo( ObjectManager::GetLocalPlayer()))
 					Color = ImColor(1.0f, 0.0f, 0.0f, Alpha);
 				else
 					Color = ImColor(0.0f, 1.0f, 0.0f, Alpha);
@@ -57,7 +58,6 @@ void Evade::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 void Evade::Initalize() {
 	SpellData.insert({ "MorganaQ", { SpellType::Line, 1.2, kDangerLevel::High}});
 	SpellData.insert({ "MorganaW", { SpellType::Circle, 5, kDangerLevel::Low}});
-	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	EventManager::AddEventHandler(EventManager::EventType::OnProcessSpell, OnProcessSpell);
 	EventManager::AddEventHandler(EventManager::EventType::OnDraw, OnDraw);
 }

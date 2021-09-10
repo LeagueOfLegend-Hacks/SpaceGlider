@@ -27,6 +27,7 @@ public:
 	void end_draw();
 	void draw_text(Vector2 screen_pos, const char* text, bool outlined = false, ImColor color = ImColor(255,255,255,255) , ImFont* font = nullptr);
 	void draw_line(Vector2 start_pos, Vector2 end_pos, ImColor color = ImColor(255, 255, 255, 255), float thickness = 1.0f);
+	void draw_line3D(Vector3 start_pos, Vector3 end_pos, ImColor color = ImColor(255, 255, 255, 255), float thickness = 1.0f);
 	void draw_rect(Vector4 screen_pos, ImColor color = ImColor(255, 255, 255, 255), DrawType type = DrawType::Normal, float rounding = 0.0f, unsigned short points = 12, float thickness = 1.0f);
 	void draw_triangle(Vector2 pos_one, Vector2 pos_two, Vector2 pos_three, ImColor color = ImColor(255,255,255,255), DrawType type = DrawType::Normal, float thickness = 1.0f);
 	void draw_circle(Vector2 screen_pos, float radius, ImColor color = ImColor(255, 255, 255, 255), DrawType type = DrawType::Normal, unsigned short points = 12, float thickness= 1.0f);

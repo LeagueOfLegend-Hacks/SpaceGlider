@@ -117,6 +117,13 @@ void ImRender::draw_line(Vector2 start_pos, Vector2 end_pos, ImColor color, floa
 {
 	ImGui::GetWindowDrawList()->AddLine(ImVec2(start_pos.x, start_pos.y), ImVec2(end_pos.x, end_pos.y), color, thickness);
 }
+void ImRender::draw_line3D(Vector3 start_pos, Vector3 end_pos, ImColor color, float thickness)
+{
+	auto startPos = riot_render->WorldToScreen(start_pos);
+	auto endPos = riot_render->WorldToScreen(end_pos);
+
+	ImGui::GetWindowDrawList()->AddLine(ImVec2(startPos.x, startPos.y), ImVec2(endPos.x, endPos.y), color, thickness);
+}
 void ImRender::draw_rect(Vector4 screen_pos, ImColor color, DrawType type, float rounding, unsigned short points, float thickness)
 {
 	switch (type)

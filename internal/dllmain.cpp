@@ -13,14 +13,13 @@
 #include <list>
 #include "Hooks/Hooks.h"
 #include "Evade/Evade.h"
-#include "ModuleLoader/ModuleLoader.h"
+#include "Plugins/PluginLoader.h"
 
 LeagueDecrypt rito_nuke;
-D3DRenderer* riot_render;
 HMODULE g_module;
+D3DRenderer* riot_render;
 UltimateHooks ulthook;
 PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
-ModuleLoader Loader;
 MouseLockedPos MLP;
 
 
@@ -61,16 +60,16 @@ DWORD WINAPI MainThread(LPVOID param) {
 	Sleep(200);
 	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
 	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
-	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 	ApplyHooks();
-	OrbWalker::Initalize();
-	Evade::Initalize();
 
-	Loader.LoadChampionModule();
+	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
+
+	PluginLoader::LoadPlugins();
+	OrbWalker::Initialize();
+	Evade::Initalize();
 
 	EventManager::Trigger(EventManager::EventType::OnLoad);
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
-		EventManager::Trigger(EventManager::EventType::OnTick);
 		DelayedAction.update(GetTickCount64());
 	}
 	EventManager::Trigger(EventManager::EventType::OnUnLoad);
@@ -100,8 +99,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 	}
 	return TRUE;
 #else
-	return compileInRelease
+	return compile_in_release_
 #endif
 
-	
-}
+
+	}

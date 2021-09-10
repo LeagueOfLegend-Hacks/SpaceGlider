@@ -144,7 +144,7 @@ public:
 	};
 
 	AIManager* GameObject::GetAIManager() {
-		return reinterpret_cast<AIManager*(__thiscall*)(GameObject*)>(this->VTable[149])(this);
+		return reinterpret_cast<AIManager * (__thiscall*)(GameObject*)>(this->VTable[149])(this);
 	}
 
 	float GameObject::GetBoundingRadius() {
@@ -164,6 +164,7 @@ public:
 	std::string GetChampionName() {
 		return std::string(this->ChampionName);
 	}
+
 };
 template<typename T>
 struct SEntityList {
