@@ -57,6 +57,8 @@ SET(core_sources
 	TargetSelector/TargetSelector.cpp
 	Plugins/PluginLoader.h
 	Plugins/Utilities/WaypointTracker.h
+	BuffManager/BuffManager.h
+	BuffManager/BuffManager.cpp
 )
 add_library(${PROJECT_NAME} SHARED ${core_sources} ${zydis_source})
 include_directories($ENV{DXSDK_DIR}/Include)

@@ -4,7 +4,10 @@
 #include "../Vector.h"
 #include "../Enums.h"
 #include "../Patchables/CharacterData.h"
+#include "../BuffManager/BuffManager.h"
 #include <string>
+#include <vector>
+#include <algorithm>
 
 struct SpellDataEntry {
 	SpellType type;
@@ -141,7 +144,36 @@ public:
 			DEFINE_MEMBER_N(int				MissileDestIdx, Offsets::GameObject::MissileDestIndex)
 			DEFINE_MEMBER_N(SpellBook		SpellBook, Offsets::GameObject::SpellBook)
 			DEFINE_MEMBER_N(CharacterData* BaseCharacterData, Offsets::GameObject::BaseCharacterData)
+			DEFINE_MEMBER_N(BuffManager BuffManager, Offsets::BuffManager::Instance);
 	};
+
+	std::string ToLower(std::string str)
+	{
+		std::string strLower;
+		strLower.resize(str.size());
+
+		std::transform(str.begin(),
+			str.end(),
+			strLower.begin(),
+			::tolower);
+
+		return strLower;
+		return str;
+	}
+
+	bool StringContains(std::string strA, std::string strB)
+	{
+		if (strA.empty() || strB.empty())
+			return true;
+
+		strA = ToLower(strA);
+		strB = ToLower(strB);
+
+		if (strA.find(strB) != std::string::npos)
+			return true;
+
+		return false;
+	}
 
 	AIManager* GameObject::GetAIManager() {
 		return reinterpret_cast<AIManager * (__thiscall*)(GameObject*)>(this->VTable[149])(this);

@@ -14,6 +14,7 @@ int Functions::GetPing() {
 	fnGetPing pGetPing = (fnGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
 	return pGetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
 }
+
 Vector3 Functions::GetMouseWorldPosition()
 {
 	DWORD MousePtr = DEFINE_RVA(Offsets::Data::HudInstance);

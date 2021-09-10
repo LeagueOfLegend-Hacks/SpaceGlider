@@ -147,6 +147,23 @@ namespace Offsets {
 		BaseCharacterData = 0x2B44,
 	};
 
+	enum class BuffManager
+	{
+		Instance = 0x21BC,
+		ArrayStart = 0x10,
+		ArrayEnd = 0x14,
+		StartTime = 0xC,
+		BuffScript = 0x8,
+		EndTime = 0x10,
+		BuffType = 0x4,
+		BuffDuration = 0x14,
+		BuffCount = 0x74,
+		BuffCountAlt = 0x20,
+		BuffCountAlt2 = 0x24,
+		BuffName = 0x8,
+		BuffHash = 0x88,  
+	};
+
 	enum class AIManager
 	{
 		NavStart = 0x1cc,

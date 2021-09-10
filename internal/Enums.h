@@ -64,3 +64,13 @@ enum class SpellState
 	NoMana = 64,
 	Unknown
 };
+
+enum class kRecallState
+{
+	None = 0,
+	Odin_Recall = 6,
+	Super_Recall = 11,
+	Teleporting = 16,
+	Stand_United = 19,
+	Yuumi_W_Ally = 10
+};
