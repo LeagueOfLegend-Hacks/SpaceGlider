@@ -83,6 +83,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 }
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
+#ifdef NDEBUG
 	g_module = hModule;
 	DisableThreadLibraryCalls(hModule);
 	switch (ul_reason_for_call)
@@ -98,4 +99,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		break;
 	}
 	return TRUE;
+#else
+	return FALSE;
+#endif
+
+	
 }
