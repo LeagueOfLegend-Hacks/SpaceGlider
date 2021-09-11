@@ -62,6 +62,8 @@ bool BuffManager::buffStrainer(BuffEntry* buff)
         return false;
     if ((int)(*(float*)(DEFINE_RVA(Offsets::Data::GameTime))) > buff->endTime)
         return false;
+    if (strcmp(buff->name().c_str(), xorstr("invalidBuff")) == 0 || buff->stacksAlt() == 0)
+        return false;
     return true;
 }
 
