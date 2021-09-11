@@ -12,12 +12,12 @@ WNDPROC Functions::Original_WndProc;
 
 float Functions::GameTime()
 {
-	*(float*)(DEFINE_RVA(Offsets::Data::GameTime));
+	return *(float*)(DEFINE_RVA(Offsets::Data::GameTime));
 }
 
 float Functions::GameTimeTick()
 {
-	*(float*)(DEFINE_RVA(Offsets::Data::GameTime));
+	return *(float*)(DEFINE_RVA(Offsets::Data::GameTime));
 }
 
 int Functions::GetPing() {
