@@ -16,6 +16,13 @@ GameObject* TargetSelector::tryFindTarget(TargetType targetting_type, std::list<
 						if (CurTarget != nullptr && CurTarget->Health > pObject->Health)
 							CurTarget = pObject;
 						break;
+					case TargetType::Killable:
+					{
+						auto pLocal = ObjectManager::GetLocalPlayer();
+						if (pObject->Health + (pObject->Armor + pObject->BonusArmor) <= pLocal->BaseAttackDamage + pLocal->BonusAttackDamage)
+							CurTarget = pObject;
+						break;
+					}
 					}
 				}
 			}

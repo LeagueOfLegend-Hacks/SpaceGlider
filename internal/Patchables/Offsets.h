@@ -136,7 +136,7 @@ namespace Offsets {
 		ShutdownValue = 0x3a1c,
 		BaseGoldGivenOnDeath = 0x3a2c,
 
-		BonusAttackDamage = 0x121C+ 0x18,
+		BonusAttackDamage = 0x1234,
 		ChampionName = 0x2BD4,
 
 		MissileSpellInfo = 0x258,

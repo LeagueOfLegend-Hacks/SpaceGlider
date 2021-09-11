@@ -31,7 +31,7 @@ bool OrbWalker::CanAttack() {
 bool OrbWalker::CanMove(float extraWindup) {
 	return GetGameTick() >= LastAttackCommandT + Functions::GetAttackCastDelay(ObjectManager::GetLocalPlayer()) * 1000.f + Functions::GetPing() / 2 + extraWindup || ObjectManager::GetLocalPlayer()->GetChampionName() == "Kalista";
 }
-static clock_t lastCast;
+
 void OrbWalker::OrbWalk(GameObject* target, float extraWindup) {
 	if (CanAttack() && target != nullptr) {
 		if (Functions::IsAlive(target)) {
@@ -55,10 +55,18 @@ void OrbWalker::OnDraw()
 	if (GetAsyncKeyState(VK_SPACE)) {
 		OrbWalk(target, 90.f);
 	}
-	else if (GetAsyncKeyState(0x56)) {
+	else if (GetAsyncKeyState(0x56)) { // VK_V - wave clear
 		auto ObjectList = ObjectManager::MinionList();
 		ObjectList.merge(ObjectManager::BuildingList());
+		ObjectList.merge(ObjectManager::HeroList());
 		target = TargetSelector::tryFindTarget(TargetSelector::TargetType::LowestHealth, ObjectList);
+		OrbWalk(target, 90.0f);
+	}
+	else if (GetAsyncKeyState(0x58)) {	// VK_X - last hit, WIP
+		auto ObjectList = ObjectManager::MinionList();
+		ObjectList.merge(ObjectManager::BuildingList());
+		ObjectList.merge(ObjectManager::HeroList());
+		target = TargetSelector::tryFindTarget(TargetSelector::TargetType::Killable, ObjectList);
 		OrbWalk(target, 90.0f);
 	}
 
