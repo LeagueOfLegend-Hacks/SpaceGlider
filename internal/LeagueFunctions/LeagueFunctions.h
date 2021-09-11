@@ -25,6 +25,8 @@ namespace Functions {
 	extern FuncTypes::fnIssueSpell IssueSpell;
 	extern WNDPROC Original_WndProc;
 
+	float GameTime();
+	float GameTimeTick();
 	int GetPing();
 	Vector3 GetMouseWorldPosition();
 	bool IsAlive(GameObject* Object);
