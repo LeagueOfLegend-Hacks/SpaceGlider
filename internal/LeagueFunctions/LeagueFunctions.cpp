@@ -9,6 +9,17 @@ FuncTypes::fnDeleteObject Functions::OnDeleteObject;
 FuncTypes::fnIssueClick Functions::IssueClick;
 FuncTypes::fnIssueSpell Functions::IssueSpell;
 WNDPROC Functions::Original_WndProc;
+
+float Functions::GameTime()
+{
+	*(float*)(DEFINE_RVA(Offsets::Data::GameTime));
+}
+
+float Functions::GameTimeTick()
+{
+	*(float*)(DEFINE_RVA(Offsets::Data::GameTime));
+}
+
 int Functions::GetPing() {
 	typedef bool(__thiscall* fnGetPing)(void* netClient);
 	fnGetPing pGetPing = (fnGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
