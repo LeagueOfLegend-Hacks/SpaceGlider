@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <algorithm>
 #include <Windows.h>
 #define baseAddress (DWORD)GetModuleHandleA(NULL)
 #define DEFINE_RVA(address) (baseAddress + (DWORD)address)
