@@ -1,8 +1,12 @@
 #pragma once
 #include "../XorStr.h"
+#include "../Patchables/Offsets.h"
+#include "../Utils/Utils.h"
 #include <string>
 #include <Windows.h>
 #include <vector>
+#include <iostream>
+#include <functional>
 
 enum class BuffType {
     Internal = 0,
@@ -49,24 +53,29 @@ enum class BuffType {
 class BuffScript
 {
 public:
-    ULONG GetBuffHash();
+    ULONG buffHash();
 };
 
 class BuffEntry {
 public:
-    BuffType GetType();
-    BuffScript* GetBuffScript();
-    const char* GetBuffName();
-    float GetStartTime();
-    float GetEndTime();
-    int GetBuffStacksAlt();
-    bool IsValid();
+    union
+    {
+        DEFINE_MEMBER_N(BuffScript* buffScript, Offsets::BuffManager::BuffScript)
+        DEFINE_MEMBER_N(BuffType type, Offsets::BuffManager::BuffType)
+        DEFINE_MEMBER_N(float startTime, Offsets::BuffManager::StartTime)
+        DEFINE_MEMBER_N(float endTime, Offsets::BuffManager::EndTime)
+        DEFINE_MEMBER_N(int count, Offsets::BuffManager::BuffCount)
+        DEFINE_MEMBER_N(int countAlt, Offsets::BuffManager::BuffCountAlt)
+        DEFINE_MEMBER_N(int countAlt2, Offsets::BuffManager::BuffCountAlt2)
+    };
+    std::string name();
+    int stacksAlt();
 };
 
 class BuffManager {
 public:
-    std::vector<BuffEntry*> GetAllBuffs();
-    bool HasBuff(char* name);
+    std::vector<BuffEntry*> entries();
+    bool hasBuff(std::string name);
 private:
-    std::vector<BuffEntry*> GetBuffEntries();
+    static bool buffStrainer(BuffEntry* buff);
 };
