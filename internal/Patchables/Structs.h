@@ -5,6 +5,7 @@
 #include "../Enums.h"
 #include "../Patchables/CharacterData.h"
 #include "../BuffManager/BuffManager.h"
+#include "../SpellInstance/Spellbase.h"
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -112,13 +113,7 @@ public:
 			DEFINE_MEMBER_N(unsigned short	TargetId, Offsets::SpellInfo::TargetID)
 	};
 };
-class SpellBook {
-public:
-	union {
-		DEFINE_MEMBER_0(DWORD* VTable)
-			DEFINE_MEMBER_N(DWORD* Info, Offsets::Spell::kInvalid)
-	};
-};
+
 class GameObject {
 public:
 	union {
@@ -131,49 +126,25 @@ public:
 			DEFINE_MEMBER_N(bool			IsTargetable, Offsets::GameObject::mIsTargetable)
 			DEFINE_MEMBER_N(float			Health, Offsets::GameObject::HP)
 			DEFINE_MEMBER_N(float			MaxHealth, Offsets::GameObject::MaxHP)
+			DEFINE_MEMBER_N(float			Mana, Offsets::GameObject::Mana)
+			DEFINE_MEMBER_N(float			Mana, Offsets::GameObject::MaxMana)
 			DEFINE_MEMBER_N(float			Armor, Offsets::GameObject::Armor)
 			DEFINE_MEMBER_N(float			BonusArmor, Offsets::GameObject::BonusArmor)
 			DEFINE_MEMBER_N(float			AttackRange, Offsets::GameObject::AttackRange)
 			DEFINE_MEMBER_N(float			BaseAttackDamage, Offsets::GameObject::BaseAttackDamage)
 			DEFINE_MEMBER_N(float			BonusAttackDamage, Offsets::GameObject::BonusAttackDamage)
+			DEFINE_MEMBER_N(float			MovementSpeed, Offsets::GameObject::MoveSpeed)
 			DEFINE_MEMBER_N(char* ChampionName, Offsets::GameObject::ChampionName)
 			DEFINE_MEMBER_N(SpellData* MissileSpellInfo, Offsets::GameObject::MissileSpellInfo)
 			DEFINE_MEMBER_N(int				MissileSrcInx, Offsets::GameObject::MissileSrcIndex)
 			DEFINE_MEMBER_N(Vector3			MissileStartPos, Offsets::GameObject::MissileStartPos)
 			DEFINE_MEMBER_N(Vector3			MissileEndPos, Offsets::GameObject::MissileEndPos)
 			DEFINE_MEMBER_N(int				MissileDestIdx, Offsets::GameObject::MissileDestIndex)
-			DEFINE_MEMBER_N(SpellBook		SpellBook, Offsets::GameObject::SpellBook)
+			DEFINE_MEMBER_N(CSpellBook		SpellBook, Offsets::GameObject::SpellBook)
 			DEFINE_MEMBER_N(CharacterData* BaseCharacterData, Offsets::GameObject::BaseCharacterData)
 			DEFINE_MEMBER_N(BuffManager BuffManager, Offsets::BuffManager::Instance);
+
 	};
-
-	std::string ToLower(std::string str)
-	{
-		std::string strLower;
-		strLower.resize(str.size());
-
-		std::transform(str.begin(),
-			str.end(),
-			strLower.begin(),
-			::tolower);
-
-		return strLower;
-		return str;
-	}
-
-	bool StringContains(std::string strA, std::string strB)
-	{
-		if (strA.empty() || strB.empty())
-			return true;
-
-		strA = ToLower(strA);
-		strB = ToLower(strB);
-
-		if (strA.find(strB) != std::string::npos)
-			return true;
-
-		return false;
-	}
 
 	AIManager* GameObject::GetAIManager() {
 		return reinterpret_cast<AIManager * (__thiscall*)(GameObject*)>(this->VTable[149])(this);
