@@ -57,25 +57,31 @@ std::string GetGameVersion() {
 	return std::string(reinterpret_cast<char*>(GameVersion));
 }
 DWORD WINAPI MainThread(LPVOID param) {
+	IsPatchDetected = GetGameVersion() != xorstr("Version 11.18.395.7538 [PUBLIC]");
 
-	while (!*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
-		Sleep(1);
+	if (!IsPatchDetected) {
+		while (!*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
+			Sleep(1);
 
+		TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
 
-	TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
+		LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
 
-	LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
+		ApplyHooks();
 
-	ApplyHooks();
+		PluginLoader::LoadPlugins();
 
-	PluginLoader::LoadPlugins();
-
-	EventManager::Trigger(EventManager::EventType::OnLoad);
-	while (!(GetAsyncKeyState(VK_END) & 1)) {
-		DelayedAction.update(GetTickCount64());
+		EventManager::Trigger(EventManager::EventType::OnLoad);
+		while (!(GetAsyncKeyState(VK_END) & 1)) {
+			DelayedAction.update(GetTickCount64());
+		}
+		EventManager::Trigger(EventManager::EventType::OnUnLoad);
 	}
-	EventManager::Trigger(EventManager::EventType::OnUnLoad);
-
+	else {
+		TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
+		LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
+		MessageBoxA(nullptr, xorstr("A patch has been detected. please do a league dump now."), xorstr("PatchGuard"), 0);
+	}
 
 	return 1;
 }
