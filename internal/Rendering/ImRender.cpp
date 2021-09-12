@@ -45,8 +45,9 @@ void ImRender::Init(LPDIRECT3DDEVICE9 Device) {
 	IsInitalized = true;
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 
-	LoadIcons(Device, std::string("path 1"));
-	LoadIcons(Device, std::string("path 2"));
+	LoadIcons(Device, std::string("C:/SpaceGlider/Sprites/Wards"));
+	LoadIcons(Device, std::string("C:/SpaceGlider/Sprites/UI"));
+	LoadIcons(Device, std::string("C:/SpaceGlider/Sprites/Spells"));
 }
 
 void ImRender::Free() {
@@ -117,6 +118,13 @@ void ImRender::draw_line(Vector2 start_pos, Vector2 end_pos, ImColor color, floa
 {
 	ImGui::GetWindowDrawList()->AddLine(ImVec2(start_pos.x, start_pos.y), ImVec2(end_pos.x, end_pos.y), color, thickness);
 }
+void ImRender::draw_line(Vector3 start_pos, Vector3 end_pos, ImColor color, float thickness)
+{
+	Vector2 startWorldPos, endWorldPos;
+	startWorldPos = riot_render->WorldToScreen(start_pos);
+	endWorldPos = riot_render->WorldToScreen(end_pos);
+	ImGui::GetWindowDrawList()->AddLine(ImVec2(startWorldPos.x, startWorldPos.y), ImVec2(endWorldPos.x, endWorldPos.y), color, thickness);
+}
 void ImRender::draw_line3D(Vector3 start_pos, Vector3 end_pos, ImColor color, float thickness)
 {
 	auto startPos = riot_render->WorldToScreen(start_pos);
@@ -180,10 +188,12 @@ void ImRender::draw_circle(Vector3 screen_pos, float radius, ImColor color, Draw
 
 void ImRender::draw_image(const char* img, Vector3 pos, Vector2 body, ImColor color)
 {
+	Vector2 worldPos = riot_render->WorldToScreen(pos);
 	static ImVec2 zero = ImVec2(0.f, 0.f);
     static ImVec2 one = ImVec2(1.f, 1.f);
+
 	auto it = Images.find(std::string(img));
 	if (it == Images.end())
 		return;
-	ImGui::GetWindowDrawList()->AddImage(it->second, ImVec2(pos.x, pos.y), ImVec2(body.x + pos.x, body.y + pos.y), zero, one, color);
+	ImGui::GetWindowDrawList()->AddImage(it->second, ImVec2(worldPos.x, worldPos.y), ImVec2(body.x + worldPos.x, body.y + worldPos.y), zero, one, color);
 }
