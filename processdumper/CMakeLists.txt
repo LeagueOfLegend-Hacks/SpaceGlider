@@ -33,5 +33,5 @@ SET(process_dumper_src
 	utils.h
 	work_queue.h
 )
-add_library(${PROJECT_NAME} SHARED ${process_dumper_src})
+add_executable(${PROJECT_NAME} ${process_dumper_src})
 target_link_libraries(${PROJECT_NAME} PUBLIC Shlwapi.lib Kernel32.lib)
