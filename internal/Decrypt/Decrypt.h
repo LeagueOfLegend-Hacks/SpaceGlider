@@ -43,3 +43,5 @@ public:
 private:
     t_RtlDispatchException fn_RtlDispatchException;
 };
+
+extern LeagueDecrypt TextDecryptor;

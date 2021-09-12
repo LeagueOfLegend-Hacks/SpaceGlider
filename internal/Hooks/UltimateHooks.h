@@ -51,3 +51,4 @@ private:
 	bool UltimateHooks::Hook(DWORD original_fun, DWORD hooked_fun, size_t offset);
 	void UltimateHooks::FixRellocation(DWORD OldFnAddress, DWORD OldFnAddressEnd, DWORD NewFnAddress, size_t size, size_t _offset);
 };
+extern UltimateHooks UltHook;

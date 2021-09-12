@@ -1,5 +1,7 @@
 #include "Decrypt.h"
 
+LeagueDecrypt TextDecryptor;
+
 uint8_t* LeagueDecrypt::FindSignature(const LPCSTR szModule, const char* szSignature)
 {
     const HMODULE module = GetModuleHandleA(szModule);

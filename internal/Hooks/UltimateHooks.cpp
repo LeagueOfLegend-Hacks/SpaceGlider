@@ -4,6 +4,7 @@
 
 
 std::vector<HookEntries> hookEntries;
+UltimateHooks UltHook;
 
 bool inRange(unsigned low, unsigned high, unsigned x)
 {

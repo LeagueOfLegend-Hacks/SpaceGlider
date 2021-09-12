@@ -21,19 +21,15 @@
 #ifdef _WIN64
 #error YOU MUST COMPILE IN x86 or Win32, Win64 will not work.
 #endif
-LeagueDecrypt rito_nuke;
 HMODULE g_module;
-D3DRenderer* riot_render;
-UltimateHooks ulthook;
-PVOID NewOnProcessSpell, NewOnNewPath, NewOnCreateObject, NewOnDeleteObject;
 MouseLockedPos MLP;
 
 
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
-	ulthook.RestoreRtlAddVectoredExceptionHandler();
-	ulthook.RestoreZwQueryInformationProcess();
+	UltHook.RestoreRtlAddVectoredExceptionHandler();
+	UltHook.RestoreZwQueryInformationProcess();
 	Original_GetCursorPos = &GetCursorPos;
 	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (FuncTypes::Prototype_Reset)GetDeviceAddress(16);
@@ -46,7 +42,7 @@ void ApplyHooks() {
 	DetourTransactionCommit();
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 	if (GetSystemDEPPolicy()) {
-		ulthook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
+		UltHook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
 	}
 }
 void RemoveHooks() {
@@ -58,18 +54,16 @@ void RemoveHooks() {
 	DetourDetach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
 	DetourTransactionCommit();
 	if (GetSystemDEPPolicy())
-		ulthook.deinit();
+		UltHook.deinit();
 }
 DWORD WINAPI MainThread(LPVOID param) {
 	config.load(g_module);
 	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
 	Sleep(200);
-	rito_nuke._RtlDispatchExceptionAddress = rito_nuke.FindRtlDispatchExceptionAddress();
-	LeagueDecryptData ldd = rito_nuke.Decrypt(nullptr);
+	TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
+	LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
 	ApplyHooks();
-
-	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 
 	PluginLoader::LoadPlugins();
 	OrbWalker::Initialize();

@@ -45,6 +45,7 @@ SET(core_sources
 	LeagueFunctions/LeagueFunctions.h
 	Hooks/Hooks.cpp
 	Hooks/Hooks.h
+	Rendering/D3DRenderer.cpp
 	Rendering/D3DRenderer.h
 	EventManager/EventManager.cpp
 	EventManager/EventManager.h

@@ -2,6 +2,7 @@
 
 Console console;
 ImRender render;
+PVOID NewOnProcessSpell;
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
 	if (Device != nullptr) {
