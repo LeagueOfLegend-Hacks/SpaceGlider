@@ -61,31 +61,22 @@ DWORD WINAPI MainThread(LPVOID param) {
 	while (!*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
 
-	IsPatchDetected = GetGameVersion() != xorstr("Version 11.18.395.7538 [PUBLIC]");
-
-	if (IsPatchDetected)
-		console.Print(xorstr("Patch Detected!"));
-
-	Sleep(200);
 
 	TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
 
 	LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
 
-	if (!IsPatchDetected) {
-		ApplyHooks();
+	ApplyHooks();
 
-		PluginLoader::LoadPlugins();
+	PluginLoader::LoadPlugins();
 
-		EventManager::Trigger(EventManager::EventType::OnLoad);
-		while (!(GetAsyncKeyState(VK_END) & 1)) {
-			DelayedAction.update(GetTickCount64());
-		}
-		EventManager::Trigger(EventManager::EventType::OnUnLoad);
+	EventManager::Trigger(EventManager::EventType::OnLoad);
+	while (!(GetAsyncKeyState(VK_END) & 1)) {
+		DelayedAction.update(GetTickCount64());
 	}
-	else {
-		MessageBoxA(nullptr, xorstr("A patch has been detected. please do a league dump now."), xorstr("PatchGuard"), 0);
-	}
+	EventManager::Trigger(EventManager::EventType::OnUnLoad);
+
+
 	return 1;
 }
 void OnExit() noexcept {

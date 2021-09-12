@@ -22,7 +22,7 @@ namespace PluginLoader
 
 	void LoadPlugins()
 	{
-		LoadChampionModule();
+		//LoadChampionModule();
 
 		WaypointTracker::Initialize();
 		OrbWalker::Initialize();
