@@ -51,11 +51,16 @@ void RemoveHooks() {
 		UltHook.deinit();
 }
 DWORD WINAPI MainThread(LPVOID param) {
-	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
+	while (!*(DWORD*)(*(DWORD*)(TextDecryptor.FindSignature(nullptr, "8B 0D ? ? ? ? 85 C9 0F 84 ? ? ? ? 83 7E 10 00") + 0x2)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
 	
+	if (*(DWORD*)(*(DWORD*)(TextDecryptor.FindSignature(nullptr, "8B 0D ? ? ? ? 85 C9 0F 84 ? ? ? ? 83 7E 10 00") + 0x2)) != *(DWORD*)(DEFINE_RVA(Offsets::Data::LocalPlayer)))
+		console.Print("Patch Detected.");
+	else
+		console.Print("Integrity secured.");
 	Sleep(200);
-	
+
+
 	TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
 	
 	LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);

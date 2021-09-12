@@ -13,6 +13,7 @@ namespace FuncTypes {
 	typedef int(__cdecl* fnOnNewPath)(GameObject* obj, Vector3* start, Vector3* end, Vector3* tail, int unk1, float* dashSpeed, unsigned dash, int unk3, char unk4, int unk5, int unk6, int unk7);
 	typedef int(__thiscall* fnIssueClick)(int thisptr, int State, int IsAttack, int isAttackCommand, int screen_x, int screen_y, char unknown3);
 	typedef int(__thiscall* fnIssueSpell)(int HudSpellLogic, int Slot, int always4, int State);
+	typedef char* (__cdecl* fnIsVersion)(char* a1);
 }
 namespace Functions {
 	extern FuncTypes::Prototype_Reset Original_Reset;
