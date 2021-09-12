@@ -37,3 +37,4 @@ private:
 	}
 	nlohmann::ordered_json json;
 };
+extern ConfigManager config;

@@ -14,6 +14,7 @@
 #include "Hooks/Hooks.h"
 #include "Evade/Evade.h"
 #include "Plugins/PluginLoader.h"
+#include "ConfigManager/Config.h"
 
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
@@ -55,6 +56,7 @@ void RemoveHooks() {
 		ulthook.deinit();
 }
 DWORD WINAPI MainThread(LPVOID param) {
+	config.load(g_module);
 	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
 	Sleep(200);
@@ -76,7 +78,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	RemoveHooks();
 
 	render.Free();
-
+	config.save(g_module);
 	FreeLibraryAndExitThread(g_module, 0);
 	return 1;
 }
