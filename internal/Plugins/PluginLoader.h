@@ -25,6 +25,8 @@ namespace PluginLoader
 		LoadChampionModule();
 
 		WaypointTracker::Initialize();
+		OrbWalker::Initialize();
+		Evade::Initalize();
 
 		if (EventManager::EventCallbacks->size() > 0)
 			Constants::PluginsLoaded = true;

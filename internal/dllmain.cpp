@@ -15,15 +15,9 @@
 #include "Evade/Evade.h"
 #include "Plugins/PluginLoader.h"
 #include "ConfigManager/Config.h"
-#ifdef _DEBUG
-#error ONLY COMPILE IN RELEASE MODE. DO NOT COMPILE IN ANYTHING ELSE.
-#endif
-#ifdef _WIN64
-#error YOU MUST COMPILE IN x86 or Win32, Win64 will not work.
-#endif
 HMODULE g_module;
 MouseLockedPos MLP;
-
+uintptr_t initThreadHandle;
 
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
@@ -57,36 +51,35 @@ void RemoveHooks() {
 		UltHook.deinit();
 }
 DWORD WINAPI MainThread(LPVOID param) {
-	//config.load(g_module);
 	while (!(*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
+	
 	Sleep(200);
+	
 	TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
+	
 	LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
+	
 	ApplyHooks();
 
 	PluginLoader::LoadPlugins();
-	OrbWalker::Initialize();
-	Evade::Initalize();
 
 	EventManager::Trigger(EventManager::EventType::OnLoad);
 	while (!(GetAsyncKeyState(VK_END) & 1)) {
 		DelayedAction.update(GetTickCount64());
 	}
 	EventManager::Trigger(EventManager::EventType::OnUnLoad);
-	RemoveHooks();
-
-	render.Free();
-	//config.save(g_module);
 	return 1;
 }
-uintptr_t initThreadHandle;
-void OnExit() noexcept
-{
+void OnExit() noexcept {
+	RemoveHooks();
+	render.Free();
+	//config.save(g_module);
 	CloseHandle((HANDLE)initThreadHandle);
 }
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
 	g_module = hModule;
+	//config.load(hModule);
 	DisableThreadLibraryCalls(hModule);
 	switch (ul_reason_for_call)
 	{

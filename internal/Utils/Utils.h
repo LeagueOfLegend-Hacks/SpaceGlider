@@ -1,4 +1,10 @@
 #pragma once
+#ifdef _DEBUG
+#error ONLY COMPILE IN RELEASE MODE. DO NOT COMPILE IN ANYTHING ELSE.
+#endif
+#ifdef _WIN64
+#error YOU MUST COMPILE IN x86 or Win32, Win64 will not work.
+#endif
 #include <string>
 #include <algorithm>
 #include <Windows.h>
