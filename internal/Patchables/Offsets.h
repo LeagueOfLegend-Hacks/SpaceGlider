@@ -66,7 +66,9 @@ namespace Offsets {
 		mLifetimeTicks = 0xca8,
 		mIsTargetable = 0xD1C,
 		HP = 0xdb4,
-		MaxHP = 0xDC4,
+		MaxHP = HP + 0x10,
+		Mana = 0x2B4,
+		MaxMana = Mana + 0x10,
 		PercentCooldownMod = 0x16c8,
 		AbilityHasteMod = 0x16d8,
 		PercentCooldownCapMod = 0x16e8,
@@ -182,4 +184,3 @@ namespace Offsets {
 		SkinHash = 0x10,
 	};
 }
-//yer
