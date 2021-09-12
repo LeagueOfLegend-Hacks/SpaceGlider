@@ -18,6 +18,7 @@
 HMODULE g_module;
 MouseLockedPos MLP;
 uintptr_t initThreadHandle;
+bool IsPatchDetected;
 
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
@@ -51,10 +52,9 @@ void RemoveHooks() {
 		UltHook.deinit();
 }
 std::string GetGameVersion() {
-	auto GameVersion = *(DWORD*)(TextDecryptor.FindSignature(nullptr, "8B 44 24 04 BA ? ? ? ? 2B D0") + 0x5);
+	auto GameVersion = *(DWORD*)(TextDecryptor.FindSignature(nullptr, xorstr("8B 44 24 04 BA ? ? ? ? 2B D0")) + 0x5);
 	return std::string(reinterpret_cast<char*>(GameVersion));
 }
-bool IsPatchDetected;
 DWORD WINAPI MainThread(LPVOID param) {
 
 	while (!*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
