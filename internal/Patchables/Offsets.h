@@ -22,7 +22,7 @@ namespace Offsets {
 		WorldToScreen = 0x972BA0,						// 11.18
 		GetFirstObject = 0x27A880,						// 11.18
 		GetNextObject = 0x27B280,						// 11.18
-		IsAlive = 0x13EDF0,								// 11.18
+		IsAlive = 0x13EDF0,								// 11.18 vtable[127]
 		IsHero = 0x1A94C0,								// 11.18
 		IsMissile = 0x1A9520,							// 11.18
 		IsMinion = 0x1a70c0,							// 11.17

@@ -15,6 +15,7 @@
 #include "Evade/Evade.h"
 #include "Plugins/PluginLoader.h"
 #include "ConfigManager/Config.h"
+
 HMODULE g_module;
 MouseLockedPos MLP;
 uintptr_t initThreadHandle;
@@ -60,7 +61,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	while (!*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
 		Sleep(1);
 
-	IsPatchDetected = GetGameVersion() == xorstr("Version 11.18.395.7538 [PUBLIC]");
+	IsPatchDetected = GetGameVersion() != xorstr("Version 11.18.395.7538 [PUBLIC]");
 
 	if (IsPatchDetected)
 		console.Print(xorstr("Patch Detected!"));
@@ -68,9 +69,9 @@ DWORD WINAPI MainThread(LPVOID param) {
 	Sleep(200);
 
 	TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
-	
+
 	LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
-	
+
 	if (!IsPatchDetected) {
 		ApplyHooks();
 
