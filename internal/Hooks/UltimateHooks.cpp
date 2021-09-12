@@ -94,7 +94,6 @@ DWORD UltimateHooks::RestoreRtlAddVectoredExceptionHandler() {
 }
 DWORD UltimateHooks::RestoreZwQueryInformationProcess() {
 	HMODULE ntdll = GetModuleHandleA("ntdll.dll");
-	//AppLog.AddLog(("ntdll:" + hexify<DWORD>(DWORD(ntdll))+ "\n").c_str());
 
 	DWORD ZwQueryInformationProcessAddr = reinterpret_cast<DWORD>(
 		GetProcAddress(ntdll, "ZwQueryInformationProcess"));
