@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <vector>
 #include <VersionHelpers.h>
+#include <Zydis/Zydis.h>
 
 #define VP_Offset 0x170
 

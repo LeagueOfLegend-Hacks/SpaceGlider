@@ -1,7 +1,5 @@
 #include "UltimateHooks.h"
 #include "../DirectSysCalls/makesyscall.h"
-#include <Zydis/Zydis.h>
-
 
 std::vector<HookEntries> hookEntries;
 UltimateHooks UltHook;
