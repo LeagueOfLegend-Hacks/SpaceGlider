@@ -7,7 +7,8 @@ class CSpellData
 public:
     union
     {
-        DEFINE_MEMBER_N(char* name, 0x6C)
+        DEFINE_MEMBER_N(char* missileName, 0x6C)
+        DEFINE_MEMBER_N(char* name, 0x90)
     };
     float mana(int level);
 };
