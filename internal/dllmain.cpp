@@ -15,7 +15,9 @@
 #include "Evade/Evade.h"
 #include "Plugins/PluginLoader.h"
 #include "ConfigManager/Config.h"
-
+#ifdef _DEBUG
+#error ONLY COMPILE IN RELEASE MODE. DO NOT COMPILE IN ANYTHING ELSE.
+#endif
 LeagueDecrypt rito_nuke;
 HMODULE g_module;
 D3DRenderer* riot_render;
@@ -84,7 +86,6 @@ DWORD WINAPI MainThread(LPVOID param) {
 }
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
-#ifdef NDEBUG
 	g_module = hModule;
 	DisableThreadLibraryCalls(hModule);
 	switch (ul_reason_for_call)
@@ -100,9 +101,4 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		break;
 	}
 	return TRUE;
-#else
-	return compile_in_release_
-#endif
-
-
-	}
+}
