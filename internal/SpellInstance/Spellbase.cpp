@@ -1,5 +1,5 @@
 #pragma once
-#include "../Spell.h"
+#include "../SpellInstance/Spellbase.h"
 
 float CSpellData::mana(int level) {
     if (level > 4) {
