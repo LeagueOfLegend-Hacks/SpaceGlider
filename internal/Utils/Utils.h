@@ -13,3 +13,4 @@
 HWND GetHwndProc();
 DWORD FindDevice(DWORD Len);
 DWORD GetDeviceAddress(int VTableIndex);
+bool IsLeagueInForeground();

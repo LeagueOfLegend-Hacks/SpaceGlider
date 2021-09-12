@@ -5,6 +5,8 @@ ImRender render;
 PVOID NewOnProcessSpell;
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
+	if (!IsLeagueInForeground())
+		return Functions::Original_Present(Device, pSrcRect, pDestRect, hDestWindow, pDirtyRegion);
 	if (Device != nullptr) {
 
 		render.Init(Device);

@@ -78,23 +78,29 @@ DWORD WINAPI MainThread(LPVOID param) {
 
 	render.Free();
 	//config.save(g_module);
-	FreeLibraryAndExitThread(g_module, 0);
 	return 1;
 }
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+uintptr_t initThreadHandle;
+void OnExit() noexcept
 {
+	CloseHandle((HANDLE)initThreadHandle);
+}
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
 	g_module = hModule;
 	DisableThreadLibraryCalls(hModule);
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
-		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)MainThread, hModule, 0, nullptr);
+		std::atexit(OnExit);
+		initThreadHandle = _beginthreadex(nullptr, 0, (_beginthreadex_proc_type)MainThread, hModule, 0, nullptr);
+		FreeLibrary(hModule);
 		break;
 	case DLL_THREAD_ATTACH:
 		break;
 	case DLL_THREAD_DETACH:
 		break;
 	case DLL_PROCESS_DETACH:
+		OnExit();
 		break;
 	}
 	return TRUE;

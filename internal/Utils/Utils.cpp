@@ -44,3 +44,9 @@ DWORD GetDeviceAddress(int VTableIndex)
 	*(DWORD*)&VTable = *(DWORD*)FindDevice(0x128000);
 	return VTable[VTableIndex];
 }
+bool IsLeagueInForeground()
+{
+	TCHAR title[500];
+	GetWindowText(GetForegroundWindow(), title, 500);
+	return wcscmp(title, L"League of Legends (TM) Client") == 0;
+}
