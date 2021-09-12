@@ -50,30 +50,41 @@ void RemoveHooks() {
 	if (GetSystemDEPPolicy())
 		UltHook.deinit();
 }
+std::string GetGameVersion() {
+	auto GameVersion = *(DWORD*)(TextDecryptor.FindSignature(nullptr, "8B 44 24 04 BA ? ? ? ? 2B D0") + 0x5);
+	return std::string(reinterpret_cast<char*>(GameVersion));
+}
+bool IsPatchDetected;
 DWORD WINAPI MainThread(LPVOID param) {
-	while (!*(DWORD*)(*(DWORD*)(TextDecryptor.FindSignature(nullptr, "8B 0D ? ? ? ? 85 C9 0F 84 ? ? ? ? 83 7E 10 00") + 0x2)) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
-		Sleep(1);
-	
-	if (*(DWORD*)(*(DWORD*)(TextDecryptor.FindSignature(nullptr, "8B 0D ? ? ? ? 85 C9 0F 84 ? ? ? ? 83 7E 10 00") + 0x2)) != *(DWORD*)(DEFINE_RVA(Offsets::Data::LocalPlayer)))
-		console.Print("Patch Detected.");
-	else
-		console.Print("Integrity secured.");
-	Sleep(200);
 
+	while (!*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer) && *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) < 1)
+		Sleep(1);
+
+	IsPatchDetected = GetGameVersion() == xorstr("Version 11.18.395.7538 [PUBLIC]");
+
+	if (IsPatchDetected)
+		console.Print(xorstr("Patch Detected!"));
+
+	Sleep(200);
 
 	TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
 	
 	LeagueDecryptData ldd = TextDecryptor.Decrypt(nullptr);
 	
-	ApplyHooks();
+	if (!IsPatchDetected) {
+		ApplyHooks();
 
-	PluginLoader::LoadPlugins();
+		PluginLoader::LoadPlugins();
 
-	EventManager::Trigger(EventManager::EventType::OnLoad);
-	while (!(GetAsyncKeyState(VK_END) & 1)) {
-		DelayedAction.update(GetTickCount64());
+		EventManager::Trigger(EventManager::EventType::OnLoad);
+		while (!(GetAsyncKeyState(VK_END) & 1)) {
+			DelayedAction.update(GetTickCount64());
+		}
+		EventManager::Trigger(EventManager::EventType::OnUnLoad);
 	}
-	EventManager::Trigger(EventManager::EventType::OnUnLoad);
+	else {
+		MessageBoxA(nullptr, xorstr("A patch has been detected. please do a league dump now."), xorstr("PatchGuard"), 0);
+	}
 	return 1;
 }
 void OnExit() noexcept {
