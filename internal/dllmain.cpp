@@ -15,6 +15,7 @@
 #include "Evade/Evade.h"
 #include "Plugins/PluginLoader.h"
 #include "ConfigManager/Config.h"
+#include "Security/AntiDetection.h"
 
 HMODULE g_module;
 MouseLockedPos MLP;
@@ -29,12 +30,18 @@ void ApplyHooks() {
 	Original_GetCursorPos = &GetCursorPos;
 	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (FuncTypes::Prototype_Reset)GetDeviceAddress(16);
+	Security::oModule32First = (Security::tModule32First)Module32First;
+	Security::oModule32Next = (Security::tModule32Next)Module32Next;
+	Security::oReadProcessMemory = (Security::tReadProcessMemory)ReadProcessMemory;
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourAttach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourAttach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
+	DetourAttach(&(PVOID&)Security::oModule32First, Security::hkModule32First);
+	DetourAttach(&(PVOID&)Security::oModule32Next, Security::hkModule32Next);
+	DetourAttach(&(PVOID&)Security::oReadProcessMemory, Security::hkReadProcessMemory);
 	DetourTransactionCommit();
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 	if (GetSystemDEPPolicy()) {
@@ -48,6 +55,9 @@ void RemoveHooks() {
 	DetourDetach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourDetach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourDetach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
+	DetourDetach(&(PVOID&)Security::oModule32First, Security::hkModule32First);
+	DetourDetach(&(PVOID&)Security::oModule32Next, Security::hkModule32Next);
+	DetourDetach(&(PVOID&)Security::oReadProcessMemory, Security::hkReadProcessMemory);
 	DetourTransactionCommit();
 	if (GetSystemDEPPolicy())
 		UltHook.deinit();
