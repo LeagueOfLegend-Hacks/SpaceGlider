@@ -33,6 +33,8 @@ void ApplyHooks() {
 	Security::oModule32First = (Security::tModule32First)Module32First;
 	Security::oModule32Next = (Security::tModule32Next)Module32Next;
 	Security::oReadProcessMemory = (Security::tReadProcessMemory)ReadProcessMemory;
+	/***********************************************************************************/
+	// really need to get rid of ms detours. they're fast but i don't like them.
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -43,6 +45,7 @@ void ApplyHooks() {
 	DetourAttach(&(PVOID&)Security::oModule32Next, Security::hkModule32Next);
 	DetourAttach(&(PVOID&)Security::oReadProcessMemory, Security::hkReadProcessMemory);
 	DetourTransactionCommit();
+	/***********************************************************************************/
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
 	if (GetSystemDEPPolicy()) {
 		UltHook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
