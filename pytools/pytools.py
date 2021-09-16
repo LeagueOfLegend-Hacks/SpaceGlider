@@ -12,34 +12,24 @@ def MakeEnum(enumName, offsetArray):
         if type(offset[1]) is str:
             print ("   %s = %s," % ( offset[0], offset[1]))
             continue
-
         fncValue = offset[1] if offset[1] != -1 else 0x0
-
         isMismatch = fncValue == BADADDR or fncValue == 0
-        
         if (fncValue >= idaapi.get_imagebase() and not isMismatch):
             idc.set_name(fncValue, offset[0])
             fncValue = fncValue - idaapi.get_imagebase()
-
-
         print ("   %s = 0x%x,%s" % (offset[0], fncValue, '// Possible mismatch' if isMismatch else ''))
-
     print ("};\r\n")
 
 def FindOffsetByString(name, offset, operandValue):
     address = idc.find_binary(0, SEARCH_DOWN, "\"" + name + "\"")
     dword = -1
-    
     if address == BADADDR:
         return BADADDR
-    
     xrefs = XrefsTo(address)
     for xref in xrefs:
         dword = xref.frm + offset
-    
     if dword == BADADDR:
         return BADADDR
-    
     return idc.get_operand_value(dword, operandValue)
 
 def FindFuncCall(Pattern):
@@ -51,7 +41,6 @@ def FindFunctionByPatternStartEA(pattern):
 	address = idc.find_binary(0, SEARCH_DOWN, pattern)
 	if address == BADADDR:
 		return BADADDR
-
 	try:
 		return idaapi.get_func(address).start_ea
 	except Exception:
@@ -65,14 +54,11 @@ def FindOffsetPattern(Pattern, Operand):
 def FindFunctionFirstXRef(name):
 	address = idc.find_binary(0, SEARCH_DOWN, "\"" + name + "\"")
 	dword = BADADDR
-	
 	if address == BADADDR:
 		return BADADDR
-	
 	xrefs = XrefsTo(address)
 	for xref in xrefs:
 		dword = xref.frm
-	
 	try:
 		return idaapi.get_func(dword).start_ea
 	except Exception:
@@ -103,16 +89,16 @@ def main():
         ["HudInstance", FindOffsetPattern("8B 0D ? ? ? ? 6A 00 8B 49 34 E8 ? ? ? ? B0", 1)], 
     ])
     MakeEnum("pwConsole", [
-		["pwOpen", FindFunctionFirstXRef("game_console_chatcommand_allchat_1")]
-	])
+        ["pwOpen", FindFunctionFirstXRef("game_console_chatcommand_allchat_1")]
+    ])
     MakeEnum("r3dRenderer", [
-		["r3dRendererInstance", FindOffsetPattern("8B 15 ? ? ? ? 83 EC 08 F3", 1)],
+        ["r3dRendererInstance", FindOffsetPattern("8B 15 ? ? ? ? 83 EC 08 F3", 1)],
         ["ViewMatrix", FindOffsetPattern("8D 4A ? 51 81 C2 ? ? ? ? 52", 1)],
         ["Projection", FindOffsetPattern("81 C2 ? ? ? ? 52 FF 74 24 38", 1)],
         ["DrawCircle", FindFuncCall("E8 ? ? ? ? 83 C4 1C 80 7F")],
         ["WorldToScreen", FindFunctionByPatternStartEA("83 EC 10 56 E8 ? ? ? ? 8B 08")],
-		["r3dProjectToScreen", FindFunctionByPatternStartEA("0f 2f 05 ?? ?? ?? ?? 73 ?? 0f 2f da 77")]
-	])
+        ["r3dProjectToScreen", FindFunctionByPatternStartEA("0f 2f 05 ?? ?? ?? ?? 73 ?? 0f 2f da 77")]
+    ])
     MakeEnum("BuffHost", [
         ["BuffAddRemove", FindFunctionFirstXRef("SpellToggleSlot")]
     ])
