@@ -93,6 +93,7 @@ def main():
         ["OnProcessSpell", FindFuncCall("E8 ?? ?? ?? ?? 8B CE E8 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? ?? D8")],
         ["GameVersion", FindFunctionByPatternStartEA("8B 44 24 04 BA ? ? ? ? 2B D0")],
         ["IsNotWall", FindFuncCall("E8 ? ? ? ? 33 C9 83 C4 0C 84")],
+        ["GetHeightPos", FindFuncCall("E8 ? ? ? ? 8B 44 24 0C D9 18")],
     ])
     MakeEnum("Offsets", [
         ["GameInfo", FindOffsetPattern("A1 ? ? ? ? 83 78 08 02 0F 94", 1)],
