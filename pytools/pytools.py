@@ -26,6 +26,22 @@ def MakeEnum(enumName, offsetArray):
 
     print ("};\r\n")
 
+def FindOffsetByString(name, offset, operandValue):
+    address = idc.find_binary(0, SEARCH_DOWN, "\"" + name + "\"")
+    dword = -1
+    
+    if address == BADADDR:
+        return BADADDR
+    
+    xrefs = XrefsTo(address)
+    for xref in xrefs:
+        dword = xref.frm + offset
+    
+    if dword == BADADDR:
+        return BADADDR
+    
+    return idc.get_operand_value(dword, operandValue)
+
 def FindFuncCall(Pattern):
     addr = idc.find_binary(0, SEARCH_DOWN, Pattern)
     if addr == BADADDR: return 0
@@ -95,6 +111,7 @@ def main():
         ["TeamID", FindOffsetPattern("8B 40 4C C3 33 C0", 1)],
         ["Position", FindOffsetPattern("8D 86 ? ? ? ? 8B 74 24 08", 1)],
         ["AttackRange", FindOffsetPattern("D8 81 ? ? ? ? 8B 81 ? ? ? ?", 1)],
+        ["SpellBook", FindOffsetByString("mReplicatedSpellCanCastBitsLower1", 0x11, 1)],
         ])
     print('----------------------------')
     print("[*] Finished")
