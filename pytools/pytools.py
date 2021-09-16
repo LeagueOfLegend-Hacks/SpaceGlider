@@ -26,47 +26,6 @@ def MakeEnum(enumName, offsetArray):
 
     print ("};\r\n")
 
-def FindNOPAddr(name, offset):
-	address = idc.FindBinary(0, SEARCH_DOWN, "\"" + name + "\"")
-	dword = -1
-	
-	if address == BADADDR:
-		return -1
-	
-	xrefs = XrefsTo(address)
-	for xref in xrefs:
-		dword = xref.frm + offset
-
-	return dword
-
-def FindFunctionAddrByPattern(displayName, pattern, offset, operandValue):
-	address = idc.FindBinary(0, SEARCH_DOWN, pattern)
-	if address != BADADDR:
-		return BADADDR
-	
-	return idc.GetOperandValue(address, operandValue)
-
-def FindFunctionAddr(name, offset, operandValue):
-	address = idc.FindBinary(0, SEARCH_DOWN, "\"" + name + "\"")
-	dword = -1
-	
-	if address == BADADDR:
-		return BADADDR
-	
-	xrefs = XrefsTo(address)
-	for xref in xrefs:
-		dword = xref.frm + offset
-	
-	if dword == BADADDR:
-		return BADADDR
-
-	return idc.GetOperandValue(dword, operandValue)
-	
-def FindFunctionByPattern(pattern, offset):
-	address = idc.find_binary(0, SEARCH_DOWN, pattern)
-		
-	return address
-
 def FindFuncCall(Pattern):
     addr = idc.find_binary(0, SEARCH_DOWN, Pattern)
     if addr == BADADDR: return 0
@@ -81,22 +40,6 @@ def FindFunctionByPatternStartEA(pattern):
 		return idaapi.get_func(address).start_ea
 	except Exception:
 		return -1
-		
-def FindFunctionFirstXRef(name):
-	address = idc.find_binary(0, SEARCH_DOWN, "\"" + name + "\"")
-	dword = BADADDR
-	
-	if address == BADADDR:
-		return BADADDR
-	
-	xrefs = XrefsTo(address)
-	for xref in xrefs:
-		dword = xref.frm
-	
-	try:
-		return idaapi.get_func(dword).start_ea
-	except Exception:
-		return -1
 
 def FindOffsetPattern(Pattern, Operand):
     addr = idc.find_binary(0, SEARCH_DOWN, Pattern)
@@ -104,10 +47,10 @@ def FindOffsetPattern(Pattern, Operand):
     return idc.get_operand_value(addr, Operand)
     
 def main():	
-    print ("[*] League of Legends Client Update Tool")
-    print ("[*] By Dencelle")
-    print ("[*] Started at: %s" % datetime.datetime.now())
-    print ("----------------------------")
+    print("[*] League of Legends Client Update Tool")
+    print("[*] By Dencelle")
+    print("[*] Started at: %s" % datetime.datetime.now())
+    print("----------------------------")
     MakeEnum("Game", [
         ["IsNotWall", FindFuncCall("E8 ? ? ? ? 33 C9 83 C4 0C 84")],
         ["GameVersion", FindFunctionByPatternStartEA("8B 44 24 04 BA ? ? ? ? 2B D0")],
@@ -125,13 +68,13 @@ def main():
         ["HudInstance", FindOffsetPattern("8B 0D ? ? ? ? 6A 00 8B 49 34 E8 ? ? ? ? B0", 1)], 
         ["DrawCircle", FindFuncCall("E8 ? ? ? ? 83 C4 1C 80 7F")],
         ["WorldToScreen", FindFunctionByPatternStartEA("83 EC 10 56 E8 ? ? ? ? 8B 08")],
-        ])  
+        ])
     MakeEnum("ObjectManager", [
         ["GetFirstObject", FindFuncCall("E8 ? ? ? ? 8B F0 85 F6 74 1E 66 90")],
         ["GetNextObject", FindFunctionByPatternStartEA("8B 44 24 04 56 8B 71 18")],
         ["ObjManager", FindOffsetPattern("8B 0D ? ? ? ? E8 ? ? ? ? FF 77", 1)],
         ["LocalPlayer", FindOffsetPattern("A1 ? ? ? ? 85 C0 74 07 05 ? ? ? ? EB 02 33 C0 56", 1)],
-        ])    
+        ])
     MakeEnum("GameObject", [
         ["GetAttackDelay", FindFunctionByPatternStartEA("8B 44 24 04 51 F3")],
         ["GetAttackCastDelay", FindFunctionByPatternStartEA("83 EC 0C 53 8B 5C 24 14 8B CB 56 57 8B 03 FF 90")],
@@ -148,8 +91,6 @@ def main():
         ["GetBasicAttack", FindFunctionByPatternStartEA("53 8B D9 B8 ? ? ? ? 8B 93")],
         ["AttackRange", FindOffsetPattern("D8 81 ? ? ? ? 8B 81 ? ? ? ?", 1)],
         ])
-        
-    print ('----------------------------')
-    print ("[*] Finished")
-	
+    print('----------------------------')
+    print("[*] Finished")
 main()
