@@ -90,33 +90,33 @@ def main():
         ["DrawTurretRange", FindFuncCall("E8 ? ? ? ? 84 C0 75 1B 83")],
         ["Hud_OnDisconnect", FindFunctionFirstXRef("game_messagebox_caption_disconnect")],
         ["Hud_OnAfk", FindFunctionFirstXRef("game_messagebox_text_afkwarningcaption")],
-        ["pwOpen", FindFunctionFirstXRef("game_console_chatcommand_allchat_1")],
-        ["r3dProjectToScreen", FindFunctionByPatternStartEA("0f 2f 05 ?? ?? ?? ?? 73 ?? 0f 2f da 77")],
+        ["OnProcessSpell", FindFuncCall("E8 ?? ?? ?? ?? 8B CE E8 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? ?? D8")],
+        ["GameVersion", FindFunctionByPatternStartEA("8B 44 24 04 BA ? ? ? ? 2B D0")],
+        ["IsNotWall", FindFuncCall("E8 ? ? ? ? 33 C9 83 C4 0C 84")],
     ])
+    MakeEnum("Offsets", [
+        ["GameInfo", FindOffsetPattern("A1 ? ? ? ? 83 78 08 02 0F 94", 1)],
+        ["GameTime", FindOffsetPattern("F3 0F 11 05 ? ? ? ? 5E 83 C4 08 C2 04 00", 0)],
+        ["NetClient", FindOffsetPattern("8B 0D ? ? ? ? 85 C9 74 07 8B 01 6A 01 FF 50 08 8B", 1)],
+        ["ZoomClass", FindOffsetPattern("A3 ? ? ? ? 83 FA 10 72 32", 0)],
+        ["HudInstance", FindOffsetPattern("8B 0D ? ? ? ? 6A 00 8B 49 34 E8 ? ? ? ? B0", 1)], 
+    ])
+    MakeEnum("pwConsole", [
+		["pwOpen", FindFunctionFirstXRef("game_console_chatcommand_allchat_1")]
+	])
+    MakeEnum("r3dRenderer", [
+		["r3dRendererInstance", FindOffsetPattern("8B 15 ? ? ? ? 83 EC 08 F3", 1)],
+        ["ViewMatrix", FindOffsetPattern("8D 4A ? 51 81 C2 ? ? ? ? 52", 1)],
+        ["Projection", FindOffsetPattern("81 C2 ? ? ? ? 52 FF 74 24 38", 1)],
+        ["DrawCircle", FindFuncCall("E8 ? ? ? ? 83 C4 1C 80 7F")],
+        ["WorldToScreen", FindFunctionByPatternStartEA("83 EC 10 56 E8 ? ? ? ? 8B 08")],
+		["r3dProjectToScreen", FindFunctionByPatternStartEA("0f 2f 05 ?? ?? ?? ?? 73 ?? 0f 2f da 77")]
+	])
     MakeEnum("BuffHost", [
         ["BuffAddRemove", FindFunctionFirstXRef("SpellToggleSlot")]
     ])
     MakeEnum("AudioManager", [
         ["PlaySound", FindFunctionFirstXRef("AudioManager::PlaySoundEvent: Failed to play sound event %s.")]
-    ])
-    MakeEnum("Game", [
-        ["IsNotWall", FindFuncCall("E8 ? ? ? ? 33 C9 83 C4 0C 84")],
-        ["GameVersion", FindFunctionByPatternStartEA("8B 44 24 04 BA ? ? ? ? 2B D0")],
-        ["", 0x0],
-        ["GameInfo", FindOffsetPattern("A1 ? ? ? ? 83 78 08 02 0F 94", 1)],
-        ["GameTime", FindOffsetPattern("F3 0F 11 05 ? ? ? ? 5E 83 C4 08 C2 04 00", 0)],
-        ["", 0x0],
-        ["NetClient", FindOffsetPattern("8B 0D ? ? ? ? 85 C9 74 07 8B 01 6A 01 FF 50 08 8B", 1)],
-        ["OnProcessSpell", FindFuncCall("E8 ?? ?? ?? ?? 8B CE E8 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? ?? D8")],
-    ])
-    MakeEnum("Render", [
-        ["ViewMatrix", FindOffsetPattern("8D 4A ? 51 81 C2 ? ? ? ? 52", 1)],
-        ["Projection", FindOffsetPattern("81 C2 ? ? ? ? 52 FF 74 24 38", 1)],
-        ["ZoomClass", FindOffsetPattern("A3 ? ? ? ? 83 FA 10 72 32", 0)],
-        ["Renderer", FindOffsetPattern("8B 15 ? ? ? ? 83 EC 08 F3", 1)],
-        ["HudInstance", FindOffsetPattern("8B 0D ? ? ? ? 6A 00 8B 49 34 E8 ? ? ? ? B0", 1)], 
-        ["DrawCircle", FindFuncCall("E8 ? ? ? ? 83 C4 1C 80 7F")],
-        ["WorldToScreen", FindFunctionByPatternStartEA("83 EC 10 56 E8 ? ? ? ? 8B 08")],
     ])
     MakeEnum("ObjectManager", [
         ["GetFirstObject", FindFuncCall("E8 ? ? ? ? 8B F0 85 F6 74 1E 66 90")],
@@ -126,7 +126,7 @@ def main():
         ["ManagerTemplate_Minions", FindOffsetPattern("A1 ?? ?? ?? ?? 53 55 8B 6C 24 1C", 1)],
         ["ManagerTemplate_Heros", FindOffsetPattern("8B 0D ?? ?? ?? ?? 50 8D 44 24 18", 1)],
         ["ManagerTemplate_Turrets", FindOffsetPattern("A1 ? ? ? ? 53 56 8B 70 04", 1)],
-        ["ManagerTemplate_Missiles", FindOffsetPattern("8B 1D ? ? ? ? 85 DB 0F 84 ? ? ? ? 0F B6 43 08 33 C9", 1)],
+        ["ManagerTemplate_Missiles", FindOffsetPattern("C7 05 ? ? ? ? ? ? ? ? 74 0B 6A 10 56 E8 ? ? ? ? 83 C4 08 8B C6 5E C2 04 00 CC CC CC CC 56 8B F1 8B 4E 28", 0)],
     ])
     MakeEnum("GameObjectFunctions", [
         ["GetAttackDelay", FindFunctionByPatternStartEA("8B 44 24 04 51 F3")],
