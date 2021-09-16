@@ -80,6 +80,7 @@ def main():
         ["GameVersion", FindFunctionByPatternStartEA("8B 44 24 04 BA ? ? ? ? 2B D0")],
         ["IsNotWall", FindFuncCall("E8 ? ? ? ? 33 C9 83 C4 0C 84")],
         ["GetHeightPos", FindFuncCall("E8 ? ? ? ? 8B 44 24 0C D9 18")],
+        ["D3DRender", FindOffsetPattern("A1 ? ? ? ? 83 B8 ? ? ? ? ? 75 50", 1)],
     ])
     MakeEnum("Offsets", [
         ["GameInfo", FindOffsetPattern("A1 ? ? ? ? 83 78 08 02 0F 94", 1)],

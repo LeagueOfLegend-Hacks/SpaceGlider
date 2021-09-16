@@ -21,9 +21,8 @@ HMODULE g_module;
 MouseLockedPos MLP;
 uintptr_t initThreadHandle;
 bool IsPatchDetected;
-
 void ApplyHooks() {
-	if (GetSystemDEPPolicy())
+	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff)
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
 	UltHook.RestoreZwProtectVirtualMemory();
 	UltHook.RestoreRtlAddVectoredExceptionHandler();
@@ -48,7 +47,7 @@ void ApplyHooks() {
 	DetourTransactionCommit();
 	/***********************************************************************************/
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
-	if (GetSystemDEPPolicy()) {
+	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff) {
 		UltHook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
 	}
 }

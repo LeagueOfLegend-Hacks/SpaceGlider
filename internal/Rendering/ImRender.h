@@ -12,6 +12,7 @@
 #include <string>
 #include <d3dx9.h>
 #include <experimental/filesystem>
+#include "../Console/Console.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

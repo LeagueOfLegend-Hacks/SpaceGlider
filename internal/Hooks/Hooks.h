@@ -48,6 +48,7 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo) {
 	if (spellBook == nullptr || CastInfo == nullptr)
 		return Functions::OnProcessSpell(spellBook, CastInfo);
+	console.Print("OnProcessSpell");
 	EventManager::Trigger(EventManager::EventType::OnProcessSpell, spellBook, CastInfo);
 	return Functions::OnProcessSpell(spellBook, CastInfo);
 }

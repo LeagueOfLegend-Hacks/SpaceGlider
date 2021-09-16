@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include "XorStr.h"
-
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 template<typename Ret = NTSTATUS>
 class syscall_t
 {
@@ -49,11 +49,11 @@ private:
 
 		uint8_t shell_code[]
 		{
-			0x90, 0x90, 0x90,					// nop, nop, nop
-			0xB8, 0x00, 0x00, 0x00, 0x00,		// mov eax, SysCallIndex
-			0xBA, 0x00, 0x00, 0x00, 0x00,		// mov edx, [Wow64Transition]
-			0xFF, 0xD2,							// call edx
-			0xC2, 0x14, 0x00					// ret
+			0x90, 0x90, 0x90,
+			0xB8, 0x00, 0x00, 0x00, 0x00,
+			0xBA, 0x00, 0x00, 0x00, 0x00,
+			0xFF, 0xD2,
+			0xC2, 0x14, 0x00
 		};
 
 		*(uintptr_t*)(shell_code + 9) = *(uintptr_t*)GetProcAddress(GetModuleHandleA("ntdll.dll"), "Wow64Transition");
