@@ -4,9 +4,8 @@
 #include <VersionHelpers.h>
 #include <Zydis/Zydis.h>
 
-#define VP_Offset 0x170
-
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+BOOL sys_VirtualProtect(LPVOID lpAddress, SIZE_T* dwSize, DWORD flNewProtect, PDWORD lpflOldProtect);
 
 struct HookDetails {
 	DWORD hookAddress;
@@ -41,6 +40,7 @@ public:
 	bool deinit();
 	DWORD RestoreRtlAddVectoredExceptionHandler();
 	DWORD RestoreZwQueryInformationProcess();
+	DWORD RestoreZwProtectVirtualMemory();
 private:
 	bool IsDoneInit = false;
 	PVOID VEH_Handle = nullptr;

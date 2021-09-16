@@ -25,6 +25,7 @@ bool IsPatchDetected;
 void ApplyHooks() {
 	if (GetSystemDEPPolicy())
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
+	UltHook.RestoreZwProtectVirtualMemory();
 	UltHook.RestoreRtlAddVectoredExceptionHandler();
 	UltHook.RestoreZwQueryInformationProcess();
 	Original_GetCursorPos = &GetCursorPos;

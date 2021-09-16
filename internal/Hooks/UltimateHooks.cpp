@@ -1,5 +1,8 @@
 #include "UltimateHooks.h"
 #include "../DirectSysCalls/makesyscall.h"
+BOOL sys_VirtualProtect(LPVOID lpAddress, SIZE_T* dwSize, DWORD flNewProtect, PDWORD lpflOldProtect) {
+	return NT_SUCCESS(syscall_t<NTSTATUS>("ZwProtectVirtualMemory")(GetCurrentProcess(), lpAddress, dwSize, flNewProtect, lpflOldProtect));
+}
 
 std::vector<HookEntries> hookEntries;
 UltimateHooks UltHook;
@@ -46,9 +49,7 @@ bool UltimateHooks::deinit()
 				{
 					auto addr = (PVOID)hd.addressToHook;
 					auto size = static_cast<SIZE_T>(static_cast<int>(1));
-					if (NT_SUCCESS(
-						makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", VP_Offset, 0xC2, 0x14,
-							0x00)(GetCurrentProcess(), &addr, &size, hs.addressToHookOldProtect, &old)))
+					if (sys_VirtualProtect(&addr, &size, hs.addressToHookOldProtect, &old))
 					{
 					}
 				}
@@ -75,9 +76,7 @@ DWORD UltimateHooks::RestoreRtlAddVectoredExceptionHandler() {
 
 	auto addr = (PVOID)RtlAddVectoredExceptionHandlerAddr;
 	auto size = static_cast<SIZE_T>(5);
-	if (NT_SUCCESS(
-		makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", VP_Offset, 0xC2, 0x14, 0x00)(
-			GetCurrentProcess(), &addr, &size, PAGE_EXECUTE_READWRITE, &oldProt)))
+	if (sys_VirtualProtect(&addr, &size, PAGE_EXECUTE_READWRITE, &oldProt))
 	{
 		int i = 0;
 		for (BYTE _byte : RtlAVE) {
@@ -85,9 +84,7 @@ DWORD UltimateHooks::RestoreRtlAddVectoredExceptionHandler() {
 			i++;
 		}
 
-		NT_SUCCESS(
-			makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", VP_Offset, 0xC2, 0x14, 0x00)(
-				GetCurrentProcess(), &addr, &size, oldProt, &oldProt));
+		sys_VirtualProtect(&addr, &size, oldProt, &oldProt);
 	}
 
 	return RtlAddVectoredExceptionHandlerAddr;
@@ -100,6 +97,24 @@ DWORD UltimateHooks::RestoreZwQueryInformationProcess() {
 
 	BYTE ZwQIP[] = {
 		0xB8, 0x19, 0x00, 0x00, 0x00
+	};
+
+	int i = 0;
+	for (BYTE _byte : ZwQIP) {
+		*(BYTE*)(ZwQueryInformationProcessAddr + i) = _byte;
+		i++;
+	}
+
+	return ZwQueryInformationProcessAddr;
+}
+DWORD UltimateHooks::RestoreZwProtectVirtualMemory() {
+	HMODULE ntdll = GetModuleHandleA("ntdll.dll");
+
+	DWORD ZwQueryInformationProcessAddr = reinterpret_cast<DWORD>(
+		GetProcAddress(ntdll, "ZwProtectVirtualMemory"));
+
+	BYTE ZwQIP[] = {
+		0xB8, 0x50, 0x00, 0x00, 0x00
 	};
 
 	int i = 0;
@@ -344,9 +359,7 @@ bool UltimateHooks::Hook(DWORD original_fun, DWORD hooked_fun, size_t offset)
 	{
 		auto addr = (PVOID)original_fun;
 		auto size = static_cast<SIZE_T>(static_cast<int>(1));
-		if (NT_SUCCESS(
-			makesyscall<NTSTATUS>(0x50, 0x00, 0x00, 0x00, "RtlInterlockedCompareExchange64", VP_Offset, 0xC2, 0x14, 0x00)(
-				GetCurrentProcess(), &addr, &size, PAGE_READONLY, &hs.addressToHookOldProtect)))
+		if (sys_VirtualProtect(&addr, &size, PAGE_READONLY, &hs.addressToHookOldProtect))
 		{
 			hookEntries.push_back(hs);
 			return true;
