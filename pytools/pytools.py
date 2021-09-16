@@ -45,7 +45,7 @@ def FindOffsetPattern(Pattern, Operand):
     addr = idc.find_binary(0, SEARCH_DOWN, Pattern)
     if addr == BADADDR: return 0
     return idc.get_operand_value(addr, Operand)
-    
+
 def main():	
     print("[*] League of Legends Client Update Tool")
     print("[*] By Dencelle")
@@ -75,7 +75,7 @@ def main():
         ["ObjManager", FindOffsetPattern("8B 0D ? ? ? ? E8 ? ? ? ? FF 77", 1)],
         ["LocalPlayer", FindOffsetPattern("A1 ? ? ? ? 85 C0 74 07 05 ? ? ? ? EB 02 33 C0 56", 1)],
         ])
-    MakeEnum("GameObject", [
+    MakeEnum("GameObjectFunctions", [
         ["GetAttackDelay", FindFunctionByPatternStartEA("8B 44 24 04 51 F3")],
         ["GetAttackCastDelay", FindFunctionByPatternStartEA("83 EC 0C 53 8B 5C 24 14 8B CB 56 57 8B 03 FF 90")],
         ["IsAlive", FindFunctionByPatternStartEA("56 8B F1 8B 06 8B 80 ? ? ? ? FF D0 84 C0 74 19")],
@@ -89,6 +89,11 @@ def main():
         ["IsMissile", FindFuncCall("E8 ? ? ? ? 83 C4 04 84 C0 74 60")],
         ["GetSpellState", FindFuncCall("E8 ? ? ? ? 8B F8 8B CB 89")],
         ["GetBasicAttack", FindFunctionByPatternStartEA("53 8B D9 B8 ? ? ? ? 8B 93")],
+        ])
+    MakeEnum("GameObject", [
+        ["ID", FindOffsetPattern("8B 40 20 C3 33 C0 C3 CC CC", 1)],
+        ["TeamID", FindOffsetPattern("8B 40 4C C3 33 C0", 1)],
+        ["Position", FindOffsetPattern("8D 86 ? ? ? ? 8B 74 24 08", 1)],
         ["AttackRange", FindOffsetPattern("D8 81 ? ? ? ? 8B 81 ? ? ? ?", 1)],
         ])
     print('----------------------------')
