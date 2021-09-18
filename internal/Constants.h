@@ -1,5 +1,5 @@
 #pragma once
-#include "../ObjectManager/ObjectManager.h"
+#include "ObjectManager/ObjectManager.h"
 
 namespace Constants
 {

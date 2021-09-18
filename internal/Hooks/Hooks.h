@@ -5,8 +5,6 @@ ImRender render;
 PVOID NewOnProcessSpell;
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
-	if (!IsLeagueInForeground())
-		return Functions::Original_Present(Device, pSrcRect, pDestRect, hDestWindow, pDirtyRegion);
 	if (Device != nullptr) {
 
 		render.Init(Device);
@@ -48,7 +46,6 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo) {
 	if (spellBook == nullptr || CastInfo == nullptr)
 		return Functions::OnProcessSpell(spellBook, CastInfo);
-	console.Print("OnProcessSpell");
 	EventManager::Trigger(EventManager::EventType::OnProcessSpell, spellBook, CastInfo);
 	return Functions::OnProcessSpell(spellBook, CastInfo);
 }

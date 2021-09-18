@@ -7,13 +7,11 @@ BOOL sys_VirtualProtect(LPVOID lpAddress, SIZE_T* dwSize, DWORD flNewProtect, PD
 std::vector<HookEntries> hookEntries;
 UltimateHooks UltHook;
 
-bool inRange(unsigned low, unsigned high, unsigned x)
-{
+bool inRange(unsigned low, unsigned high, unsigned x) {
 	return  ((x - low) <= (high - low));
 }
 
-LONG __stdcall LeoHandler(EXCEPTION_POINTERS* pExceptionInfo)
-{
+LONG __stdcall LeoHandler(EXCEPTION_POINTERS* pExceptionInfo) {
 	if (pExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION && pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 8)
 	{
 		for (HookEntries hs : hookEntries)
@@ -35,8 +33,7 @@ LONG __stdcall LeoHandler(EXCEPTION_POINTERS* pExceptionInfo)
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 
-bool UltimateHooks::deinit()
-{
+bool UltimateHooks::deinit() {
 	DWORD old;
 	if (VEH_Handle)
 	{
@@ -136,8 +133,7 @@ void UltimateHooks::CopyRegion(DWORD dest, DWORD source, size_t size) {
 	(void)memcpy((void*)dest, (PVOID)source, size);
 }
 
-bool UltimateHooks::addHook(DWORD address, DWORD hkAddress, size_t offset)
-{
+bool UltimateHooks::addHook(DWORD address, DWORD hkAddress, size_t offset) {
 	if (Hook(address, hkAddress, offset))
 	{
 		return true;
@@ -145,8 +141,7 @@ bool UltimateHooks::addHook(DWORD address, DWORD hkAddress, size_t offset)
 	return false;
 }
 
-bool UltimateHooks::Hook(DWORD original_fun, DWORD hooked_fun, size_t offset)
-{
+bool UltimateHooks::Hook(DWORD original_fun, DWORD hooked_fun, size_t offset) {
 	auto mbi = MEMORY_BASIC_INFORMATION{ 0 };
 	if (!VirtualQuery(reinterpret_cast<void*>(original_fun), &mbi, sizeof(mbi))) {
 		return false;
@@ -225,8 +220,7 @@ bool UltimateHooks::Hook(DWORD original_fun, DWORD hooked_fun, size_t offset)
 	return false;
 }
 
-void UltimateHooks::FixRellocation(DWORD OldFnAddress, DWORD OldFnAddressEnd, DWORD NewFnAddress, size_t size, size_t _offset)
-{
+void UltimateHooks::FixRellocation(DWORD OldFnAddress, DWORD OldFnAddressEnd, DWORD NewFnAddress, size_t size, size_t _offset) {
 	ZydisDecoder decoder;
 	ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_COMPAT_32, ZYDIS_ADDRESS_WIDTH_32);
 	ZydisFormatter formatter;

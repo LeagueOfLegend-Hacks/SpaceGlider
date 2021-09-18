@@ -8,8 +8,6 @@ namespace WaypointTracker
 	void drawSpell(GameObject* unit, CSpellBase* spell, Vector3 pos)
 	{
 		ImColor color = spell->ready() ? ImColor(255, 255, 255) : ImColor(120, 120, 120);
-		if (spell->spellInfo()->spellData()->mana(spell->level) <= unit->Mana)
-			color = ImColor(49, 97, 121);
 		render.draw_image(spell->spellInfo()->spellData()->name, pos, Vector2(24, 24), color);
 		if (spell->remainingCooldown() > 0.0f) {
 			Vector2 worldPos = riot_render->WorldToScreen(pos);
@@ -30,9 +28,8 @@ namespace WaypointTracker
 		drawSpell(ObjectManager::GetLocalPlayer(), ObjectManager::GetLocalPlayer()->SpellBook.spellId(2), pos);
 		pos.x += 35;
 		drawSpell(ObjectManager::GetLocalPlayer(), ObjectManager::GetLocalPlayer()->SpellBook.spellId(3), pos);
-		for (GameObject * hero : ObjectManager::HeroList())
-		{
-			if (!hero->IsVisible || !Functions::IsAlive(hero) || hero->IsAllyTo(ObjectManager::GetLocalPlayer()))
+		for (GameObject* hero : ObjectManager::HeroList()) {
+			if (!hero->IsVisible || !Functions::IsAlive(hero))
 				continue;
 			Vector3 pos = hero->Position;
 			pos.x -= 70;
@@ -45,9 +42,10 @@ namespace WaypointTracker
 			drawSpell(hero, hero->SpellBook.spellId(2), pos);
 			pos.x += 35;
 			drawSpell(hero, hero->SpellBook.spellId(3), pos);
-			if (!hero->GetAIManager()->Moving)
-				continue;
-			if (hero->IsVisible && Functions::IsAlive(hero)) {
+		}
+		for (GameObject * hero : ObjectManager::HeroList())
+		{
+			if (hero->IsVisible && Functions::IsAlive(hero) && hero->GetAIManager()->Moving) {
 				render.draw_image("singletarget", hero->GetAIManager()->NavEndPos, Vector2(36, 36), ImColor(255, 255, 255));
 			}
 		}

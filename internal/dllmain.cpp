@@ -22,7 +22,7 @@ MouseLockedPos MLP;
 uintptr_t initThreadHandle;
 bool IsPatchDetected;
 void ApplyHooks() {
-	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff)
+	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyOptIn)
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
 	UltHook.RestoreZwProtectVirtualMemory();
 	UltHook.RestoreRtlAddVectoredExceptionHandler();
@@ -38,18 +38,22 @@ void ApplyHooks() {
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
+	/***********************************************************************************/
+	// dx9 functions
 	DetourAttach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourAttach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
+	/***********************************************************************************/
+	// win32 functions
+	DetourAttach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourAttach(&(PVOID&)Security::oModule32First, Security::hkModule32First);
 	DetourAttach(&(PVOID&)Security::oModule32Next, Security::hkModule32Next);
 	DetourAttach(&(PVOID&)Security::oReadProcessMemory, Security::hkReadProcessMemory);
+	/***********************************************************************************/
 	DetourTransactionCommit();
 	/***********************************************************************************/
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
-	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff) {
+	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff)
 		UltHook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
-	}
 }
 void RemoveHooks() {
 	SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)Functions::Original_WndProc);
@@ -88,7 +92,6 @@ DWORD WINAPI MainThread(LPVOID param) {
 		while (!(GetAsyncKeyState(VK_END) & 1)) {
 			DelayedAction.update(GetTickCount64());
 		}
-		EventManager::Trigger(EventManager::EventType::OnUnLoad);
 	}
 	else {
 		TextDecryptor._RtlDispatchExceptionAddress = TextDecryptor.FindRtlDispatchExceptionAddress();
@@ -99,6 +102,7 @@ DWORD WINAPI MainThread(LPVOID param) {
 	return 1;
 }
 void OnExit() noexcept {
+	EventManager::Trigger(EventManager::EventType::OnUnLoad);
 	RemoveHooks();
 	render.Free();
 	//config.save(g_module);
