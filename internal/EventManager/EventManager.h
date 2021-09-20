@@ -6,6 +6,7 @@ namespace EventManager {
 		OnUnLoad,
 		OnDraw,
 		OnProcessSpell,
+		OnDeleteObject,
 		Size
 	};
 	extern std::vector<void*> EventCallbacks[(unsigned int)EventType::Size];

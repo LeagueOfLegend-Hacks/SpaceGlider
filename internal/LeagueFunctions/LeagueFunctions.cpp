@@ -1,15 +1,5 @@
 #include "LeagueFunctions.h"
 #include <ctime>
-FuncTypes::Prototype_Reset Functions::Original_Reset;
-FuncTypes::Prototype_Present Functions::Original_Present;
-FuncTypes::fnOnProcessSpell Functions::OnProcessSpell;
-FuncTypes::fnOnNewPath Functions::OnNewPath;
-FuncTypes::fnCreateObject Functions::OnCreateObject;
-FuncTypes::fnDeleteObject Functions::OnDeleteObject;
-FuncTypes::fnIssueClick Functions::IssueClick;
-FuncTypes::fnIssueSpell Functions::IssueSpell;
-WNDPROC Functions::Original_WndProc;
-
 float Functions::GameTime()
 {
 	return *(float*)(DEFINE_RVA(Offsets::Data::GameTime));
@@ -17,13 +7,24 @@ float Functions::GameTime()
 
 float Functions::GameTimeTick()
 {
-	return *(float*)(DEFINE_RVA(Offsets::Data::GameTime));
+	return *(float*)(DEFINE_RVA(Offsets::Data::GameTime)) * 1000;
 }
 
 int Functions::GetPing() {
 	typedef bool(__thiscall* fnGetPing)(void* netClient);
 	fnGetPing pGetPing = (fnGetPing)(DEFINE_RVA(Offsets::Functions::GetPing));
 	return pGetPing(*(void**)(DEFINE_RVA(Offsets::Data::NetClient)));
+}
+
+SpellData* Functions::GetBasicAttack(GameObject* unit)
+{
+	typedef SpellData** (__thiscall* fnGetBasicAttack)(GameObject* target, unsigned slot);
+	auto ret = reinterpret_cast<fnGetBasicAttack>(DEFINE_RVA(Offsets::Functions::GetBasicAttack)
+		)(unit, 0x41);
+	if (ret) {
+		return *ret;
+	}
+	return nullptr;
 }
 
 Vector3 Functions::GetMouseWorldPosition()
@@ -41,6 +42,18 @@ Vector3 Functions::GetMouseWorldPosition()
 	temp.z = *(float*)(aux2 + 0x8);
 
 	return temp;
+}
+
+/*bool Functions::WorldToScreen(Vector3* in, Vector2* out)
+{
+	return reinterpret_cast<bool(__cdecl*)(Vector3*, Vector2*)>((__int32)GetModuleHandle(NULL) + static_cast<int>(Offsets::Functions::WorldToScreen))(in, out);
+}
+*/
+
+bool Functions::IsWall(Vector3* position)
+{
+	typedef bool(__cdecl* fnIsNotWall)(Vector3* position, unsigned __int16 uk);
+	return !((fnIsNotWall)(DEFINE_RVA(Offsets::Functions::IsNotWall)))(position, (unsigned __int16)0);
 }
 
 bool Functions::IsAlive(GameObject* Object)
@@ -96,8 +109,8 @@ void Functions::IssueOrder(EOrderType orderType, int screen_x, int screen_y)
 	if (MLP.enabled)
 		return;
 	DWORD HUDInputLogic = *(DWORD*)(*(DWORD*)DEFINE_RVA(Offsets::Data::HudInstance) + 0x24);
-	Functions::IssueClick(HUDInputLogic, 0, static_cast<int>(orderType), 1, screen_x, screen_y, 0);
-	Functions::IssueClick(HUDInputLogic, 1, static_cast<int>(orderType), 1, screen_x, screen_y, 0);
+	Functions::IssueClick(HUDInputLogic, 0, 0, 1, screen_x, screen_y, static_cast<int>(orderType));
+	Functions::IssueClick(HUDInputLogic, 1, 0, 1, screen_x, screen_y, static_cast<int>(orderType));
 }
 UINT PressKey(WORD scanCode)
 {

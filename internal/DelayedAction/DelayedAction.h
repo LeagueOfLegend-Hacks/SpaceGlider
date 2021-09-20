@@ -53,4 +53,4 @@ public:
 		}
 	}
 };
-extern delayAction DelayedAction;
+inline delayAction DelayedAction;

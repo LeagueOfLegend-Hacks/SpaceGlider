@@ -1,8 +1,5 @@
 #include "AntiDetection.h"
 
-Security::tModule32First Security::oModule32First;
-Security::tModule32Next Security::oModule32Next;
-Security::tReadProcessMemory Security::oReadProcessMemory;
 BOOL __stdcall Security::hkReadProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T* lpNumberOfBytesRead)
 {
     return 0;

@@ -10,18 +10,12 @@
 #include <vector>
 #include <algorithm>
 
-struct SpellDataEntry {
-	SpellType type;
-	float duration = 0.0f;
-	kDangerLevel DangerLevel = kDangerLevel::None;
-
-};
 struct MouseLockedPos {
 	long x;
 	long y;
 	bool enabled;
 };
-extern MouseLockedPos MLP;
+inline MouseLockedPos MLP;
 class SpellDataResource
 {
 public:
@@ -67,9 +61,14 @@ public:
 	{
 		float length = 0;
 		for (int i = 0; i < this->pathSize(); ++i)
-			length += this->NavArray[i + 1].distance(this->NavArray[i]);
+			length += this->NavArray[i + 1].distanceTo(this->NavArray[i]);
 
 		return length;
+	}
+
+	std::list<Vector3> navPath()
+	{
+
 	}
 };
 
@@ -86,8 +85,17 @@ public:
 		DEFINE_MEMBER_N(Vector3			StartPosition, Offsets::SpellInfo::StartPosition)
 		DEFINE_MEMBER_N(Vector3			EndPosition, Offsets::SpellInfo::EndPosition)
 		DEFINE_MEMBER_N(bool			HasTarget, Offsets::SpellInfo::HasTarget)
-		DEFINE_MEMBER_N(unsigned short	TargetId, Offsets::SpellInfo::TargetID)
+		DEFINE_MEMBER_N(DWORD			TargetArray, 0xB8)	
+		DEFINE_MEMBER_N(DWORD			TargetSize, 0xC0)
 	};
+
+	unsigned short targetIndex()
+	{
+		auto target_info = this->TargetArray + 0x10 * this->TargetSize;
+		//console.Print("%d", target_info);
+		return *(short*)((DWORD)target_info - 0x10);
+	}
+
 };
 
 class GameObject {
@@ -98,8 +106,9 @@ public:
 		DEFINE_MEMBER_N(int				Team, Offsets::GameObject::TeamID)
 		DEFINE_MEMBER_N(unsigned int	NetworkID, 0xCC)
 		DEFINE_MEMBER_N(Vector3			Position, Offsets::GameObject::Position)
-		DEFINE_MEMBER_N(bool			IsVisible, 0x23C)
+		DEFINE_MEMBER_N(bool			IsVisible, 0x28C)
 		DEFINE_MEMBER_N(bool			IsTargetable, Offsets::GameObject::mIsTargetable)
+		DEFINE_MEMBER_N(bool			IsInvulnearable, Offsets::GameObject::mIsInvulnearable)
 		DEFINE_MEMBER_N(float			Health, Offsets::GameObject::HP)
 		DEFINE_MEMBER_N(float			MaxHealth, Offsets::GameObject::MaxHP)
 		DEFINE_MEMBER_N(float			Mana, Offsets::GameObject::Mana)
@@ -109,6 +118,9 @@ public:
 		DEFINE_MEMBER_N(float			AttackRange, Offsets::GameObject::AttackRange)
 		DEFINE_MEMBER_N(float			BaseAttackDamage, Offsets::GameObject::BaseAttackDamage)
 		DEFINE_MEMBER_N(float			BonusAttackDamage, Offsets::GameObject::BonusAttackDamage)
+		DEFINE_MEMBER_N(float			FlatPhysicalDamageMod, Offsets::GameObject::FlatPhysicalDamageMod)
+		DEFINE_MEMBER_N(float			BaseAbilityDamage, Offsets::GameObject::BaseAbilityDamage)
+		DEFINE_MEMBER_N(float			FlatMagicDamageMod, Offsets::GameObject::FlatMagicDamageMod)
 		DEFINE_MEMBER_N(float			MovementSpeed, Offsets::GameObject::MoveSpeed)
 		DEFINE_MEMBER_N(char* ChampionName, Offsets::GameObject::ChampionName)
 		DEFINE_MEMBER_N(SpellData* MissileSpellInfo, Offsets::GameObject::MissileSpellInfo)
@@ -118,17 +130,24 @@ public:
 		DEFINE_MEMBER_N(int				MissileDestIdx, Offsets::GameObject::MissileDestIndex)
 		DEFINE_MEMBER_N(CSpellBook		SpellBook, Offsets::GameObject::SpellBook)
 		DEFINE_MEMBER_N(CharacterData* BaseCharacterData, Offsets::GameObject::BaseCharacterData)
-		DEFINE_MEMBER_N(BuffManager BuffManager, Offsets::BuffManager::Instance);
+		DEFINE_MEMBER_N(BuffManager BuffManager, Offsets::BuffManager::Instance)
+		DEFINE_MEMBER_N(CombatType combat, Offsets::GameObject::CombatType)
 
 	};
 
-	AIManager* GameObject::GetAIManager() {
+	AIManager* GetAIManager() {
 		return reinterpret_cast<AIManager * (__thiscall*)(GameObject*)>(this->VTable[149])(this);
 	}
 
-	float GameObject::GetBoundingRadius() {
+	float GetBoundingRadius() {
 		return reinterpret_cast<float(__thiscall*)(GameObject*)>(this->VTable[35])(this);
 	}
+
+	bool isValid()
+	{
+		return this->Position.IsValid();
+	}
+
 	bool IsAllyTo(GameObject* Obj) {
 		return Obj->Team == this->Team;
 	}
@@ -142,6 +161,35 @@ public:
 	}
 	std::string GetChampionName() {
 		return std::string(this->ChampionName);
+	}
+
+	bool IsInRange(GameObject* object, float distance, bool takeBoundingRadius)
+	{
+		float rangeSqr;
+		if (takeBoundingRadius)
+		{
+			float objectBoundingBox = object->GetBoundingRadius() / 1.5f;
+			float sourceBoundingBox = this->GetBoundingRadius();
+			float boundingBoxTotalDistanceSqr = objectBoundingBox * objectBoundingBox + sourceBoundingBox * sourceBoundingBox;
+			float realRange = distance + objectBoundingBox + sourceBoundingBox;
+			rangeSqr = realRange * realRange;
+			return this->Position.DistanceSquared(object->Position) <= rangeSqr;
+		}
+		else {
+			rangeSqr = distance * distance;
+			return this->Position.DistanceSquared(object->Position) < rangeSqr;
+		}
+	}
+
+	bool IsInRange(Vector3 position)
+	{
+		float rangeSqr = this->AttackRange * this->AttackRange;
+		return this->Position.DistanceSquared(position) < rangeSqr;
+	}
+
+	bool IsMelee()
+	{
+		return this->combat == CombatType::Melee;
 	}
 
 };

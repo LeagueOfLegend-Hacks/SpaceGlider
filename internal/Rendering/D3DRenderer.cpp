@@ -1,7 +1,5 @@
 #include "D3DRenderer.h"
 
-D3DRenderer* riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
-
 int D3DRenderer::GetWidth() {
 	return *(int*)((DWORD)this + 0xC);
 }

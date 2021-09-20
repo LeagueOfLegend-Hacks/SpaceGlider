@@ -23,6 +23,19 @@ public:
 		}
 		return nullptr;
 	}
+
+	static GameObject* FindObjectByIndex(short casterIndex)
+	{
+		GameObject* target = nullptr;
+		auto Object = GetFirstObject();
+		while (Object) {
+			if (casterIndex == Object->Index)
+				target = Object;
+			Object = GetNextObject(Object);
+		}
+		return target;
+	}
+
 	static std::list<GameObject*> MinionList() {
 		std::list<GameObject*> ObjectList;
 		auto Object_list = *reinterpret_cast<SEntityList<GameObject>**>(DEFINE_RVA(Offsets::Data::ManagerTemplate_Minions));
@@ -96,7 +109,29 @@ public:
 		}
 		return ObjectList;
 	}
+
+	static bool isValidTarget(GameObject* target, Vector3 from, float range)
+	{
+		if (!target || !Functions::IsAlive(target))
+			return false;
+
+		if (from.distanceTo(target->Position) <= range)
+			return true;
+
+		return false;
+	}
+
 	static GameObject* GetLocalPlayer() {
 		return (GameObject*)*(DWORD*)DEFINE_RVA(Offsets::Data::LocalPlayer);
 	}
+
+	static bool IsValidTarget(GameObject* unit, float range, bool bounding = false)
+	{
+		if (!unit || !Functions::IsAlive(unit) || !unit->IsInRange(GetLocalPlayer(), range, bounding))
+			return false;
+
+		return true;
+	}
 };
+
+inline GameObject* Local = ObjectManager::GetLocalPlayer();

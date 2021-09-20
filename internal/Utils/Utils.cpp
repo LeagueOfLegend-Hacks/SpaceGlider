@@ -50,3 +50,65 @@ bool IsLeagueInForeground()
 	GetWindowText(GetForegroundWindow(), title, 500);
 	return wcscmp(title, L"League of Legends (TM) Client") == 0;
 }
+
+std::string ToLower(std::string str)
+{
+	std::string strLower;
+	strLower.resize(str.size());
+
+	std::transform(str.begin(),
+		str.end(),
+		strLower.begin(),
+		::tolower);
+
+	return strLower;
+	return str;
+}
+
+std::wstring ToLower(std::wstring str)
+{
+	std::wstring strLower;
+	strLower.resize(str.size());
+
+	std::transform(str.begin(),
+		str.end(),
+		strLower.begin(),
+		::tolower);
+
+	return strLower;
+	return str;
+}
+
+bool StringContains(std::string strA, std::string strB, bool ignore_case)
+{
+	if (strA.empty() || strB.empty())
+		return true;
+
+	if (ignore_case)
+	{
+		strA = ToLower(strA);
+		strB = ToLower(strB);
+	}
+
+	if (strA.find(strB) != std::string::npos)
+		return true;
+
+	return false;
+}
+
+bool StringContains(std::wstring strA, std::wstring strB, bool ignore_case)
+{
+	if (strA.empty() || strB.empty())
+		return true;
+
+	if (ignore_case)
+	{
+		strA = ToLower(strA);
+		strB = ToLower(strB);
+	}
+
+	if (strA.find(strB) != std::wstring::npos)
+		return true;
+
+	return false;
+}

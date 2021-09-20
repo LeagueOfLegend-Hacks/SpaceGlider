@@ -1,31 +1,5 @@
 #include "BuffManager.h"
 
-template <class Functor>
-class Not
-{
-public:
-    Not(Functor& f) : func(f) {}
-
-    template <typename ArgType>
-    bool operator()(ArgType& arg) { return !func(arg); }
-
-private:
-    Functor& func;
-};
-
-template<typename T, typename B>
-T filter(T list, B pred) {
-    T ret;
-    std::remove_copy_if(
-        list.begin(),
-        list.end(),
-        std::back_insert_iterator<T>(ret),
-        Not<B>(pred)
-    );
-
-    return ret;
-}
-
 ULONG BuffScript::buffHash()
 {
     return *reinterpret_cast<ULONG*>(reinterpret_cast<ULONG>(this + static_cast<int>(Offsets::BuffManager::BuffHash)));
@@ -47,10 +21,11 @@ int BuffEntry::stacksAlt()
 
 bool BuffManager::hasBuff(std::string name)
 {
-    /*if (std::find(GetAllBuffs().begin(), GetAllBuffs().end(), name) != GetAllBuffs().end()) // buff vector example
-    {
-        return true;
-    }*/
+    for (auto b : this->entries()) {
+        if (b->name() == name) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -71,5 +46,5 @@ std::vector<BuffEntry*> BuffManager::entries()
 {
     std::vector<BuffEntry*> buffs = *reinterpret_cast<std::vector<BuffEntry*>*>(this + static_cast<int>(Offsets::BuffManager::ArrayStart));
 
-    return filter(buffs, &buffStrainer);
+    return filterVector(buffs, buffStrainer);
 }

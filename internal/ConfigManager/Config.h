@@ -21,9 +21,9 @@ public:
 		auto path = getModulePath(hModule);
 		auto settingsPath = path.parent_path() / xorstr("settings.json");
 		std::ofstream outSettings(settingsPath);
-        json = nlohmann::ordered_json{
+		json = nlohmann::ordered_json{
 			{xorstr("ShowMenu"), this->ShowMenu},
-        };
+		};
 		outSettings << std::setw(4) << json << std::endl;
 		outSettings.close();
 	}
@@ -38,4 +38,4 @@ private:
 	}
 	nlohmann::ordered_json json;
 };
-extern ConfigManager config;
+inline ConfigManager config;

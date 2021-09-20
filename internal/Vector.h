@@ -1,400 +1,158 @@
 #pragma once
+
 #include <cmath>
-#include <cfloat>
+#include <limits>
+
+#ifndef M_PI
 #define M_PI 3.14159265358979323846f
-__forceinline float ToDegree(float Args)
+#define M_PI_F (float)M_PI
+#endif
+
+struct ProjectionInfo;
+struct IntersectionResult;
+class Vector2
 {
-	const float flPi = 3.141592654f;
-	return (Args * (180.f / flPi));
-}
-struct Vector2 {
-	Vector2() {};
-	Vector2(float _x, float _y) {
-		x = _x;
-		y = _y;
-	}
 
-	float x;
-	float y;
-	float operator*(Vector2& a) const
-	{
-		return ((x * a.x) + (y * a.y));
-	}
-	inline bool operator == (const Vector2& A) const
-	{
-		return A.x == x && A.y == y;
-	}
+public:
+	float x, y;
 
-	inline Vector2 operator + (const Vector2& A) const
-	{
-		return Vector2(x + A.x, y + A.y);
-	}
+	Vector2() = default;
+	Vector2(float xx, float yy) : x(xx), y(yy) {}
+	operator float* ();
 
-	inline Vector2 operator + (const float A) const
-	{
-		return Vector2(x + A, y + A);
-	}
+	Vector2& operator+=(const Vector2& v);
+	Vector2& operator+=(float fl);
+	Vector2 operator+(const Vector2& v) const;
+	Vector2 operator+(float mod) const;
 
-	inline Vector2 operator * (const float A) const
-	{
-		return Vector2(A * x, A * y);
-	}
+	Vector2& operator-=(const Vector2& v);
+	Vector2& operator-=(float fl);
+	Vector2 operator-(const Vector2& v) const;
+	Vector2 operator-(float mod) const;
 
-	inline Vector2 operator * (const Vector2& A) const
-	{
-		return Vector2(A.x * x, A.y * y);
-	}
+	Vector2& operator*=(const Vector2& v);
+	Vector2& operator*=(float s);
+	Vector2 operator*(const Vector2& v) const;
+	Vector2 operator*(float mod) const;
 
-	inline Vector2 operator - (const float A) const
-	{
-		return Vector2(A * x, A * y);
-	}
-
-	inline Vector2 operator - (const Vector2& A) const
-	{
-		return Vector2(A.x - x, A.y - y);
-	}
-
-	inline Vector2 operator / (const float A) const
-	{
-		return Vector2(A / x, A / y);
-	}
-
-	inline Vector2 operator / (const Vector2& A) const
-	{
-		return Vector2(A.x / x, A.y / y);
-	}
-	Vector2& operator*=(const float a)
-	{
-		x *= a;
-		y *= a;
-		return *this;
-	}
-	friend Vector2 operator*(const float a, const Vector2 b)
-	{
-		return Vector2(b.x * a, b.y * a);
-	}
-	Vector2 Rotated(float Angle)
-	{
-		float c = cosf(Angle);
-		float s = sinf(Angle);
-
-		return Vector2(x * c - y * s, y * c + x * s);
-	}
-
-	Vector2 Perpendicular()
-	{
-		return Vector2(y, -x);
-	}
-
-	float length() {
-		return sqrt(x * x + y * y);
-	}
-
-	float distance(const Vector2& o) {
-		return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2));
-	}
-
-	Vector2 vscale(const Vector2& s) {
-		return Vector2(x * s.x, y * s.y);
-	}
-
-	Vector2 scale(float s) {
-		return Vector2(x * s, y * s);
-	}
-
-	Vector2 normalize() {
-		float l = length();
-		return Vector2(x / l, y / l);
-	}
-
-	Vector2 add(const Vector2& o) {
-		return Vector2(x + o.x, y + o.y);
-	}
-
-	Vector2 sub(const Vector2& o) {
-		return Vector2(x - o.x, y - o.y);
-	}
-
-	Vector2 clone() {
-		return Vector2(x, y);
-	}
-	bool Intersects(Vector2 const& Seg1End, Vector2 const& Seg2Start, Vector2 const& Seg2End, Vector2* IntersectionOut)
-	{
-		double deltaACy = y - Seg2Start.y;
-		double deltaDCx = Seg2End.x - Seg2Start.x;
-		double deltaACx = x - Seg2Start.x;
-		double deltaDCy = Seg2End.y - Seg2Start.y;
-		double deltaBAx = Seg1End.x - x;
-		double deltaBAy = Seg1End.y - y;
-
-		auto denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
-		auto numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
-
-		if (fabs(denominator) < FLT_EPSILON)
-		{
-			if (fabs(numerator) < FLT_EPSILON)
-			{
-				// collinear. Potentially infinite intersection points.
-				// Check and return one of them.
-				if (x >= Seg2Start.x && x <= Seg2End.x)
-				{
-					if (IntersectionOut)
-						*IntersectionOut = *this;
-
-					return true;
-				}
-
-				if (Seg2Start.x >= x && Seg2Start.x <= Seg1End.x)
-				{
-					if (IntersectionOut)
-						*IntersectionOut = Seg2Start;
-
-					return true;
-				}
-
-				return false;
-			}
-
-			// parallel
-			return false;
-		}
-
-		auto r = numerator / denominator;
-
-		if (r < 0 || r > 1)
-			return false;
-
-		auto s = (deltaACy * deltaBAx - deltaACx * deltaBAy) / denominator;
-
-		if (s < 0 || s > 1)
-			return false;
-
-		if (IntersectionOut)
-			*IntersectionOut = Vector2(x + r * deltaBAx, y + r * deltaBAy);
-
-		return true;
-	}
-	bool Close(float a, float b, float eps) const
-	{
-		if (fabs(eps) < FLT_EPSILON)
-			eps = (float)1e-9;
-
-		return fabs(a - b) <= eps;
-	}
-	float Polar() const
-	{
-		if (Close(x, 0, 0))
-		{
-			if (y > 0)
-				return 90;
-
-			return y < 0 ? 270.f : 0.f;
-		}
-
-		float flTheta = ToDegree(atanf(y / x));
-
-		if (x < 0)
-			flTheta += 180.f;
-
-		if (flTheta < 0)
-			flTheta += 360.f;
-
-		return flTheta;
-	}
-	float AngleBetween(Vector2 const& Other) const
-	{
-		float flTheta = Polar() - Other.Polar();
-
-		if (flTheta < 0)
-			flTheta += 360.f;
-
-		if (flTheta > 180.f)
-			flTheta = 360.f - flTheta;
-
-		return flTheta;
-	}
+	Vector2& operator/=(const Vector2& v);
+	Vector2& operator/=(float s);
+	Vector2 operator/(const Vector2& v) const;
+	Vector2 operator/(float mod) const;
 };
-struct Vector3 {
-	Vector3() {};
-	Vector3(float _x, float _y, float _z) {
-		x = _x;
-		y = _y;
-		z = _z;
-	}
+class Vector3
+{
+public:
+	float x, y, z;
 
-	float x;
-	float y;
-	float z;
-	Vector3 Rotated(float angle) const
+	Vector3(float xx, float yy, float zz) : x(xx), y(yy), z(zz) {}
+	Vector3();
+	operator float* ();
+
+	bool IsValid() const;
+	Vector3 toGround() const;
+	bool operator==(const Vector3& other) const;
+	bool operator!=(const Vector3& other) const;
+	/*Vector3& operator/=(const Vector3& v);
+	Vector3& operator/=(float fl);*/
+	bool IsZero(float tolerance = 0.01f) const;
+
+	float DistanceLine(Vector3 segmentStart, Vector3 segmentEnd, bool onlyIfOnSegment, bool squared);
+
+	float getX() const;
+	float getY() const;
+	float getZ() const;
+
+	float Distance(const Vector3& v) const;
+
+	float distanceTo(const Vector3& v) const;
+	float LengthSquared() const;
+	float Distance(Vector3 const& segment_start, Vector3 const& segment_end, bool only_if_on_segment = false, bool squared = false) const;
+	float DistanceSquared(Vector3 const& to) const;
+
+	Vector3& operator*=(const Vector3& v);
+	Vector3& operator*=(float s);
+
+	Vector3& operator/=(const Vector3& v);
+	Vector3& operator/=(float s);
+
+	Vector3& operator+=(const Vector3& v);
+	Vector3& operator+=(float fl);
+
+	Vector3& operator-=(const Vector3& v);
+	Vector3& operator-=(float fl);
+
+	Vector3 operator-(const Vector3& v) const;
+	Vector3 operator-(float mod) const;
+	Vector3 operator+(const Vector3& v) const;
+	Vector3 operator+(float mod) const;
+
+	Vector3 operator/(const Vector3& v) const;
+	Vector3 operator/(float mod) const;
+	Vector3 operator*(const Vector3& v) const;
+	Vector3 operator*(float mod) const;
+
+	Vector3& operator=(const Vector3& v);
+
+	Vector3& SwitchYZ();
+	Vector3& Negate();
+
+	float Length() const;
+	Vector3 Rotate_x(float angle) const;
+	Vector3 Rotate_y(float angle) const;
+	Vector3 Normalized() const;
+	float NormalizeInPlace() const;
+
+	float DotProduct(Vector3 const& other) const;
+	float CrossProduct(Vector3 const& other) const;
+	float Polar() const;
+	float AngleBetween(Vector3 const& other) const;
+
+	bool Close(float a, float b, float eps) const;
+
+	Vector3 Rotated(float angle) const;
+	Vector3 Perpendicular() const;
+	Vector3 Perpendicular2() const;
+	Vector3 Extend(Vector3 const& to, float distance) const;
+
+	Vector3 Append(Vector3 pos1, Vector3 pos2, float dist) const;
+
+	ProjectionInfo ProjectOn(Vector3 const& segment_start, Vector3 const& segment_end) const;
+	IntersectionResult Intersection(Vector3 const& line_segment_end, Vector3 const& line_segment2_start, Vector3 const& line_segment2_end) const;
+
+	Vector3 Scale(float s)
 	{
-		auto const c = cos(angle);
-		auto const s = sin(angle);
-
-		return { static_cast<float>(x * c - z * s), y, static_cast<float>(z * c + x * s) };
-	}
-	bool Close(float a, float b, float eps) const
-	{
-		if (abs(eps) < FLT_EPSILON)
-		{
-			eps = static_cast<float>(1e-9);
-		}
-		return abs(a - b) <= eps;
-	}
-	float Polar() const
-	{
-		if (this->Close(x, 0.f, 0.f))
-		{
-			if (y > 0.f)
-			{
-				return 90.f;
-			}
-			return y < 0.f ? 270.f : 0.f;
-		}
-
-		auto theta = atan(y / x) * 180.f / M_PI;
-		if (x < 0.f)
-		{
-			theta = theta + 180.f;
-		}
-		if (theta < 0.f)
-		{
-			theta = theta + 360.f;
-		}
-		return theta;
-	}
-	float AngleBetween(Vector3 const& other) const
-	{
-		auto theta = Polar() - other.Polar();
-		if (theta < 0.f)
-		{
-			theta = theta + 360.f;
-		}
-		if (theta > 180.f)
-		{
-			theta = 360.f - theta;
-		}
-		return theta;
-	}
-	Vector3 Perpendicular()
-	{
-		return Vector3(z, y, -x);
-	}
-	Vector2 To2D() const
-	{
-		return Vector2(x, z);
-	}
-
-	float length() {
-		return sqrt(x * x + y * y + z * z);
-	}
-
-	float distance(const Vector3& o) {
-		return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2) + pow(z - o.z, 2));
-	}
-
-	inline bool operator == (const Vector3& A) const
-	{
-		return A.x == x && A.y == y && A.z == z;
-	}
-
-	inline Vector3 operator + (const Vector3& A) const
-	{
-		return Vector3(x + A.x, y + A.y, z + A.z);
-	}
-
-	inline Vector3 operator + (const float A) const
-	{
-		return Vector3(x + A, y + A, z + A);
-	}
-
-	inline Vector3 operator * (float A) const
-	{
-		return Vector3(A * x, A * y, A * z);
-	}
-	float operator*(Vector3& a) const
-	{
-		return ((x * a.x) + (y * a.y) + (z * a.z));
-	}
-
-	inline Vector3 operator * (const Vector3& A) const
-	{
-		return Vector3(A.x * x, A.y * y, A.z * z);
-	}
-
-	inline Vector3 operator - (const float A) const
-	{
-		return Vector3(A * x, A * y, A * z);
-	}
-
-	inline Vector3 operator - (const Vector3& A) const
-	{
-		return Vector3(A.x - x, A.y - y, A.z - z);
-	}
-
-	inline Vector3 operator / (const float A) const
-	{
-		return Vector3(A / x, A / y, A / z);
-	}
-
-	inline Vector3 operator / (const Vector3& A) const
-	{
-		return Vector3(A.x / x, A.y / y, A.z / z);
-	}
-
-	Vector3 rotate_x(float angle) {
-		return Vector3(
-			x,
-			y * cos(angle) - z * sin(angle),
-			y * sin(angle) + z * cos(angle)
-		);
-	}
-
-	Vector3 rotate_y(float angle) {
-		return Vector3(
-			x * cos(angle) + z * sin(angle),
-			y,
-			-x * sin(angle) + z * cos(angle)
-		);
-	}
-
-	Vector3 rotate_z(float angle) {
-		return Vector3(
-			x * cos(angle) - y * sin(angle),
-			x * sin(angle) + y * cos(angle),
-			z
-		);
-	}
-
-	Vector3 vscale(const Vector3& s) {
-		return Vector3(x * s.x, y * s.y, z * s.z);
-	}
-
-	Vector3 scale(float s) {
 		return Vector3(x * s, y * s, z * s);
 	}
 
-	Vector3 normalize() {
-		float l = length();
-		return Vector3(x / l, y / l, z / l);
-	}
+	Vector3 Rotate(Vector3 startPos, float theta)
+	{
+		float dx = this->x - startPos.x;
+		float dz = this->z - startPos.z;
 
-	Vector3 add(const Vector3& o) {
-		return Vector3(x + o.x, y + o.y, z + o.z);
-	}
-
-	Vector3 sub(const Vector3& o) {
-		return Vector3(x - o.x, y - o.y, z - o.z);
-	}
-
-	Vector3 clone() {
-		return Vector3(x, y, z);
-	}
-
-	Vector3 extend(const Vector3& dir, double distance) {
-		return add(dir).scale(distance);
+		float px = dx * cos(theta) - dz * sin(theta);
+		float pz = dx * sin(theta) + dz * cos(theta);
+		return { px + startPos.x, this->y, pz + startPos.z };
 	}
 };
+
+struct ProjectionInfo
+{
+	bool IsOnSegment;
+	Vector3 LinePoint;
+	Vector3 SegmentPoint;
+
+	ProjectionInfo(bool is_on_segment, Vector3 const& segment_point, Vector3 const& line_point);
+};
+
+struct IntersectionResult
+{
+	bool Intersects;
+	Vector3 Point;
+
+	IntersectionResult(bool intersects = false, Vector3 const& point = Vector3());
+};
+
 struct Vector4 {
 	Vector4() {};
 	Vector4(float _x, float _y, float _z, float _w) {

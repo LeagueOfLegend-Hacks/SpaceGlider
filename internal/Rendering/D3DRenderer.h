@@ -13,4 +13,4 @@ public:
 	void MultiplyMatrices(float* out, float* a, float* b);
 	Vector2 WorldToScreen(const Vector3& pos);
 };
-extern D3DRenderer* riot_render;
+inline D3DRenderer* riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);

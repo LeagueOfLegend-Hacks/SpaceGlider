@@ -1,10 +1,12 @@
 #pragma once
 #include "../EventManager/EventManager.h"
 #include "../ObjectManager/ObjectManager.h"
-#include "../Constants.h"
+#include "Constants.h"
+#include "../Evade/Evade.h"
+#include "../Plugins/Prediction/Health.h"
 
 #pragma region Plugin Includes
-#include "Utilities/WaypointTracker.h"
+#include "../Plugins/Utilities/WaypointTracker.h"
 #pragma endregion
 
 namespace PluginLoader
@@ -12,7 +14,7 @@ namespace PluginLoader
 
 	void LoadChampionModule()
 	{
-		switch ( ObjectManager::GetLocalPlayer()->BaseCharacterData->SkinHash)
+		switch (ObjectManager::GetLocalPlayer()->BaseCharacterData->SkinHash)
 		{
 		case Character::Vayne:
 			console.Print("Vayne Loaded");
@@ -25,8 +27,9 @@ namespace PluginLoader
 		//LoadChampionModule();
 
 		WaypointTracker::Initialize();
-		OrbWalker::Initialize();
-		Evade::Initalize();
+		Orbwalking::Initialize();
+		Evade::Core::Initalize();
+		HealthPrediction::Initialize();
 
 		if (EventManager::EventCallbacks->size() > 0)
 			Constants::PluginsLoaded = true;

@@ -10,7 +10,7 @@ namespace Offsets {
 		StartPosition = 0x7C,
 		EndPosition = 0x88,
 		HasTarget = 0xB4,
-		TargetID = 0xB8
+		TargetID = 0x74
 	};
 
 	enum class Spell {
@@ -19,20 +19,24 @@ namespace Offsets {
 	enum class Functions {
 		GetPing = 0x322500,								// 11.18
 		OnProcessSpell = 0x4FC190,						// 11.18
+		OnDeleteObject = 0x278DE0,
 		WorldToScreen = 0x972BA0,						// 11.18
 		GetFirstObject = 0x27A880,						// 11.18
 		GetNextObject = 0x27B280,						// 11.18
 		IsAlive = 0x13EDF0,								// 11.18 vtable[127]
 		IsHero = 0x1A94C0,								// 11.18
 		IsMissile = 0x1A9520,							// 11.18
-		IsMinion = 0x1a70c0,							// 11.17
+		IsMinion = 0x1a9500,							// 11.17
 		IsInhib = 0x1a6f00,								// 11.17
 		IsBaron = 0x165B20,								// 11.17
-		IsNexus = 0x1a7000,								// 11.17
-		IsTurret = 0x1a6ec0,							// 11.17
+		IsNexus = 0x1a9440,								// 11.17
+		IsTurret = 0x1a96b0,							// 11.17
 		GetAttackDelay = 0x2781A0,						// 11.18
 		GetAttackCastDelay = 0x2780a0,					// 11.18
 		IssueClick = 0x5F5B40,							// 11.18
+		IsNotWall = 0x8F7CA0,							// 11.18
+		GetHeightForPosition = 0x8f3180,				// 11.18
+		GetBasicAttack = 0x1209c0,						// 11.18
 	};
 	enum class Data {
 		NetClient = 0x30DA3EC,							// 11.18
@@ -65,6 +69,7 @@ namespace Offsets {
 		mLifetime = 0xc88,
 		mLifetimeTicks = 0xca8,
 		mIsTargetable = 0xD1C,
+		mIsInvulnearable = 0x3EC,
 		HP = 0xdb4,
 		MaxHP = HP + 0x10,
 		Mana = 0x2B4,

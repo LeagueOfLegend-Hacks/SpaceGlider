@@ -35,13 +35,13 @@ typedef BOOLEAN(__stdcall* t_RtlDispatchException)(PEXCEPTION_RECORD exceptionRe
 
 class LeagueDecrypt {
 public:
-	uint8_t* FindRtlDispatchExceptionAddress();
-	int IsMemoryDecrypted(PVOID address);
-	LeagueDecryptData Decrypt(const wchar_t* szModule);
+    uint8_t* FindRtlDispatchExceptionAddress();
+    int IsMemoryDecrypted(PVOID address);
+    LeagueDecryptData Decrypt(const wchar_t* szModule);
     uint8_t* _RtlDispatchExceptionAddress;
-	uint8_t* FindSignature(const LPCSTR szModule, const char* szSignature);
+    uint8_t* FindSignature(const LPCSTR szModule, const char* szSignature);
 private:
     t_RtlDispatchException fn_RtlDispatchException;
 };
 
-extern LeagueDecrypt TextDecryptor;
+inline LeagueDecrypt TextDecryptor;

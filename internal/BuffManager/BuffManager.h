@@ -2,11 +2,6 @@
 #include "../XorStr.h"
 #include "../Patchables/Offsets.h"
 #include "../Utils/Utils.h"
-#include <string>
-#include <Windows.h>
-#include <vector>
-#include <iostream>
-#include <functional>
 
 enum class BuffType {
     Internal = 0,
@@ -61,12 +56,12 @@ public:
     union
     {
         DEFINE_MEMBER_N(BuffScript* buffScript, Offsets::BuffManager::BuffScript)
-        DEFINE_MEMBER_N(BuffType type, Offsets::BuffManager::BuffType)
-        DEFINE_MEMBER_N(float startTime, Offsets::BuffManager::StartTime)
-        DEFINE_MEMBER_N(float endTime, Offsets::BuffManager::EndTime)
-        DEFINE_MEMBER_N(int count, Offsets::BuffManager::BuffCount)
-        DEFINE_MEMBER_N(int countAlt, Offsets::BuffManager::BuffCountAlt)
-        DEFINE_MEMBER_N(int countAlt2, Offsets::BuffManager::BuffCountAlt2)
+            DEFINE_MEMBER_N(BuffType type, Offsets::BuffManager::BuffType)
+            DEFINE_MEMBER_N(float startTime, Offsets::BuffManager::StartTime)
+            DEFINE_MEMBER_N(float endTime, Offsets::BuffManager::EndTime)
+            DEFINE_MEMBER_N(int count, Offsets::BuffManager::BuffCount)
+            DEFINE_MEMBER_N(int countAlt, Offsets::BuffManager::BuffCountAlt)
+            DEFINE_MEMBER_N(int countAlt2, Offsets::BuffManager::BuffCountAlt2)
     };
     std::string name();
     int stacksAlt();

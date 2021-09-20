@@ -1,8 +1,7 @@
 #pragma once
 
 Console console;
-ImRender render;
-PVOID NewOnProcessSpell;
+PVOID NewOnProcessSpell, NewOnDeleteObject;
 
 HRESULT WINAPI Hooked_Present(LPDIRECT3DDEVICE9 Device, CONST RECT* pSrcRect, CONST RECT* pDestRect, HWND hDestWindow, CONST RGNDATA* pDirtyRegion) {
 	if (Device != nullptr) {
@@ -48,4 +47,10 @@ int __fastcall hk_OnProcessSpell(void* spellBook, void* edx, SpellInfo* CastInfo
 		return Functions::OnProcessSpell(spellBook, CastInfo);
 	EventManager::Trigger(EventManager::EventType::OnProcessSpell, spellBook, CastInfo);
 	return Functions::OnProcessSpell(spellBook, CastInfo);
+}
+int __fastcall hk_OnDeleteObject(void* thisPtr, void* edx, GameObject* obj) {
+	if (obj == nullptr || thisPtr == nullptr)
+		return Functions::OnDeleteObject(thisPtr, obj);
+	EventManager::Trigger(EventManager::EventType::OnDeleteObject, thisPtr, obj);
+	return Functions::OnDeleteObject(thisPtr, obj);
 }

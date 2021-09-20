@@ -2,7 +2,7 @@
 #include "Patchables/Offsets.h"
 #include "Decrypt/Decrypt.h"
 #include "Console/Console.h"
-#include "Orbwalker/OrbWalker.h"
+#include "OrbWalker/OrbWalker.h"
 #include "Hooks/UltimateHooks.h"
 #include "Rendering/ImRender.h"
 #include <windows.h>
@@ -16,17 +16,17 @@
 #include "Plugins/PluginLoader.h"
 #include "ConfigManager/Config.h"
 #include "Security/AntiDetection.h"
+#include <thread>
 
 HMODULE g_module;
-MouseLockedPos MLP;
 uintptr_t initThreadHandle;
 bool IsPatchDetected;
 void ApplyHooks() {
-	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyOptIn)
+	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff)
 		SetProcessDEPPolicy(PROCESS_DEP_ENABLE);
-	UltHook.RestoreZwProtectVirtualMemory();
-	UltHook.RestoreRtlAddVectoredExceptionHandler();
-	UltHook.RestoreZwQueryInformationProcess();
+	UltimateHooks::RestoreZwProtectVirtualMemory();
+	UltimateHooks::RestoreRtlAddVectoredExceptionHandler();
+	UltimateHooks::RestoreZwQueryInformationProcess();
 	Original_GetCursorPos = &GetCursorPos;
 	Functions::Original_Present = (FuncTypes::Prototype_Present)GetDeviceAddress(17);
 	Functions::Original_Reset = (FuncTypes::Prototype_Reset)GetDeviceAddress(16);
@@ -38,22 +38,18 @@ void ApplyHooks() {
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	/***********************************************************************************/
-	// dx9 functions
+	DetourAttach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourAttach(&(PVOID&)Functions::Original_Present, Hooked_Present);
 	DetourAttach(&(PVOID&)Functions::Original_Reset, Hooked_Reset);
-	/***********************************************************************************/
-	// win32 functions
-	DetourAttach(&(PVOID&)Original_GetCursorPos, hGetCursorPos);
 	DetourAttach(&(PVOID&)Security::oModule32First, Security::hkModule32First);
 	DetourAttach(&(PVOID&)Security::oModule32Next, Security::hkModule32Next);
 	DetourAttach(&(PVOID&)Security::oReadProcessMemory, Security::hkReadProcessMemory);
-	/***********************************************************************************/
 	DetourTransactionCommit();
 	/***********************************************************************************/
 	Functions::Original_WndProc = (WNDPROC)SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)WndProc);
-	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff)
-		UltHook.DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
+	if (GetSystemDEPPolicy() != DEP_SYSTEM_POLICY_TYPE::DEPPolicyAlwaysOff) {
+		UltimateHooks::DEPAddHook(DEFINE_RVA(Offsets::Functions::OnProcessSpell), (DWORD)hk_OnProcessSpell, Functions::OnProcessSpell, 0x60, NewOnProcessSpell, 1);
+	}
 }
 void RemoveHooks() {
 	SetWindowLongPtr(GetHwndProc(), GWLP_WNDPROC, (LONG_PTR)Functions::Original_WndProc);
@@ -67,7 +63,7 @@ void RemoveHooks() {
 	DetourDetach(&(PVOID&)Security::oReadProcessMemory, Security::hkReadProcessMemory);
 	DetourTransactionCommit();
 	if (GetSystemDEPPolicy())
-		UltHook.deinit();
+		UltimateHooks::deinit();
 }
 std::string GetGameVersion() {
 	auto GameVersion = *(DWORD*)(TextDecryptor.FindSignature(nullptr, xorstr("8B 44 24 04 BA ? ? ? ? 2B D0")) + 0x5);

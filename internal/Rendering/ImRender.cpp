@@ -45,9 +45,13 @@ void ImRender::Init(LPDIRECT3DDEVICE9 Device) {
 	IsInitalized = true;
 	riot_render = (D3DRenderer*)*(DWORD*)DEFINE_RVA(Offsets::Data::D3DRender);
 
-	LoadIcons(Device, std::string("C:/SpaceGlider/Sprites/Wards"));
-	LoadIcons(Device, std::string("C:/SpaceGlider/Sprites/UI"));
-	LoadIcons(Device, std::string("C:/SpaceGlider/Sprites/Spells"));
+	std::string wards = std::string("C:/SpaceGlider/Sprites/Wards");
+	std::string ui = std::string("C:/SpaceGlider/Sprites/UI");
+	std::string spells = std::string("C:/SpaceGlider/Sprites/Spells");
+
+	LoadIcons(Device, wards);
+	LoadIcons(Device, ui);
+	LoadIcons(Device, spells);
 }
 
 void ImRender::Free() {
@@ -70,6 +74,11 @@ void ImRender::begin_draw() {
 
 	ImGui::GetStyle().AntiAliasedFill = true;
 	ImGui::GetStyle().AntiAliasedLines = true;
+
+	if (ImGui::Begin("SpaceGlider", nullptr))
+	{
+		ImGui::End();
+	}
 
 	ImGui::Begin("##overlay", nullptr, flags);
 
@@ -120,19 +129,48 @@ void ImRender::draw_line(Vector2 start_pos, Vector2 end_pos, ImColor color, floa
 }
 void ImRender::draw_line(Vector3 start_pos, Vector3 end_pos, ImColor color, float thickness)
 {
-	Vector2 startWorldPos, endWorldPos;
-	startWorldPos = riot_render->WorldToScreen(start_pos);
-	endWorldPos = riot_render->WorldToScreen(end_pos);
+	Vector2 startWorldPos = riot_render->WorldToScreen(start_pos);
+	Vector2 endWorldPos = riot_render->WorldToScreen(end_pos);
 	ImGui::GetWindowDrawList()->AddLine(ImVec2(startWorldPos.x, startWorldPos.y), ImVec2(endWorldPos.x, endWorldPos.y), color, thickness);
 }
 void ImRender::draw_line3D(Vector3 start_pos, Vector3 end_pos, ImColor color, float thickness)
 {
-	auto startPos = riot_render->WorldToScreen(start_pos);
-	auto endPos = riot_render->WorldToScreen(end_pos);
+	Vector2 startWorldPos = riot_render->WorldToScreen(start_pos);
+	Vector2 endWorldPos = riot_render->WorldToScreen(end_pos);
 
-	ImGui::GetWindowDrawList()->AddLine(ImVec2(startPos.x, startPos.y), ImVec2(endPos.x, endPos.y), color, thickness);
+	ImGui::GetWindowDrawList()->AddLine(ImVec2(startWorldPos.x, endWorldPos.y), ImVec2(endWorldPos.x, endWorldPos.y), color, thickness);
 }
-void ImRender::draw_rect(Vector4 screen_pos, ImColor color, DrawType type, float rounding, unsigned short points, float thickness)
+
+void ImRender::rect(Vector3 start, Vector3 end, float radius, float width, ImColor color) {
+	Vector3 vector = (end - start).Normalized();
+	Vector3 value = vector.Perpendicular();
+	Vector3 point2 = start + value * radius;
+	Vector3 point3 = start - value * radius;
+	Vector3 point4 = end + value * radius;
+	Vector3 point5 = end - value * radius;
+
+	draw_line(point2, point4, color, width);
+	draw_line(point3, point5, color, width);
+	draw_line(point2, point3, color, width);
+	draw_line(point5, point4, color, width);
+}
+
+void ImRender::polygon(Geometry::Polygon poly, ImColor color, float tick)
+{
+	ImVec2 points[200];
+	int i = 0;
+	for (auto& point : poly.Points)
+	{
+		Vector2 screenSpace = riot_render->WorldToScreen(point);
+		points[i].x = screenSpace.x;
+		points[i].y = screenSpace.y;
+		i++;
+	}
+
+	ImGui::GetWindowDrawList()->AddPolyline(points, i, color, true, tick);
+}
+
+/*void ImRender::draw_rect(Vector4 screen_pos, ImColor color, DrawType type, float rounding, unsigned short points, float thickness)
 {
 	switch (type)
 	{
@@ -146,6 +184,7 @@ void ImRender::draw_rect(Vector4 screen_pos, ImColor color, DrawType type, float
 		break;
 	}
 }
+*/
 void ImRender::draw_triangle(Vector2 pos_one, Vector2 pos_two, Vector2 pos_three, ImColor color, DrawType type, float thickness)
 {
 	if (type == DrawType::Normal)
@@ -177,7 +216,7 @@ void ImRender::draw_circle(Vector3 screen_pos, float radius, ImColor color, Draw
 		auto angle = (float)i * IM_PI * 1.98f / 98.0f;
 		world_pos.x = screen_pos.x + ImCos(angle) * radius;
 		world_pos.z = screen_pos.z + ImSin(angle) * radius;
-		auto pos = riot_render->WorldToScreen(world_pos);
+		Vector2 pos = riot_render->WorldToScreen(world_pos);
 		ImGui::GetWindowDrawList()->PathLineTo(ImVec2(pos.x, pos.y));
 	}
 	if (type == DrawType::Normal)
@@ -189,11 +228,23 @@ void ImRender::draw_circle(Vector3 screen_pos, float radius, ImColor color, Draw
 void ImRender::draw_image(const char* img, Vector3 pos, Vector2 body, ImColor color)
 {
 	Vector2 worldPos = riot_render->WorldToScreen(pos);
-	static ImVec2 zero = ImVec2(0.f, 0.f);
-    static ImVec2 one = ImVec2(1.f, 1.f);
+	ImVec2 zero = ImVec2(0.f, 0.f);
+    ImVec2 one = ImVec2(1.f, 1.f);
 
 	auto it = Images.find(std::string(img));
 	if (it == Images.end())
 		return;
 	ImGui::GetWindowDrawList()->AddImage(it->second, ImVec2(worldPos.x, worldPos.y), ImVec2(body.x + worldPos.x, body.y + worldPos.y), zero, one, color);
+}
+
+
+void ImRender::draw_image(const char* img, Vector2 pos, Vector2 body, ImColor color)
+{
+	ImVec2 zero = ImVec2(0.f, 0.f);
+	ImVec2 one = ImVec2(1.f, 1.f);
+
+	auto it = Images.find(std::string(img));
+	if (it == Images.end())
+		return;
+	ImGui::GetWindowDrawList()->AddImage(it->second, ImVec2(pos.x, pos.y), ImVec2(body.x + pos.x, body.y + pos.y), zero, one, color);
 }
