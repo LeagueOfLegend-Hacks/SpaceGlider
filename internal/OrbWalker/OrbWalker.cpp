@@ -17,11 +17,19 @@ std::string Orbwalking::AttackResets[] =
 };
 
 bool Orbwalking::CanAttack() {
+	if (Local->GetChampionName() == "Jhin")
+	{
+		if (Local->BuffManager.hasBuff("JhinPassiveReload"))
+		{
+			return false;
+		}
+	}
+
 	return Functions::GameTimeTick() + Functions::GetPing() / 2.f >= LastAttackCommandT + Functions::GetAttackDelay(Local) * 1000.f;
 }
 
 bool Orbwalking::CanMove(float extraWindup) {
-	return Functions::GameTimeTick() >= LastAttackCommandT + Functions::GetAttackCastDelay(Local) * 1000.f + Functions::GetPing() / 2 + extraWindup || Local->GetChampionName() == "Kalista";
+	return Functions::GameTimeTick() + Functions::GetPing() / 2 >= LastAttackCommandT + Functions::GetAttackCastDelay(Local) * 1000.f + extraWindup || Local->GetChampionName() == "Kalista";
 }
 
 void Orbwalking::Orbwalk(GameObject* target, float extraWindup) {
@@ -239,7 +247,10 @@ void Orbwalking::OnProcessSpell(void* spellBook, SpellInfo* castInfo) {
 	}
 
 	if (castInfo->BasicAttackSpellData != nullptr)
+	{
 		LastAttackCommandT = Functions::GameTimeTick() - Functions::GetPing() / 2;
+		LastMoveCommandT = 0;
+	}
 
 }
 
